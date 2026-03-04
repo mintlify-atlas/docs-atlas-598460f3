@@ -1,0 +1,240 @@
+---
+title: "Geography API"
+description: "API endpoints for geographic data including states, regions, municipalities, and localities"
+icon: "map-location-dot"
+---
+
+## Overview
+
+The Geography API provides access to hierarchical geographic data used throughout SIGSAHO for defining transfer origins, destinations, and operational areas. The geographic structure follows: State → Region → Municipality → Locality.
+
+## Get States
+
+```bash cURL
+curl -X GET "https://api.sigsaho.com/geography?search=Mexico"
+```
+
+Retrieves all states with their associated regions.
+
+### Query Parameters
+
+<ParamField query="search" type="string">
+  Filter states by name (case-insensitive partial match)
+</ParamField>
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Estado de México",
+    "created_at": "2024-01-01T00:00:00Z",
+    "regions": [
+      {
+        "id": 1,
+        "name": "Región Valle de México",
+        "created_at": "2024-01-01T00:00:00Z"
+      }
+    ]
+  }
+]
+```
+
+<ResponseField name="[].id" type="integer">
+  State unique identifier
+</ResponseField>
+
+<ResponseField name="[].name" type="string">
+  State name
+</ResponseField>
+
+<ResponseField name="[].regions" type="array">
+  Array of regions within this state
+  
+  <Expandable title="properties">
+    <ResponseField name="id" type="integer">
+      Region unique identifier
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Region name
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string">
+      Timestamp when region was created
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Get Municipalities
+
+```bash cURL
+curl -X GET "https://api.sigsaho.com/geography/municipalities?region_id=1&search=Toluca"
+```
+
+Retrieves municipalities for a specific region.
+
+### Query Parameters
+
+<ParamField query="region_id" type="integer" required>
+  Region ID to filter municipalities
+</ParamField>
+
+<ParamField query="search" type="string">
+  Filter municipalities by name (case-insensitive partial match)
+</ParamField>
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Toluca",
+    "region_id": 1,
+    "created_at": "2024-01-01T00:00:00Z"
+  }
+]
+```
+
+<ResponseField name="[].id" type="integer">
+  Municipality unique identifier
+</ResponseField>
+
+<ResponseField name="[].name" type="string">
+  Municipality name
+</ResponseField>
+
+<ResponseField name="[].region_id" type="integer">
+  Parent region ID
+</ResponseField>
+
+---
+
+## Get Localities
+
+```bash cURL
+curl -X GET "https://api.sigsaho.com/geography/localities?municipality_id=1&search=Centro"
+```
+
+Retrieves localities (cities, towns, neighborhoods) for a specific municipality.
+
+### Query Parameters
+
+<ParamField query="municipality_id" type="integer" required>
+  Municipality ID to filter localities
+</ParamField>
+
+<ParamField query="search" type="string">
+  Filter localities by name (case-insensitive partial match)
+</ParamField>
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Centro Histórico",
+    "municipality_id": 1,
+    "latitude": 19.2827,
+    "longitude": -99.6557,
+    "created_at": "2024-01-01T00:00:00Z"
+  }
+]
+```
+
+<ResponseField name="[].id" type="integer">
+  Locality unique identifier
+</ResponseField>
+
+<ResponseField name="[].name" type="string">
+  Locality name
+</ResponseField>
+
+<ResponseField name="[].municipality_id" type="integer">
+  Parent municipality ID
+</ResponseField>
+
+<ResponseField name="[].latitude" type="number">
+  Latitude coordinate (optional)
+</ResponseField>
+
+<ResponseField name="[].longitude" type="number">
+  Longitude coordinate (optional)
+</ResponseField>
+
+---
+
+## Geographic Hierarchy
+
+The geographic data follows this hierarchy:
+
+<Steps>
+  <Step title="State (Estado)">
+    Top-level administrative division
+  </Step>
+  
+  <Step title="Region (Región)">
+    Sub-division of a state grouping multiple municipalities
+  </Step>
+  
+  <Step title="Municipality (Municipio)">
+    Administrative subdivision within a region
+  </Step>
+  
+  <Step title="Locality (Localidad)">
+    Specific city, town, or neighborhood within a municipality. Used for transfer origins and destinations.
+  </Step>
+</Steps>
+
+---
+
+## Usage Example
+
+To select an origin or destination for a transfer:
+
+<Steps>
+  <Step title="Get all states">
+    ```bash
+    GET /geography
+    ```
+  </Step>
+  
+  <Step title="Select a state and get its regions">
+    The state response includes regions directly
+  </Step>
+  
+  <Step title="Get municipalities for the selected region">
+    ```bash
+    GET /geography/municipalities?region_id=1
+    ```
+  </Step>
+  
+  <Step title="Get localities for the selected municipality">
+    ```bash
+    GET /geography/localities?municipality_id=1
+    ```
+  </Step>
+  
+  <Step title="Use locality ID in transfer">
+    Use the locality `id` as `origin_id` or `destination_id` when creating transfers
+  </Step>
+</Steps>
+
+---
+
+## Authentication
+
+All geography endpoints require JWT authentication via cookies.
+
+---
+
+## Related Resources
+
+- [Medical Transfers API](/api/medical-transfers)
+- [General Transfers API](/api/transfers)
+- [Managing Transfers Guide](/guides/managing-transfers)

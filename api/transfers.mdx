@@ -1,0 +1,393 @@
+---
+title: "General Transfers API"
+description: "API endpoints for managing general operational transfers (security, civil defense, maintenance)"
+icon: "plane-departure"
+---
+
+## Overview
+
+The General Transfers API allows you to create and manage non-medical operational transfers including security operations, civil defense missions, maintenance flights, and other general aviation operations.
+
+<Note>
+  For medical air ambulance transfers, see the [Medical Transfers API](/api/medical-transfers).
+</Note>
+
+## Create Transfer
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.sigsaho.com/transfers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type_transfer": "SEGURITY",
+    "description": "Security patrol operation",
+    "aircraft_id": "uuid-here",
+    "pilot_command_id": "uuid-here",
+    "date": "2024-03-15",
+    "time_init": "08:00",
+    "time_finish": "12:00",
+    "origin_id": 123,
+    "destination_id": 456,
+    "crew_member_ids": ["uuid-1", "uuid-2"]
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.sigsaho.com/transfers', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include',
+  body: JSON.stringify({
+    type_transfer: 'SEGURITY',
+    description: 'Security patrol operation',
+    aircraft_id: 'uuid-here',
+    pilot_command_id: 'uuid-here',
+    date: '2024-03-15',
+    time_init: '08:00',
+    time_finish: '12:00',
+    origin_id: 123,
+    destination_id: 456,
+    crew_member_ids: ['uuid-1', 'uuid-2']
+  })
+});
+
+const data = await response.json();
+```
+</CodeGroup>
+
+### Request
+
+<ParamField path="type_transfer" type="string" required>
+  Type of transfer operation
+  
+  **Allowed values:**
+  - `SEGURITY` - Security operations
+  - `CIVIL_DEFENSE` - Civil defense missions
+  - `MAINTENANCE` - Maintenance flights
+  - `OTHER` - Other general operations
+</ParamField>
+
+<ParamField path="description" type="string" required>
+  Detailed description of the transfer operation (max 500 characters)
+</ParamField>
+
+<ParamField path="aircraft_id" type="string" required>
+  UUID of the aircraft assigned to this transfer
+</ParamField>
+
+<ParamField path="pilot_command_id" type="string" required>
+  UUID of the pilot in command for this transfer
+</ParamField>
+
+<ParamField path="date" type="string" required>
+  Date of the transfer (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField path="time_init" type="string" required>
+  Start time of the transfer (format: HH:MM)
+</ParamField>
+
+<ParamField path="time_finish" type="string" required>
+  End time of the transfer (format: HH:MM)
+</ParamField>
+
+<ParamField path="origin_id" type="integer" required>
+  ID of the origin locality
+</ParamField>
+
+<ParamField path="destination_id" type="integer" required>
+  ID of the destination locality
+</ParamField>
+
+<ParamField path="crew_member_ids" type="array">
+  Array of UUIDs for crew members assigned to this transfer (optional)
+</ParamField>
+
+<ParamField path="observations" type="string">
+  Additional observations or notes about the transfer
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="transfer" type="object">
+  The created transfer object
+  
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      Unique identifier for the transfer
+    </ResponseField>
+    
+    <ResponseField name="transfer_number" type="string">
+      Auto-generated transfer number (format: T-YYYYMMDD-XXXX)
+    </ResponseField>
+    
+    <ResponseField name="type_transfer" type="string">
+      Type of transfer (SEGURITY, CIVIL_DEFENSE, MAINTENANCE, OTHER)
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Description of the transfer
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      Current status (PROCESS, FINISHED, CANCELED)
+    </ResponseField>
+    
+    <ResponseField name="date" type="string">
+      Date of the transfer
+    </ResponseField>
+    
+    <ResponseField name="time_init" type="string">
+      Start time
+    </ResponseField>
+    
+    <ResponseField name="time_finish" type="string">
+      End time
+    </ResponseField>
+    
+    <ResponseField name="aircraft" type="object">
+      Aircraft details (id, registration, model)
+    </ResponseField>
+    
+    <ResponseField name="pilot_command" type="object">
+      Pilot details
+    </ResponseField>
+    
+    <ResponseField name="origin" type="object">
+      Origin locality details
+    </ResponseField>
+    
+    <ResponseField name="destination" type="object">
+      Destination locality details
+    </ResponseField>
+    
+    <ResponseField name="crew_members" type="array">
+      Array of crew member objects
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string">
+      Timestamp when the transfer was created
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## List Transfers
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/transfers?page=1&limit=10&status=PROCESS&type_transfer=SEGURITY" \
+  -H "Content-Type: application/json"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.sigsaho.com/transfers?page=1&limit=10&status=PROCESS', {
+  credentials: 'include'
+});
+
+const data = await response.json();
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Number of records per page (max: 100)
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by transfer status (PROCESS, FINISHED, CANCELED)
+</ParamField>
+
+<ParamField query="type_transfer" type="string">
+  Filter by transfer type (SEGURITY, CIVIL_DEFENSE, MAINTENANCE, OTHER, MEDICAL)
+</ParamField>
+
+<ParamField query="aircraft_id" type="string">
+  Filter by aircraft UUID
+</ParamField>
+
+<ParamField query="pilot_command_id" type="string">
+  Filter by pilot UUID
+</ParamField>
+
+<ParamField query="date_from" type="string">
+  Filter transfers from this date (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+  Filter transfers until this date (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by transfer number or description
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of transfer objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination metadata
+  
+  <Expandable title="properties">
+    <ResponseField name="total" type="integer">
+      Total number of transfers
+    </ResponseField>
+    
+    <ResponseField name="page" type="integer">
+      Current page number
+    </ResponseField>
+    
+    <ResponseField name="limit" type="integer">
+      Records per page
+    </ResponseField>
+    
+    <ResponseField name="totalPages" type="integer">
+      Total number of pages
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+## Get Transfer by ID
+
+```bash cURL
+curl -X GET https://api.sigsaho.com/transfers/{id}
+```
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Transfer UUID
+</ParamField>
+
+### Response
+
+Returns a single transfer object with all related data including aircraft, pilot, crew members, origin, and destination localities.
+
+---
+
+## Update Transfer
+
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/transfers/{id} \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Updated description",
+    "observations": "Additional notes"
+  }'
+```
+
+### Request
+
+All fields from the create endpoint are optional for updates. Only include fields you want to change.
+
+---
+
+## Update Transfer Status
+
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/transfers/{id}/status \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "FINISHED"
+  }'
+```
+
+### Request
+
+<ParamField path="status" type="string" required>
+  New status for the transfer
+  
+  **Allowed values:**
+  - `PROCESS` - Transfer in progress
+  - `FINISHED` - Transfer completed
+  - `CANCELED` - Transfer canceled
+</ParamField>
+
+---
+
+## Assign Crew Members
+
+```bash cURL
+curl -X POST https://api.sigsaho.com/transfers/{id}/crew \
+  -H "Content-Type: application/json" \
+  -d '{
+    "crew_member_ids": ["uuid-1", "uuid-2", "uuid-3"]
+  }'
+```
+
+### Request
+
+<ParamField path="crew_member_ids" type="array" required>
+  Array of user UUIDs to assign as crew members
+</ParamField>
+
+---
+
+## Remove Crew Member
+
+```bash cURL
+curl -X DELETE https://api.sigsaho.com/transfers/{transfer_id}/crew/{crew_member_id}
+```
+
+### Path Parameters
+
+<ParamField path="transfer_id" type="string" required>
+  Transfer UUID
+</ParamField>
+
+<ParamField path="crew_member_id" type="string" required>
+  Crew member UUID to remove
+</ParamField>
+
+---
+
+## Delete Transfer
+
+```bash cURL
+curl -X DELETE https://api.sigsaho.com/transfers/{id}
+```
+
+<Warning>
+  This performs a soft delete. The transfer is marked as deleted but remains in the database for audit purposes.
+</Warning>
+
+### Path Parameters
+
+<ParamField path="id" type="string" required>
+  Transfer UUID
+</ParamField>
+
+---
+
+## Authentication
+
+All endpoints require JWT authentication via cookies. Include credentials in your requests.
+
+**Required permissions:**
+- Read operations: `despacho:read` permission
+- Write operations: `despacho:write` permission
+
+---
+
+## Related Resources
+
+- [Medical Transfers API](/api/medical-transfers)
+- [Flight Operations Feature](/features/flight-operations)
+- [Managing Transfers Guide](/guides/managing-transfers)

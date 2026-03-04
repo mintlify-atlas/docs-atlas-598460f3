@@ -79,6 +79,7 @@
           {
             "group": "Operations",
             "pages": [
+              "api/transfers",
               "api/flight-balance",
               "api/dashboard",
               "api/reports"
@@ -89,7 +90,14 @@
             "pages": [
               "api/users",
               "api/roles",
+              "api/trainings",
               "api/notifications"
+            ]
+          },
+          {
+            "group": "Geography",
+            "pages": [
+              "api/geography"
             ]
           }
         ]

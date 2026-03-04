@@ -1,0 +1,231 @@
+---
+title: "Trainings API"
+description: "API endpoints for managing training programs and certifications"
+icon: "graduation-cap"
+---
+
+## Overview
+
+The Trainings API manages training programs, courses, and certifications for aeronautical personnel. Track training schedules, assign users, and maintain compliance with certification requirements.
+
+## Create Training
+
+```bash cURL
+curl -X POST https://api.sigsaho.com/trainings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Emergency Procedures Recurrent Training",
+    "description": "Annual recurrent training for emergency procedures",
+    "training_date": "2024-04-15",
+    "expiration_date": "2025-04-15",
+    "instructor": "John Smith",
+    "location": "Training Center - Main Campus"
+  }'
+```
+
+### Request
+
+<ParamField path="name" type="string" required>
+  Name of the training program (max 255 characters)
+</ParamField>
+
+<ParamField path="description" type="string">
+  Detailed description of the training content
+</ParamField>
+
+<ParamField path="training_date" type="string" required>
+  Date when the training is scheduled (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField path="expiration_date" type="string">
+  Date when the training certification expires (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField path="instructor" type="string">
+  Name of the instructor conducting the training
+</ParamField>
+
+<ParamField path="location" type="string">
+  Physical or virtual location where training takes place
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="training" type="object">
+  The created training object with id, name, dates, and status
+</ResponseField>
+
+---
+
+## List Trainings
+
+```bash cURL
+curl -X GET "https://api.sigsaho.com/trainings?page=1&limit=10&status=SCHEDULED"
+```
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number for pagination
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Number of records per page (max: 100)
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by training status (SCHEDULED, IN_PROGRESS, COMPLETED, CANCELED)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by training name or description
+</ParamField>
+
+<ParamField query="date_from" type="string">
+  Filter trainings from this date
+</ParamField>
+
+<ParamField query="date_to" type="string">
+  Filter trainings until this date
+</ParamField>
+
+---
+
+## Get Training by ID
+
+```bash cURL
+curl -X GET https://api.sigsaho.com/trainings/{id}
+```
+
+Returns detailed training information including all assigned users and their completion status.
+
+---
+
+## Assign Users to Training
+
+```bash cURL
+curl -X POST https://api.sigsaho.com/trainings/{id}/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_ids": ["uuid-1", "uuid-2", "uuid-3"]
+  }'
+```
+
+### Request
+
+<ParamField path="user_ids" type="array" required>
+  Array of user UUIDs to assign to this training
+</ParamField>
+
+---
+
+## Complete User Training
+
+```bash cURL
+curl -X POST https://api.sigsaho.com/trainings/{training_id}/users/{user_id}/complete \
+  -F "certificate=@certificate.pdf" \
+  -F "score=95" \
+  -F "notes=Excellent performance"
+```
+
+### Request (multipart/form-data)
+
+<ParamField path="certificate" type="file">
+  PDF certificate file (optional)
+</ParamField>
+
+<ParamField path="score" type="number">
+  Training score or grade (0-100)
+</ParamField>
+
+<ParamField path="notes" type="string">
+  Instructor notes or comments
+</ParamField>
+
+---
+
+## Update Training
+
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/trainings/{id} \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Training Name",
+    "location": "New Location"
+  }'
+```
+
+---
+
+## Update Training Status
+
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/trainings/{id}/status \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "IN_PROGRESS"
+  }'
+```
+
+### Request
+
+<ParamField path="status" type="string" required>
+  New status for the training
+  
+  **Allowed values:**
+  - `SCHEDULED` - Training scheduled
+  - `IN_PROGRESS` - Training in progress
+  - `COMPLETED` - Training completed
+  - `CANCELED` - Training canceled
+</ParamField>
+
+---
+
+## Get User Training File
+
+```bash cURL
+curl -X GET https://api.sigsaho.com/trainings/users/{user_id}/file
+```
+
+Returns a PDF document with the complete training history and certifications for a specific user.
+
+### Path Parameters
+
+<ParamField path="user_id" type="string" required>
+  User UUID
+</ParamField>
+
+### Response
+
+Returns a PDF file with Content-Type: application/pdf
+
+---
+
+## Delete Training
+
+```bash cURL
+curl -X DELETE https://api.sigsaho.com/trainings/{id}
+```
+
+<Warning>
+  Soft delete only. Training records are preserved for compliance and audit purposes.
+</Warning>
+
+---
+
+## Authentication
+
+**Required permissions:**
+- Read operations: `capacitacion:read` permission
+- Write operations: `capacitacion:write` permission
+
+---
+
+## Related Resources
+
+- [User Management](/features/user-management)
+- [User Management API](/api/users)
