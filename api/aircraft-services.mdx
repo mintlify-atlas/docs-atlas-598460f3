@@ -1,0 +1,563 @@
+---
+title: 'Aircraft Services API'
+description: 'Manage aircraft maintenance and service records including preventive, corrective, and scheduled maintenance'
+---
+
+## Create Aircraft Service
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Create a new aircraft service or maintenance record. Must provide at least one scheduling method: `scheduled_at` (by date) or `scheduled_at_hours` (by flight hours), or both.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.sigsaho.com/aircraft-services \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "PREVENTIVE",
+    "description": "100-hour preventive maintenance inspection",
+    "aircraft_id": 1,
+    "scheduled_at": "2026-06-30",
+    "scheduled_at_hours": 5100,
+    "emails_to_notify": ["maintenance@example.com"],
+    "phones_to_notify": ["+1234567890"]
+  }'
+```
+</CodeGroup>
+
+### Request
+
+<ParamField body="type" type="enum" required>
+  Service type: `PREVENTIVE`, `CORRECTIVE`, `MAINTENANCE`
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Description of the service or maintenance
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer" required>
+  ID of the aircraft
+</ParamField>
+
+<ParamField body="scheduled_at" type="date">
+  Scheduled date for the service (YYYY-MM-DD). Optional if `scheduled_at_hours` is provided.
+</ParamField>
+
+<ParamField body="scheduled_at_hours" type="number">
+  Absolute flight hours (`total_lifetime_hours`) when service should be performed. Must be greater than current aircraft hours. Optional if `scheduled_at` is provided.
+</ParamField>
+
+<ParamField body="emails_to_notify" type="array">
+  Array of email addresses to notify
+</ParamField>
+
+<ParamField body="phones_to_notify" type="array">
+  Array of phone numbers to notify
+</ParamField>
+
+<ParamField body="completed_at" type="date">
+  Completion date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="status" type="enum" default="PENDING">
+  Service status: `PENDING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="aircraftService" type="object">
+  The created aircraft service object
+  
+  <Expandable title="Aircraft Service Object">
+    <ResponseField name="id" type="integer">
+      Service ID
+    </ResponseField>
+    
+    <ResponseField name="type" type="string">
+      Service type
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Service description
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      Service status
+    </ResponseField>
+    
+    <ResponseField name="scheduled_at" type="date">
+      Scheduled date
+    </ResponseField>
+    
+    <ResponseField name="scheduled_at_hours" type="number">
+      Scheduled flight hours
+    </ResponseField>
+    
+    <ResponseField name="hours_snapshot_at_creation" type="number">
+      Aircraft hours at service creation
+    </ResponseField>
+    
+    <ResponseField name="completed_at" type="date">
+      Completion date
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="datetime">
+      Creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="datetime">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Servicio de aeronave creado exitosamente",
+  "aircraftService": {
+    "id": 1,
+    "type": "PREVENTIVE",
+    "description": "100-hour preventive maintenance inspection",
+    "status": "PENDING",
+    "scheduled_at": "2026-06-30",
+    "scheduled_at_hours": 5100,
+    "hours_snapshot_at_creation": 5047,
+    "completed_at": null,
+    "emails_to_notify": ["maintenance@example.com"],
+    "phones_to_notify": ["+1234567890"],
+    "aircraft_id": 1,
+    "registered_by_id": 5,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## List Aircraft Services
+
+<Note>
+  Requires authentication with `requireMantenimientoRead` permission
+</Note>
+
+Get a paginated list of aircraft services with optional filters.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/aircraft-services?page=1&limit=10&status=PENDING&type=PREVENTIVE&aircraft_id=1" \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField query="status" type="enum">
+  Filter by status: `PENDING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`
+</ParamField>
+
+<ParamField query="type" type="enum">
+  Filter by type: `PREVENTIVE`, `CORRECTIVE`, `MAINTENANCE`
+</ParamField>
+
+<ParamField query="aircraft_id" type="integer">
+  Filter by aircraft ID
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by description
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of aircraft service objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination Object">
+    <ResponseField name="page" type="integer">
+      Current page
+    </ResponseField>
+    
+    <ResponseField name="limit" type="integer">
+      Records per page
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      Total records
+    </ResponseField>
+    
+    <ResponseField name="totalPages" type="integer">
+      Total pages
+    </ResponseField>
+    
+    <ResponseField name="hasNextPage" type="boolean">
+      Whether there is a next page
+    </ResponseField>
+    
+    <ResponseField name="hasPreviousPage" type="boolean">
+      Whether there is a previous page
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": 1,
+      "type": "PREVENTIVE",
+      "description": "100-hour preventive maintenance inspection",
+      "status": "PENDING",
+      "scheduled_at": "2026-06-30",
+      "scheduled_at_hours": 5100,
+      "aircraft_id": 1,
+      "created_at": "2026-03-04T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Aircraft Service by ID
+
+<Note>
+  Requires authentication with `requireMantenimientoRead` permission
+</Note>
+
+Get detailed information about a specific aircraft service.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.sigsaho.com/aircraft-services/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft service ID
+</ParamField>
+
+### Response
+
+<ResponseField name="aircraftService" type="object">
+  The aircraft service object with all details
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "aircraftService": {
+    "id": 1,
+    "type": "PREVENTIVE",
+    "description": "100-hour preventive maintenance inspection",
+    "status": "PENDING",
+    "scheduled_at": "2026-06-30",
+    "scheduled_at_hours": 5100,
+    "hours_snapshot_at_creation": 5047,
+    "completed_at": null,
+    "emails_to_notify": ["maintenance@example.com"],
+    "phones_to_notify": ["+1234567890"],
+    "aircraft_id": 1,
+    "registered_by_id": 5,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z",
+    "deleted_at": null
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Service Status
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Change the status of an aircraft service.
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/aircraft-services/1/status \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "IN_PROGRESS"}'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft service ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="status" type="enum" required>
+  New status: `PENDING`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Status del servicio de aeronave actualizado exitosamente",
+  "aircraftService": {
+    "id": 1,
+    "status": "IN_PROGRESS"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Complete Aircraft Service
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Complete an aircraft service that is in `IN_PROGRESS` status. For `MAINTENANCE` or `PREVENTIVE` services, this resets aircraft counters, processes associated parts (replacements, overhauls), and creates maintenance history records.
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/aircraft-services/1/complete \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft service ID
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="aircraftService" type="object">
+  The completed aircraft service object
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Servicio de aeronave completado exitosamente",
+  "aircraftService": {
+    "id": 1,
+    "type": "MAINTENANCE",
+    "status": "COMPLETED",
+    "completed_at": "2026-03-04"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Service Hours Status
+
+<Note>
+  Requires authentication with `requireMantenimientoRead` permission
+</Note>
+
+Get the current progress status in flight hours for a service scheduled by hours. Returns hours remaining, percentage reached, and whether the service is overdue.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.sigsaho.com/aircraft-services/1/hours-status \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft service ID
+</ParamField>
+
+### Response
+
+<ResponseField name="hoursStatus" type="object">
+  <Expandable title="Hours Status Object">
+    <ResponseField name="scheduled_at_hours" type="number">
+      Scheduled flight hours (`total_lifetime_hours`) when service is due
+    </ResponseField>
+    
+    <ResponseField name="current_hours" type="number">
+      Current aircraft `total_lifetime_hours`
+    </ResponseField>
+    
+    <ResponseField name="hours_remaining" type="number">
+      Hours remaining until threshold (0 if already reached)
+    </ResponseField>
+    
+    <ResponseField name="hours_at_creation" type="number">
+      Snapshot of hours at service creation time
+    </ResponseField>
+    
+    <ResponseField name="is_overdue_by_hours" type="boolean">
+      Whether the aircraft has reached or exceeded the scheduled hours
+    </ResponseField>
+    
+    <ResponseField name="percentage_reached" type="number">
+      Percentage of hours reached relative to scheduled threshold
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "hoursStatus": {
+    "scheduled_at_hours": 5100,
+    "current_hours": 5047,
+    "hours_remaining": 53,
+    "hours_at_creation": 5000,
+    "is_overdue_by_hours": false,
+    "percentage_reached": 98.96
+  }
+}
+```
+
+```json 422 Not Scheduled by Hours
+{
+  "error": "Este servicio no tiene programación por horas de vuelo"
+}
+```
+</ResponseExample>
+
+---
+
+## Delete Aircraft Service
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Logically delete an aircraft service (soft delete).
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE https://api.sigsaho.com/aircraft-services/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft service ID
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Servicio de aeronave eliminado exitosamente"
+}
+```
+</ResponseExample>
+
+---
+
+## Service Types
+
+The API supports the following service types:
+
+- **PREVENTIVE**: Scheduled preventive maintenance
+- **CORRECTIVE**: Corrective maintenance for issues
+- **MAINTENANCE**: General maintenance operations
+
+## Service Status
+
+- **PENDING**: Service is scheduled but not started
+- **IN_PROGRESS**: Service is currently being performed
+- **COMPLETED**: Service has been completed
+- **CANCELLED**: Service was cancelled
+- **ELIMINATED**: Service was logically deleted
+
+## Scheduling Methods
+
+### By Date
+Use `scheduled_at` to schedule a service by a specific calendar date.
+
+### By Flight Hours
+Use `scheduled_at_hours` to schedule a service when the aircraft reaches specific flight hours. When flight records are added and the aircraft reaches the specified hours, the service automatically transitions to `IN_PROGRESS` status.
+
+### Combined
+You can provide both `scheduled_at` and `scheduled_at_hours` for dual scheduling criteria.
+
+## Authentication
+
+All endpoints require authentication via JWT cookie. The API uses role-based access control:
+
+- **Read operations**: Require `requireMantenimientoRead` permission
+- **Write operations**: Require `requireMantenimientoWrite` permission
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Error message describing what went wrong
+</ResponseField>
+
+<ResponseExample>
+```json 400 Bad Request
+{
+  "error": "ID inválido"
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "No autorizado"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Servicio de aeronave no encontrado"
+}
+```
+
+```json 422 Unprocessable Entity
+{
+  "error": "El servicio no está en IN_PROGRESS"
+}
+```
+</ResponseExample>

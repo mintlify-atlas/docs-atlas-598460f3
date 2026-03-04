@@ -1,0 +1,769 @@
+---
+title: "Transfer Statistics API"
+description: "API endpoints for retrieving statistical data and analytics about transfers"
+---
+
+## Overview
+
+The Transfer Statistics API provides comprehensive analytics and reporting endpoints for transfer operations. All statistics exclude canceled transfers by default and support date range filtering.
+
+All endpoints require JWT authentication via cookies and the `stats:read` permission.
+
+## General Statistics
+
+```http
+GET /transfer-statistics/stats/general
+```
+
+Returns total transfers and breakdown by type (MEDICAL, CIVIL_DEFENSE, SECURITY). Excludes MAINTENANCE, OTHER types and CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date in YYYY-MM-DD format
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date in YYYY-MM-DD format
+</ParamField>
+
+### Response
+
+<ResponseField name="total" type="integer">
+Total number of transfers
+</ResponseField>
+
+<ResponseField name="byType" type="object">
+Breakdown by transfer type
+</ResponseField>
+
+<ResponseField name="byType.medical" type="integer">
+Number of medical transfers
+</ResponseField>
+
+<ResponseField name="byType.civilDefense" type="integer">
+Number of civil defense transfers
+</ResponseField>
+
+<ResponseField name="byType.segurity" type="integer">
+Number of security transfers
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+<ResponseField name="filters.dateFrom" type="string">
+Start date filter applied (nullable)
+</ResponseField>
+
+<ResponseField name="filters.dateTo" type="string">
+End date filter applied (nullable)
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/general?date_from=2024-01-01&date_to=2024-12-31" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+### Example Response
+
+```json
+{
+  "total": 150,
+  "byType": {
+    "medical": 80,
+    "civilDefense": 45,
+    "segurity": 25
+  },
+  "filters": {
+    "dateFrom": "2024-01-01",
+    "dateTo": "2024-12-31"
+  }
+}
+```
+
+---
+
+## Monthly Statistics
+
+```http
+GET /transfer-statistics/stats/monthly
+```
+
+Returns transfer counts grouped by year and month. Includes data for the requested year and 2 previous years. Excludes MAINTENANCE type and CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="year" type="integer">
+Base year for query (default: current year). Must be between 2000-2100.
+</ParamField>
+
+<ParamField query="status" type="enum">
+Filter by specific status. Options: `PROCESS`, `FINISHED`, `CANCELED`
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of monthly statistics objects
+</ResponseField>
+
+<ResponseField name="data[].year" type="integer">
+Year
+</ResponseField>
+
+<ResponseField name="data[].month" type="integer">
+Month (1-12)
+</ResponseField>
+
+<ResponseField name="data[].count" type="integer">
+Number of transfers
+</ResponseField>
+
+<ResponseField name="years" type="array">
+Array of years included in the response
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/monthly?year=2024&status=FINISHED" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "year": 2024,
+      "month": 1,
+      "count": 15
+    },
+    {
+      "year": 2024,
+      "month": 2,
+      "count": 20
+    }
+  ],
+  "years": [2022, 2023, 2024]
+}
+```
+
+---
+
+## Medical Transfer Statistics
+
+```http
+GET /transfer-statistics/stats/medical
+```
+
+Returns total medical transfers and breakdown by medical type (AEROMEDICAL, BLOOD_DERIVATIVE, ORGANS_TISSUES, OTHER). Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="total" type="integer">
+Total medical transfers
+</ResponseField>
+
+<ResponseField name="byMedicalType" type="object">
+Breakdown by medical transfer type
+</ResponseField>
+
+<ResponseField name="byMedicalType.aeromedical" type="integer">
+Aeromedical transfers count
+</ResponseField>
+
+<ResponseField name="byMedicalType.bloodDerivative" type="integer">
+Blood derivative transfers count
+</ResponseField>
+
+<ResponseField name="byMedicalType.organsTissues" type="integer">
+Organs/tissues transfers count
+</ResponseField>
+
+<ResponseField name="byMedicalType.other" type="integer">
+Other medical transfers count
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/medical?date_from=2024-01-01&date_to=2024-12-31" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Statistics by Aircraft
+
+```http
+GET /transfer-statistics/stats/by-aircraft
+```
+
+Returns transfer counts grouped by aircraft. Only includes aircraft with at least one transfer. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of aircraft statistics
+</ResponseField>
+
+<ResponseField name="data[].aircraftId" type="integer">
+Aircraft ID
+</ResponseField>
+
+<ResponseField name="data[].name" type="string">
+Aircraft name
+</ResponseField>
+
+<ResponseField name="data[].registration" type="string">
+Aircraft registration number
+</ResponseField>
+
+<ResponseField name="data[].totalTransfers" type="integer">
+Total transfers for this aircraft
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/by-aircraft?date_from=2024-01-01" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Statistics by Description Type
+
+```http
+GET /transfer-statistics/stats/by-description-type
+```
+
+Returns total transfers and breakdown by description_transfer_type for a specific transfer category. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="type_transfer" type="enum" required>
+Main transfer type. Options: `MEDICAL`, `SEGURITY`, `CIVIL_DEFENSE`, `OTHER`
+</ParamField>
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="total" type="integer">
+Total transfers for this type
+</ResponseField>
+
+<ResponseField name="breakdown" type="array">
+Array of description type statistics
+</ResponseField>
+
+<ResponseField name="breakdown[].descriptionType" type="string">
+Description type name
+</ResponseField>
+
+<ResponseField name="breakdown[].count" type="integer">
+Count for this description type
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters including type_transfer
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/by-description-type?type_transfer=MEDICAL&date_from=2024-01-01" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Top Crew Members
+
+```http
+GET /transfer-statistics/stats/top-pilots
+```
+
+Returns the top 10 crew members with the most transfers assigned. Based on crew_members_transfer table. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of crew member statistics (top 10)
+</ResponseField>
+
+<ResponseField name="data[].userId" type="integer">
+User ID
+</ResponseField>
+
+<ResponseField name="data[].name" type="string">
+Crew member name
+</ResponseField>
+
+<ResponseField name="data[].transfersCount" type="integer">
+Number of transfers assigned
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/top-pilots?date_from=2024-01-01&date_to=2024-12-31" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Hospital Statistics
+
+```http
+GET /transfer-statistics/stats/hospitals
+```
+
+Returns transfer counts by hospital as destination and as origin (referred). Only considers MEDICAL type transfers. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of hospital statistics
+</ResponseField>
+
+<ResponseField name="data[].name" type="string">
+Hospital name
+</ResponseField>
+
+<ResponseField name="data[].destino" type="integer">
+Number of transfers to this hospital
+</ResponseField>
+
+<ResponseField name="data[].referido" type="integer">
+Number of transfers from this hospital
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/hospitals?date_from=2024-01-01" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Beneficiaries Statistics
+
+```http
+GET /transfer-statistics/stats/beneficiaries
+```
+
+Returns patient distribution by gender. Based on patients table linked to medical transfers. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="total" type="integer">
+Total number of patients
+</ResponseField>
+
+<ResponseField name="data" type="array">
+Array of gender statistics
+</ResponseField>
+
+<ResponseField name="data[].gender" type="string">
+Gender value
+</ResponseField>
+
+<ResponseField name="data[].count" type="integer">
+Number of patients
+</ResponseField>
+
+<ResponseField name="data[].percentage" type="number">
+Percentage of total
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/beneficiaries?date_from=2024-01-01&date_to=2024-12-31" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Age Range Statistics
+
+```http
+GET /transfer-statistics/stats/age-ranges
+```
+
+Returns patient distribution by age ranges (0-12, 13-18, 19-59, 60+). Based on patients table linked to medical transfers. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="total" type="integer">
+Total number of patients
+</ResponseField>
+
+<ResponseField name="data" type="array">
+Array of age range statistics
+</ResponseField>
+
+<ResponseField name="data[].range" type="string">
+Age range (e.g., "0-12", "13-18", "19-59", "60+")
+</ResponseField>
+
+<ResponseField name="data[].count" type="integer">
+Number of patients in this range
+</ResponseField>
+
+<ResponseField name="data[].percentage" type="number">
+Percentage of total
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/age-ranges?date_from=2024-01-01" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Regional Statistics
+
+```http
+GET /transfer-statistics/stats/regional
+```
+
+Returns a cross-table of regions vs diagnosis types. Groups by origin region and medical diagnosis type. Only considers MEDICAL transfers. Excludes OTHER diagnosis type and CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of regional statistics
+</ResponseField>
+
+<ResponseField name="data[].region" type="string">
+Region name
+</ResponseField>
+
+<ResponseField name="data[].TRAUMA" type="integer">
+Trauma cases count
+</ResponseField>
+
+<ResponseField name="data[].MATER_CODE" type="integer">
+Maternal code cases count
+</ResponseField>
+
+<ResponseField name="data[].BURN" type="integer">
+Burn cases count
+</ResponseField>
+
+<ResponseField name="data[].FRACTURE" type="integer">
+Fracture cases count
+</ResponseField>
+
+<ResponseField name="diagnosisTypes" type="array">
+Array of diagnosis type names included
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/regional?date_from=2024-01-01&date_to=2024-12-31" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Monthly Statistics by Type
+
+```http
+GET /transfer-statistics/stats/monthly-by-type
+```
+
+Returns transfer counts grouped by year, month, and transfer type (MEDICAL, SEGURITY, CIVIL_DEFENSE, MAINTENANCE, OTHER). Includes data for requested year and 2 previous years. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="year" type="integer">
+Base year for query (default: current year). Must be between 2000-2100.
+</ParamField>
+
+<ParamField query="status" type="enum">
+Filter by specific status. Options: `PROCESS`, `FINISHED`, `CANCELED`
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of monthly statistics by type
+</ResponseField>
+
+<ResponseField name="data[].year" type="integer">
+Year
+</ResponseField>
+
+<ResponseField name="data[].month" type="integer">
+Month (1-12)
+</ResponseField>
+
+<ResponseField name="data[].type" type="string">
+Transfer type
+</ResponseField>
+
+<ResponseField name="data[].count" type="integer">
+Number of transfers
+</ResponseField>
+
+<ResponseField name="years" type="array">
+Array of years included
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/monthly-by-type?year=2024" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Recent Transfers
+
+```http
+GET /transfer-statistics/stats/recent-transfers
+```
+
+Returns the 10 most recent transfers with details including type, route, patient, and hospital information when applicable. Excludes CANCELED transfers.
+
+### Authentication
+Requires JWT authentication and `stats:read` permission.
+
+### Query Parameters
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of recent transfer objects (max 10)
+</ResponseField>
+
+<ResponseField name="data[].id" type="integer">
+Transfer ID
+</ResponseField>
+
+<ResponseField name="data[].date" type="string">
+Transfer date
+</ResponseField>
+
+<ResponseField name="data[].time" type="string">
+Transfer duration (nullable)
+</ResponseField>
+
+<ResponseField name="data[].typeTransfer" type="string">
+Transfer type
+</ResponseField>
+
+<ResponseField name="data[].descriptionType" type="string">
+Description type (nullable)
+</ResponseField>
+
+<ResponseField name="data[].transferRoute" type="string">
+Transfer route (nullable)
+</ResponseField>
+
+<ResponseField name="data[].status" type="string">
+Transfer status
+</ResponseField>
+
+<ResponseField name="data[].patientName" type="string">
+Patient name for medical transfers (nullable)
+</ResponseField>
+
+<ResponseField name="data[].hospitalDestiny" type="string">
+Destination hospital for medical transfers (nullable)
+</ResponseField>
+
+<ResponseField name="filters" type="object">
+Applied filters
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/transfer-statistics/stats/recent-transfers?date_from=2024-01-01" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+### Example Response
+
+```json
+{
+  "data": [
+    {
+      "id": 456,
+      "date": "2024-12-15T14:30:00.000Z",
+      "time": "1:40",
+      "typeTransfer": "MEDICAL",
+      "descriptionType": "AEROMEDICAL",
+      "transferRoute": "Guadalajara - México",
+      "status": "FINISHED",
+      "patientName": "Juan Pérez García",
+      "hospitalDestiny": "Hospital Civil de México"
+    }
+  ],
+  "filters": {
+    "dateFrom": "2024-01-01",
+    "dateTo": null
+  }
+}
+```

@@ -1,0 +1,230 @@
+---
+title: "SIGSAHO Documentation"
+description: "Aviation Operations Management System for centralizing, controlling, and optimizing aeronautical operations"
+---
+
+<div className="bg-gradient-to-br from-[#0066CC] via-[#1E40AF] to-[#0f1117] dark:from-[#0066CC] dark:via-[#1E40AF] dark:to-[#0f1117] py-20">
+  <div className="max-w-6xl mx-auto px-6 lg:px-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="lg:col-span-7">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+          Welcome to SIGSAHO
+        </h1>
+        <p className="text-lg sm:text-xl text-gray-100 dark:text-gray-100 mb-8 max-w-2xl">
+          Complete aviation operations management platform for medical transfers, aircraft fleet management, and flight operations coordination.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <a 
+            href="/quickstart" 
+            className="inline-flex items-center px-6 py-3 rounded-lg bg-white text-[#0066CC] font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Get Started
+          </a>
+          <a 
+            href="/api/auth" 
+            className="inline-flex items-center px-6 py-3 rounded-lg border border-white/30 bg-white/10 text-white font-semibold hover:bg-white/20 transition-colors"
+          >
+            API Reference
+          </a>
+        </div>
+      </div>
+      <div className="lg:col-span-5 hidden lg:block">
+        <div className="bg-white/10 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+              <span className="text-white text-sm">Medical Transfers Active</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+              <span className="text-white text-sm">Aircraft Fleet Managed</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+              <span className="text-white text-sm">Real-time Operations Dashboard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Quick Start
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Get started with SIGSAHO in minutes. Follow these steps to set up your account and begin managing aviation operations.
+  </p>
+
+  <Steps>
+    <Step title="Create your account">
+      Sign up for SIGSAHO and configure your organization profile. You'll receive admin credentials to access the system.
+      
+      ```bash
+      POST /auth/register
+      ```
+    </Step>
+    
+    <Step title="Configure your first aircraft">
+      Add aircraft to your fleet with registration details, maintenance schedules, and operational parameters.
+      
+      ```typescript
+      {
+        "registration": "XA-ABC",
+        "model": "Bell 407",
+        "status": "operational",
+        "maxFlightHours": 2500
+      }
+      ```
+    </Step>
+    
+    <Step title="Set up user roles and permissions">
+      Configure role-based access control for your team members including pilots, dispatchers, and maintenance staff.
+      
+      <Note>
+        Default roles include: Administrator, Dispatcher, Pilot, Maintenance Crew, and Observer.
+      </Note>
+    </Step>
+    
+    <Step title="Create your first medical transfer">
+      Begin coordinating medical transfers with patient information, crew assignments, and route planning.
+      
+      ```typescript
+      {
+        "patientName": "John Doe",
+        "origin": "Hospital A",
+        "destination": "Hospital B",
+        "aircraftId": "abc-123",
+        "priority": "urgent"
+      }
+      ```
+    </Step>
+  </Steps>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    Core Features
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Explore the powerful features that make SIGSAHO the complete aviation operations solution.
+  </p>
+
+  <CardGroup cols={2}>
+    <Card
+      title="Medical Transfer Management"
+      icon="helicopter"
+      href="/features/medical-transfers"
+    >
+      Track and coordinate medical air transport operations from dispatch to completion.
+    </Card>
+    <Card
+      title="Aircraft Management"
+      icon="plane"
+      href="/features/aircraft-management"
+    >
+      Manage your fleet with maintenance scheduling, flight hours tracking, and compliance documentation.
+    </Card>
+    <Card
+      title="Flight Operations"
+      icon="route"
+      href="/features/flight-operations"
+    >
+      Monitor flight balance, crew assignments, and operational logistics in real-time.
+    </Card>
+    <Card
+      title="Dashboard & Analytics"
+      icon="chart-line"
+      href="/features/dashboard-analytics"
+    >
+      Visualize operational metrics, transfer statistics, and performance indicators.
+    </Card>
+    <Card
+      title="User Management"
+      icon="users"
+      href="/features/user-management"
+    >
+      Control access with role-based permissions and manage your operational team.
+    </Card>
+    <Card
+      title="Reports & Statistics"
+      icon="file-chart-column"
+      href="/guides/reports-statistics"
+    >
+      Generate comprehensive reports for compliance, performance analysis, and operational insights.
+    </Card>
+  </CardGroup>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">
+    API & Integration
+  </h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">
+    Build on SIGSAHO with our comprehensive REST API.
+  </p>
+
+  <CardGroup cols={3}>
+    <Card
+      title="Authentication"
+      icon="lock"
+      href="/api/auth"
+    >
+      JWT-based authentication with access and refresh tokens.
+    </Card>
+    <Card
+      title="Medical Transfers API"
+      icon="briefcase-medical"
+      href="/api/medical-transfers"
+    >
+      Programmatic access to transfer management endpoints.
+    </Card>
+    <Card
+      title="Aircraft API"
+      icon="plane-departure"
+      href="/api/aircraft"
+    >
+      Manage aircraft, services, and maintenance records via API.
+    </Card>
+    <Card
+      title="Operations API"
+      icon="gauge-high"
+      href="/api/dashboard"
+    >
+      Access flight balance, dashboard data, and reports.
+    </Card>
+    <Card
+      title="User Administration"
+      icon="user-shield"
+      href="/api/users"
+    >
+      User and role management endpoints.
+    </Card>
+    <Card
+      title="Notifications"
+      icon="bell"
+      href="/api/notifications"
+    >
+      Configure and manage system notifications.
+    </Card>
+  </CardGroup>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <div className="bg-gradient-to-br from-[#0066CC]/10 to-[#1E40AF]/10 dark:from-[#0066CC]/20 dark:to-[#1E40AF]/20 rounded-2xl p-8 border border-[#0066CC]/20 dark:border-[#0066CC]/30">
+    <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+      Ready to get started?
+    </h2>
+    <p className="text-base text-gray-600 dark:text-gray-400 mb-6">
+      Jump into our quickstart guide to set up your first aviation operation in minutes.
+    </p>
+    <a 
+      href="/quickstart" 
+      className="inline-flex items-center px-6 py-3 rounded-lg bg-[#0066CC] text-white font-semibold hover:bg-[#1E40AF] transition-colors"
+    >
+      Get Started Now
+    </a>
+  </div>
+</div>

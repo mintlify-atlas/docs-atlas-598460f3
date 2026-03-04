@@ -1,0 +1,447 @@
+---
+title: 'Reports API'
+description: 'PDF report generation endpoints for transfers, users, and aircraft'
+---
+
+## Overview
+
+The Reports API generates PDF documents for various operational entities. All endpoints return PDF buffers with appropriate headers for download or display.
+
+<Note>
+All endpoints require JWT authentication via cookie and `reports:read` permission.
+</Note>
+
+## Generate Transfer Card
+
+<Api method="GET" path="/reports/transfers/{id}/card" />
+
+Generates an informative PDF card for a transfer operation.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the transfer
+</ParamField>
+
+### Response
+
+Returns a PDF buffer with content type `application/pdf` and disposition header set to download the file as `tarjeta-traslado-{id}.pdf`.
+
+<ResponseField name="Content-Type" type="header">
+  `application/pdf`
+</ResponseField>
+
+<ResponseField name="Content-Disposition" type="header">
+  `attachment; filename=tarjeta-traslado-{id}.pdf`
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.sigsaho.com/reports/transfers/123/card \
+  -H "Cookie: token=your-jwt-token" \
+  --output tarjeta-traslado-123.pdf
+```
+
+```javascript JavaScript
+fetch('https://api.sigsaho.com/reports/transfers/123/card', {
+  method: 'GET',
+  credentials: 'include',
+  headers: {
+    'Cookie': 'token=your-jwt-token'
+  }
+})
+.then(response => response.blob())
+.then(blob => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tarjeta-traslado-123.pdf';
+  a.click();
+});
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+[Binary PDF data]
+```
+
+```json 400 Bad Request
+{
+  "error": "ID de traslado inválido"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Traslado no encontrado"
+}
+```
+
+```json 500 Internal Server Error
+{
+  "error": "Error al generar el reporte"
+}
+```
+</ResponseExample>
+
+---
+
+## Generate Medical Transfer Card
+
+<Api method="GET" path="/reports/medical-transfers/{id}/card" />
+
+Generates a detailed PDF card for a medical transfer operation, including clinical data and patient information.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the medical transfer
+</ParamField>
+
+### Response
+
+Returns a PDF buffer with content type `application/pdf` and disposition header set to download the file as `tarjeta-traslado-medico-{id}.pdf`.
+
+<ResponseField name="Content-Type" type="header">
+  `application/pdf`
+</ResponseField>
+
+<ResponseField name="Content-Disposition" type="header">
+  `attachment; filename=tarjeta-traslado-medico-{id}.pdf`
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.sigsaho.com/reports/medical-transfers/456/card \
+  -H "Cookie: token=your-jwt-token" \
+  --output tarjeta-traslado-medico-456.pdf
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.sigsaho.com/reports/medical-transfers/456/card',
+    cookies={'token': 'your-jwt-token'}
+)
+
+if response.status_code == 200:
+    with open('tarjeta-traslado-medico-456.pdf', 'wb') as f:
+        f.write(response.content)
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+[Binary PDF data]
+```
+
+```json 400 Bad Request
+{
+  "error": "ID de traslado médico inválido"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Traslado médico no encontrado"
+}
+```
+
+```json 500 Internal Server Error
+{
+  "error": "Error al generar el reporte"
+}
+```
+</ResponseExample>
+
+---
+
+## Generate User Technical Report
+
+<Api method="GET" path="/reports/users/{id}/card" />
+
+Generates a technical personnel file (expediente) in PDF format, including personal data, documents, and training records.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the user
+</ParamField>
+
+### Response
+
+Returns a PDF buffer with content type `application/pdf` and disposition header set to download the file as `expediente-personal-{id}.pdf`.
+
+<ResponseField name="Content-Type" type="header">
+  `application/pdf`
+</ResponseField>
+
+<ResponseField name="Content-Disposition" type="header">
+  `attachment; filename=expediente-personal-{id}.pdf`
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.sigsaho.com/reports/users/789/card \
+  -H "Cookie: token=your-jwt-token" \
+  --output expediente-personal-789.pdf
+```
+
+```go Go
+package main
+
+import (
+    "fmt"
+    "io"
+    "net/http"
+    "os"
+)
+
+func main() {
+    req, _ := http.NewRequest("GET", 
+        "https://api.sigsaho.com/reports/users/789/card", nil)
+    req.Header.Add("Cookie", "token=your-jwt-token")
+    
+    client := &http.Client{}
+    resp, err := client.Do(req)
+    if err != nil {
+        panic(err)
+    }
+    defer resp.Body.Close()
+    
+    out, _ := os.Create("expediente-personal-789.pdf")
+    defer out.Close()
+    
+    io.Copy(out, resp.Body)
+    fmt.Println("PDF downloaded successfully")
+}
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+[Binary PDF data]
+```
+
+```json 400 Bad Request
+{
+  "error": "ID de usuario inválido"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Usuario no encontrado"
+}
+```
+
+```json 500 Internal Server Error
+{
+  "error": "Error al generar el expediente"
+}
+```
+</ResponseExample>
+
+---
+
+## Generate Aircraft Monthly Report
+
+<Api method="GET" path="/reports/aircraft/{id}/card" />
+
+Generates a monthly status report for an aircraft in PDF format, including general information, operational data for the current month, maintenance and inspections, and critical components.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the aircraft
+</ParamField>
+
+### Response
+
+Returns a PDF buffer with content type `application/pdf` and disposition header set to download the file as `reporte-aeronave-{id}.pdf`.
+
+<ResponseField name="Content-Type" type="header">
+  `application/pdf`
+</ResponseField>
+
+<ResponseField name="Content-Disposition" type="header">
+  `attachment; filename=reporte-aeronave-{id}.pdf`
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.sigsaho.com/reports/aircraft/12/card \
+  -H "Cookie: token=your-jwt-token" \
+  --output reporte-aeronave-12.pdf
+```
+
+```php PHP
+<?php
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, 
+    'https://api.sigsaho.com/reports/aircraft/12/card');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($ch, CURLOPT_COOKIE, 'token=your-jwt-token');
+
+$result = curl_exec($ch);
+if (curl_getinfo($ch, CURLINFO_HTTP_CODE) === 200) {
+    file_put_contents('reporte-aeronave-12.pdf', $result);
+    echo 'PDF downloaded successfully';
+}
+curl_close($ch);
+?>
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+[Binary PDF data]
+```
+
+```json 400 Bad Request
+{
+  "error": "ID de aeronave inválido"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Aeronave no encontrada"
+}
+```
+
+```json 500 Internal Server Error
+{
+  "error": "Error al generar el reporte"
+}
+```
+</ResponseExample>
+
+---
+
+## Report Contents Reference
+
+### Transfer Card Contents
+
+<AccordionGroup>
+  <Accordion title="Basic Information">
+    - Transfer ID and date
+    - Origin and destination
+    - Aircraft details
+    - Crew members
+  </Accordion>
+  
+  <Accordion title="Operational Data">
+    - Flight time
+    - Passengers count
+    - Cargo weight
+    - Route information
+  </Accordion>
+</AccordionGroup>
+
+### Medical Transfer Card Contents
+
+<AccordionGroup>
+  <Accordion title="Transfer Information">
+    - All standard transfer data
+    - Medical authorization
+    - Special equipment
+  </Accordion>
+  
+  <Accordion title="Patient Information">
+    - Patient demographics
+    - Medical diagnosis
+    - Clinical observations
+    - Required care level
+  </Accordion>
+  
+  <Accordion title="Medical Team">
+    - Doctor information
+    - Paramedic details
+    - Contact information
+  </Accordion>
+</AccordionGroup>
+
+### User Technical Report Contents
+
+<AccordionGroup>
+  <Accordion title="Personal Information">
+    - Full name and identification
+    - Position and role
+    - Contact details
+    - Employment history
+  </Accordion>
+  
+  <Accordion title="Documents">
+    - Licenses and certifications
+    - Medical certificates
+    - Document status and expiration
+  </Accordion>
+  
+  <Accordion title="Training History">
+    - Completed trainings
+    - Upcoming trainings
+    - Certification dates
+    - Training hours
+  </Accordion>
+</AccordionGroup>
+
+### Aircraft Monthly Report Contents
+
+<AccordionGroup>
+  <Accordion title="General Information">
+    - Aircraft registration
+    - Make and model
+    - Serial number
+    - Current status
+  </Accordion>
+  
+  <Accordion title="Operational Data (Current Month)">
+    - Flight hours
+    - Number of flights
+    - Fuel consumption
+    - Utilization rate
+  </Accordion>
+  
+  <Accordion title="Maintenance & Inspections">
+    - Scheduled maintenance
+    - Completed inspections
+    - Pending work orders
+    - Next inspection due
+  </Accordion>
+  
+  <Accordion title="Critical Components">
+    - Engine status and hours
+    - Parts near limits
+    - Required replacements
+    - AD compliance status
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Error Handling" icon="shield-check">
+    Always check HTTP status codes before processing the PDF. Handle 404 errors gracefully when entities don't exist.
+  </Card>
+  
+  <Card title="File Naming" icon="file-signature">
+    Use the filename from the `Content-Disposition` header or construct meaningful names using entity IDs and dates.
+  </Card>
+  
+  <Card title="Caching" icon="database">
+    Consider caching frequently accessed reports with appropriate TTL to reduce server load.
+  </Card>
+  
+  <Card title="Large Files" icon="file-arrow-down">
+    Implement streaming or chunked downloads for better performance with large PDF files.
+  </Card>
+</CardGroup>
+
+<Tip>
+For batch report generation, implement rate limiting and queuing to prevent server overload.
+</Tip>

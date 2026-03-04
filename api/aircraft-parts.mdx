@@ -1,0 +1,595 @@
+---
+title: 'Aircraft Parts API'
+description: 'Manage aircraft parts and components inventory including installation tracking, lifecycle management, and Excel export'
+---
+
+## Create Aircraft Part
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Create a new aircraft part with complete traceability information.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.sigsaho.com/aircraft-parts \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ata_code": "72-21-00",
+    "part_num": "407-040-100-101",
+    "description": "Main Rotor Blade",
+    "serial_number": "MRB-12345",
+    "useful_life_hours": 2000,
+    "useful_life_cycles": 1000,
+    "useful_date": "2028-03-01",
+    "installation_date": "2024-01-15",
+    "hours_at_installation": 4500,
+    "cycles_at_installation": 900,
+    "aircraft_id": 1
+  }'
+```
+</CodeGroup>
+
+### Request
+
+<ParamField body="ata_code" type="string" required>
+  ATA chapter code (e.g., "72-21-00")
+</ParamField>
+
+<ParamField body="part_num" type="string" required>
+  Part number
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Part description
+</ParamField>
+
+<ParamField body="serial_number" type="string" required>
+  Serial number (must be unique)
+</ParamField>
+
+<ParamField body="useful_life_hours" type="number" required>
+  Useful life in hours
+</ParamField>
+
+<ParamField body="useful_life_cycles" type="integer">
+  Useful life in cycles
+</ParamField>
+
+<ParamField body="useful_date" type="date">
+  Expiration date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="installation_date" type="date" required>
+  Date when part was installed (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="hours_at_installation" type="number" required>
+  Aircraft hours at installation time (default: 0)
+</ParamField>
+
+<ParamField body="cycles_at_installation" type="integer" required>
+  Aircraft cycles at installation time (default: 0)
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer" required>
+  ID of the aircraft
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="aircraftPart" type="object">
+  The created aircraft part object
+  
+  <Expandable title="Aircraft Part Object">
+    <ResponseField name="id" type="integer">
+      Part ID
+    </ResponseField>
+    
+    <ResponseField name="ata_code" type="string">
+      ATA code
+    </ResponseField>
+    
+    <ResponseField name="part_num" type="string">
+      Part number
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Part description
+    </ResponseField>
+    
+    <ResponseField name="serial_number" type="string">
+      Serial number
+    </ResponseField>
+    
+    <ResponseField name="useful_life_hours" type="number">
+      Useful life in hours
+    </ResponseField>
+    
+    <ResponseField name="useful_life_cycles" type="integer">
+      Useful life in cycles
+    </ResponseField>
+    
+    <ResponseField name="useful_date" type="date">
+      Expiration date
+    </ResponseField>
+    
+    <ResponseField name="current_hours" type="number">
+      Current accumulated hours
+    </ResponseField>
+    
+    <ResponseField name="current_cycles" type="integer">
+      Current accumulated cycles
+    </ResponseField>
+    
+    <ResponseField name="installation_date" type="date">
+      Installation date
+    </ResponseField>
+    
+    <ResponseField name="hours_at_installation" type="number">
+      Aircraft hours at installation
+    </ResponseField>
+    
+    <ResponseField name="cycles_at_installation" type="integer">
+      Aircraft cycles at installation
+    </ResponseField>
+    
+    <ResponseField name="last_service_date" type="date">
+      Last service date
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      Part status
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="datetime">
+      Creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="datetime">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Parte de aeronave creada exitosamente",
+  "aircraftPart": {
+    "id": 1,
+    "ata_code": "72-21-00",
+    "part_num": "407-040-100-101",
+    "description": "Main Rotor Blade",
+    "serial_number": "MRB-12345",
+    "useful_life_hours": 2000,
+    "useful_life_cycles": 1000,
+    "useful_date": "2028-03-01",
+    "current_hours": 0,
+    "current_cycles": 0,
+    "installation_date": "2024-01-15",
+    "hours_at_installation": 4500,
+    "cycles_at_installation": 900,
+    "last_service_date": null,
+    "status": "ACTIVE",
+    "aircraft_id": 1,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z",
+    "deprecated_at": null
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## List Aircraft Parts
+
+<Note>
+  Requires authentication with `requireMantenimientoRead` permission
+</Note>
+
+Get a paginated list of aircraft parts with optional filters.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/aircraft-parts?page=1&limit=10&status=ACTIVE&aircraft_id=1" \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField query="status" type="enum">
+  Filter by status: `ACTIVE`, `APPROACHING_LIMIT`, `NEAR_LIMIT`, `OVERDUE`, `IN_SERVICE`, `DEPRECATED`
+</ParamField>
+
+<ParamField query="aircraft_id" type="integer">
+  Filter by aircraft ID
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name, description, serial number, or ATA code
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of aircraft part objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination Object">
+    <ResponseField name="page" type="integer">
+      Current page
+    </ResponseField>
+    
+    <ResponseField name="limit" type="integer">
+      Records per page
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      Total records
+    </ResponseField>
+    
+    <ResponseField name="totalPages" type="integer">
+      Total pages
+    </ResponseField>
+    
+    <ResponseField name="hasNextPage" type="boolean">
+      Whether there is a next page
+    </ResponseField>
+    
+    <ResponseField name="hasPreviousPage" type="boolean">
+      Whether there is a previous page
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": 1,
+      "ata_code": "72-21-00",
+      "part_num": "407-040-100-101",
+      "description": "Main Rotor Blade",
+      "serial_number": "MRB-12345",
+      "useful_life_hours": 2000,
+      "current_hours": 150,
+      "status": "ACTIVE",
+      "aircraft_id": 1,
+      "installation_date": "2024-01-15"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Export Parts Inventory to Excel
+
+<Note>
+  Requires authentication with `requireAdminOrDirector` permission (ADMINISTRADOR or DIRECTOR roles only)
+</Note>
+
+Export the complete aircraft parts inventory to Excel format (XLSX). The file is streamed directly to the client using chunked transfer encoding without accumulating in server memory.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/aircraft-parts/export?status=ACTIVE&aircraft_id=1" \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -o inventory.xlsx
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="status" type="enum">
+  Filter by status: `ACTIVE`, `APPROACHING_LIMIT`, `NEAR_LIMIT`, `OVERDUE`, `IN_SERVICE`, `DEPRECATED`
+</ParamField>
+
+<ParamField query="aircraft_id" type="integer">
+  Filter by aircraft ID
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by description, serial number, or ATA code
+</ParamField>
+
+### Response
+
+Returns an Excel file (XLSX) with the parts inventory. The filename format is `inventario-componentes_YYYY-MM-DD.xlsx`.
+
+<ResponseExample>
+```text Response Headers
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+Content-Disposition: attachment; filename="inventario-componentes_2026-03-04.xlsx"
+Transfer-Encoding: chunked
+```
+</ResponseExample>
+
+---
+
+## Get Aircraft Part by ID
+
+<Note>
+  Requires authentication with `requireMantenimientoRead` permission
+</Note>
+
+Get detailed information about a specific aircraft part.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.sigsaho.com/aircraft-parts/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft part ID
+</ParamField>
+
+### Response
+
+<ResponseField name="aircraftPart" type="object">
+  The aircraft part object with all details
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "aircraftPart": {
+    "id": 1,
+    "ata_code": "72-21-00",
+    "part_num": "407-040-100-101",
+    "description": "Main Rotor Blade",
+    "serial_number": "MRB-12345",
+    "useful_life_hours": 2000,
+    "useful_life_cycles": 1000,
+    "useful_date": "2028-03-01",
+    "current_hours": 150,
+    "current_cycles": 75,
+    "installation_date": "2024-01-15",
+    "hours_at_installation": 4500,
+    "cycles_at_installation": 900,
+    "last_service_date": null,
+    "status": "ACTIVE",
+    "aircraft_id": 1,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z",
+    "deprecated_at": null
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Aircraft Part
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Update an existing aircraft part's information.
+
+<CodeGroup>
+```bash cURL
+curl -X PUT https://api.sigsaho.com/aircraft-parts/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Main Rotor Blade - Updated",
+    "useful_life_hours": 2500,
+    "status": "ACTIVE"
+  }'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft part ID
+</ParamField>
+
+### Request Body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="ata_code" type="string">
+  ATA code
+</ParamField>
+
+<ParamField body="part_num" type="string">
+  Part number
+</ParamField>
+
+<ParamField body="description" type="string">
+  Part description
+</ParamField>
+
+<ParamField body="serial_number" type="string">
+  Serial number (must be unique)
+</ParamField>
+
+<ParamField body="useful_life_hours" type="number">
+  Useful life in hours
+</ParamField>
+
+<ParamField body="useful_life_cycles" type="integer">
+  Useful life in cycles
+</ParamField>
+
+<ParamField body="useful_date" type="date">
+  Expiration date
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer">
+  Aircraft ID
+</ParamField>
+
+<ParamField body="status" type="enum">
+  Part status
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Parte de aeronave actualizada exitosamente",
+  "aircraftPart": {
+    "id": 1,
+    "description": "Main Rotor Blade - Updated",
+    "useful_life_hours": 2500,
+    "status": "ACTIVE"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Delete Aircraft Part
+
+<Note>
+  Requires authentication with `requireMantenimientoWrite` permission
+</Note>
+
+Logically delete an aircraft part (soft delete). The status changes to `DEPRECATED`.
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE "https://api.sigsaho.com/aircraft-parts/1?note=Part replaced during maintenance" \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft part ID
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="note" type="string">
+  Optional note explaining the deletion reason
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Parte de aeronave eliminada exitosamente"
+}
+```
+</ResponseExample>
+
+---
+
+## Part Status
+
+The system automatically calculates part status based on remaining useful life:
+
+<Card title="ACTIVE" icon="check-circle">
+  Part is operating normally with sufficient remaining life
+</Card>
+
+<Card title="APPROACHING_LIMIT" icon="exclamation-triangle">
+  Warning: Less than 80 hours or 40 cycles remaining, or expiration date within 3 months
+</Card>
+
+<Card title="NEAR_LIMIT" icon="exclamation-circle">
+  Warning: Less than 20 hours or 10 cycles remaining, or expiration date within 1 month
+</Card>
+
+<Card title="OVERDUE" icon="times-circle">
+  Critical: Part has exceeded useful life in hours/cycles or expiration date has passed
+</Card>
+
+<Card title="IN_SERVICE" icon="wrench">
+  Part is currently being serviced
+</Card>
+
+<Card title="DEPRECATED" icon="trash">
+  Part has been logically deleted (soft delete)
+</Card>
+
+---
+
+## ATA Codes
+
+ATA (Air Transport Association) codes are standardized numbering systems for aircraft systems:
+
+- **72-21-00**: Main Rotor Blades
+- **72-30-00**: Tail Rotor
+- **71-00-00**: Power Plant
+- **53-00-00**: Fuselage
+- And many more...
+
+---
+
+## Authentication
+
+All endpoints require authentication via JWT cookie. The API uses role-based access control:
+
+- **Read operations**: Require `requireMantenimientoRead` permission
+- **Write operations**: Require `requireMantenimientoWrite` permission
+- **Export operations**: Require `requireAdminOrDirector` permission (ADMINISTRADOR or DIRECTOR roles)
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Error message describing what went wrong
+</ResponseField>
+
+<ResponseExample>
+```json 400 Bad Request
+{
+  "error": "ID inválido"
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "No autorizado"
+}
+```
+
+```json 403 Forbidden
+{
+  "error": "Rol insuficiente (requiere ADMINISTRADOR o DIRECTOR)"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Parte de aeronave no encontrada"
+}
+```
+</ResponseExample>

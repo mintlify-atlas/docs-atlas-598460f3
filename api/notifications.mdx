@@ -1,0 +1,669 @@
+---
+title: 'Notification Configs API'
+description: 'Configure automatic notifications for document expirations and service schedules'
+icon: 'bell'
+---
+
+## Overview
+
+The Notification Configs API manages automatic notification configurations for user documents and aircraft services. Cronjobs evaluate these configurations daily and send notifications when documents are approaching expiration or services are due.
+
+## Authentication
+
+All endpoints require authentication via JWT cookie (`cookieAuth`).
+
+## Base URL
+
+```
+/api/notification-configs
+```
+
+---
+
+## Create Notification Config
+
+Create a notification configuration for a user document or aircraft service.
+
+<CodeGroup>
+```bash User Document Notification
+curl -X POST https://api.sigsaho.com/api/notification-configs \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "notification_time": "FIFTEEN_DAYS_BEFORE",
+    "target_type": "USER_DOC",
+    "user_doc_id": 5,
+    "is_active": true
+  }'
+```
+
+```bash Aircraft Service Notification
+curl -X POST https://api.sigsaho.com/api/notification-configs \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "notification_time": "SEVEN_DAYS_BEFORE",
+    "target_type": "AIRCRAFT_SERVICE",
+    "aircraft_service_id": 12,
+    "is_active": true
+  }'
+```
+</CodeGroup>
+
+### Request Body
+
+<ParamField body="notification_time" type="string" required>
+  When to send the notification relative to the expiration/scheduled date.
+  
+  **Options:**
+  - `ON_EXPIRATION_DAY` - Send on the day of expiration/service
+  - `ONE_DAY_BEFORE` - Send 1 day before
+  - `SEVEN_DAYS_BEFORE` - Send 7 days before
+  - `FIFTEEN_DAYS_BEFORE` - Send 15 days before
+</ParamField>
+
+<ParamField body="target_type" type="string" required>
+  Type of entity this notification applies to.
+  
+  **Options:**
+  - `USER_DOC` - User document notification
+  - `AIRCRAFT_SERVICE` - Aircraft service notification
+</ParamField>
+
+<ParamField body="is_active" type="boolean" default="true">
+  Whether the configuration is active and should be evaluated by cronjobs
+</ParamField>
+
+<ParamField body="user_doc_id" type="integer">
+  ID of the user document. **Required when `target_type` is `USER_DOC`**
+</ParamField>
+
+<ParamField body="aircraft_service_id" type="integer">
+  ID of the aircraft service. **Required when `target_type` is `AIRCRAFT_SERVICE`**
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="notificationConfig" type="object">
+  The created notification config object
+  
+  <Expandable title="NotificationConfig properties">
+    <ResponseField name="id" type="number">
+      Configuration ID
+    </ResponseField>
+    <ResponseField name="notification_time" type="string">
+      Notification timing
+    </ResponseField>
+    <ResponseField name="target_type" type="string">
+      Target entity type
+    </ResponseField>
+    <ResponseField name="is_active" type="boolean">
+      Active status
+    </ResponseField>
+    <ResponseField name="sent_at" type="string" nullable>
+      Timestamp when notification was sent (null if not sent)
+    </ResponseField>
+    <ResponseField name="user_doc" type="object" nullable>
+      Related user document (present if target_type is USER_DOC)
+    </ResponseField>
+    <ResponseField name="aircraft_service" type="object" nullable>
+      Related aircraft service (present if target_type is AIRCRAFT_SERVICE)
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Creation timestamp
+    </ResponseField>
+    <ResponseField name="updated_at" type="string">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 201 Success
+{
+  "message": "Configuración de notificación creada exitosamente",
+  "notificationConfig": {
+    "id": 1,
+    "notification_time": "SEVEN_DAYS_BEFORE",
+    "target_type": "AIRCRAFT_SERVICE",
+    "is_active": true,
+    "sent_at": null,
+    "user_doc": null,
+    "aircraft_service": {
+      "id": 12,
+      "service_type": "PREVENTIVE",
+      "scheduled_date": "2024-04-01T00:00:00.000Z"
+    },
+    "created_at": "2024-03-15T10:30:00.000Z",
+    "updated_at": "2024-03-15T10:30:00.000Z"
+  }
+}
+```
+
+```json 400 Validation Error
+{
+  "error": "La combinación (target_type + FK + notification_time) ya existe"
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "No autorizado"
+}
+```
+</ResponseExample>
+
+### Validation Rules
+
+1. **Target Type Validation:**
+   - If `target_type` is `USER_DOC`, `user_doc_id` must be provided
+   - If `target_type` is `AIRCRAFT_SERVICE`, `aircraft_service_id` must be provided
+
+2. **Uniqueness:**
+   - The combination of `(target_type, FK, notification_time)` must be unique
+   - Cannot create duplicate configurations for the same entity and timing
+
+3. **Foreign Key Validation:**
+   - The referenced `user_doc_id` or `aircraft_service_id` must exist
+
+### Authorization
+
+**Required Permission:** Write access to Mantenimiento module
+
+---
+
+## List Notification Configs
+
+Retrieve a paginated list of notification configurations with optional filters.
+
+<CodeGroup>
+```bash GET /notification-configs
+curl -X GET "https://api.sigsaho.com/api/notification-configs?page=1&limit=10&target_type=USER_DOC&is_active=true" \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (min: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page (min: 1, max: 100)
+</ParamField>
+
+<ParamField query="target_type" type="string">
+  Filter by entity type: `USER_DOC` or `AIRCRAFT_SERVICE`
+</ParamField>
+
+<ParamField query="is_active" type="boolean">
+  Filter by active status (true/false)
+</ParamField>
+
+<ParamField query="aircraft_service_id" type="integer">
+  Filter by aircraft service ID
+</ParamField>
+
+<ParamField query="user_doc_id" type="integer">
+  Filter by user document ID
+</ParamField>
+
+<ParamField query="sent" type="boolean">
+  Filter by sent status:
+  - `true` - Only sent notifications (sent_at != null)
+  - `false` - Only pending notifications (sent_at = null)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of notification config objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination info">
+    <ResponseField name="total" type="number">
+      Total number of configs
+    </ResponseField>
+    <ResponseField name="page" type="number">
+      Current page
+    </ResponseField>
+    <ResponseField name="limit" type="number">
+      Results per page
+    </ResponseField>
+    <ResponseField name="totalPages" type="number">
+      Total number of pages
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "data": [
+    {
+      "id": 1,
+      "notification_time": "SEVEN_DAYS_BEFORE",
+      "target_type": "USER_DOC",
+      "is_active": true,
+      "sent_at": null,
+      "user_doc": {
+        "id": 5,
+        "doc_type": "LICENSE",
+        "expiration_date": "2024-12-31T00:00:00.000Z",
+        "user": {
+          "id": 10,
+          "name": "Juan",
+          "last_name": "García"
+        }
+      },
+      "aircraft_service": null,
+      "created_at": "2024-01-15T10:00:00.000Z",
+      "updated_at": "2024-01-15T10:00:00.000Z"
+    }
+  ],
+  "pagination": {
+    "total": 25,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 3
+  }
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required Permission:** Read access to Mantenimiento module
+
+---
+
+## Get Notification Config by ID
+
+Retrieve detailed information about a specific notification configuration.
+
+<CodeGroup>
+```bash GET /notification-configs/:id
+curl -X GET https://api.sigsaho.com/api/notification-configs/1 \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Notification config ID
+</ParamField>
+
+### Response
+
+<ResponseField name="notificationConfig" type="object">
+  Notification config object with full details including relationships
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "notificationConfig": {
+    "id": 1,
+    "notification_time": "FIFTEEN_DAYS_BEFORE",
+    "target_type": "AIRCRAFT_SERVICE",
+    "is_active": true,
+    "sent_at": "2024-03-10T08:00:00.000Z",
+    "aircraft_service": {
+      "id": 12,
+      "service_type": "100_HOUR_INSPECTION",
+      "scheduled_date": "2024-03-25T00:00:00.000Z",
+      "aircraft": {
+        "id": 3,
+        "registration": "XA-ABC"
+      }
+    },
+    "created_at": "2024-02-01T10:00:00.000Z",
+    "updated_at": "2024-03-10T08:00:00.000Z"
+  }
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Configuración de notificación no encontrada"
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required Permission:** Read access to Mantenimiento module
+
+---
+
+## Update Notification Config
+
+Update an existing notification configuration's timing or active status.
+
+<CodeGroup>
+```bash PUT /notification-configs/:id
+curl -X PUT https://api.sigsaho.com/api/notification-configs/1 \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "notification_time": "ONE_DAY_BEFORE",
+    "is_active": false
+  }'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Notification config ID
+</ParamField>
+
+### Request Body
+
+All fields are optional. Provide only the fields you want to update.
+
+<ParamField body="notification_time" type="string">
+  New notification timing: `ON_EXPIRATION_DAY`, `ONE_DAY_BEFORE`, `SEVEN_DAYS_BEFORE`, or `FIFTEEN_DAYS_BEFORE`
+</ParamField>
+
+<ParamField body="is_active" type="boolean">
+  Set to `false` to disable the notification (cronjob will ignore it)
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="notificationConfig" type="object">
+  Updated notification config object
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "message": "Configuración de notificación actualizada exitosamente",
+  "notificationConfig": {
+    "id": 1,
+    "notification_time": "ONE_DAY_BEFORE",
+    "target_type": "USER_DOC",
+    "is_active": false,
+    "sent_at": null,
+    "created_at": "2024-01-15T10:00:00.000Z",
+    "updated_at": "2024-03-15T14:20:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Important Notes
+
+<Warning>
+  **Cannot Change Target:** You cannot modify `target_type`, `user_doc_id`, or `aircraft_service_id`. To change the target entity, delete the configuration and create a new one.
+</Warning>
+
+### Authorization
+
+**Required Permission:** Write access to Mantenimiento module
+
+---
+
+## Reset Notification Sent Status
+
+Reset the `sent_at` field to `null` to allow the notification to be sent again.
+
+<CodeGroup>
+```bash PATCH /notification-configs/:id/reset
+curl -X PATCH https://api.sigsaho.com/api/notification-configs/1/reset \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Notification config ID
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="notificationConfig" type="object">
+  Updated notification config with `sent_at` set to null
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "message": "Estado de envío reseteado exitosamente. La notificación se enviará en el próximo ciclo.",
+  "notificationConfig": {
+    "id": 1,
+    "notification_time": "SEVEN_DAYS_BEFORE",
+    "target_type": "USER_DOC",
+    "is_active": true,
+    "sent_at": null,
+    "created_at": "2024-01-15T10:00:00.000Z",
+    "updated_at": "2024-03-15T15:45:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+### Use Cases
+
+Reset the notification status when:
+- A document's expiration date has been updated
+- A service schedule has been changed
+- You need to force a re-send of the notification
+- The notification was sent prematurely or incorrectly
+
+### Authorization
+
+**Required Permission:** Write access to Mantenimiento module
+
+---
+
+## Delete Notification Config
+
+Soft delete a notification configuration. The cronjob will no longer evaluate it.
+
+<CodeGroup>
+```bash DELETE /notification-configs/:id
+curl -X DELETE https://api.sigsaho.com/api/notification-configs/1 \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Notification config ID
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Confirmation message
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "message": "Configuración de notificación eliminada exitosamente"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Configuración de notificación no encontrada"
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required Permission:** Write access to Mantenimiento module
+
+---
+
+## Notification Timing Options
+
+<CardGroup cols={2}>
+  <Card title="ON_EXPIRATION_DAY" icon="calendar-day">
+    Send notification on the exact day of expiration or scheduled service.
+  </Card>
+  
+  <Card title="ONE_DAY_BEFORE" icon="calendar-minus">
+    Send notification 1 day before the expiration or scheduled date.
+  </Card>
+  
+  <Card title="SEVEN_DAYS_BEFORE" icon="calendar-week">
+    Send notification 7 days before. Ideal for weekly planning.
+  </Card>
+  
+  <Card title="FIFTEEN_DAYS_BEFORE" icon="calendar-range">
+    Send notification 15 days before. Best for long-term planning.
+  </Card>
+</CardGroup>
+
+---
+
+## Target Types
+
+### USER_DOC
+Notifications for user document expirations (license, visa, passport, psycho-physical aptitude, RATARI).
+
+**Evaluated Against:** Document `expiration_date` field
+
+**Example Use Cases:**
+- Pilot license renewals
+- Visa expiration warnings
+- Medical certificate expirations
+
+### AIRCRAFT_SERVICE
+Notifications for scheduled aircraft maintenance services.
+
+**Evaluated Against:** Service `scheduled_date` field
+
+**Example Use Cases:**
+- 100-hour inspections
+- Annual maintenance
+- Component replacement schedules
+
+---
+
+## Cronjob Behavior
+
+The notification cronjob runs daily and:
+
+1. **Filters active configs:** Only evaluates configs where `is_active = true` and `sent_at = null`
+2. **Calculates trigger date:** Determines the notification trigger date based on `notification_time`
+3. **Checks current date:** Compares today's date with the calculated trigger date
+4. **Sends notification:** If trigger date matches, sends the notification
+5. **Updates sent_at:** Sets `sent_at` to the current timestamp after successful send
+
+### Trigger Date Calculation
+
+```
+Trigger Date = Expiration/Scheduled Date - Notification Offset
+
+Examples:
+- ON_EXPIRATION_DAY: March 25 - 0 days = March 25
+- ONE_DAY_BEFORE: March 25 - 1 day = March 24
+- SEVEN_DAYS_BEFORE: March 25 - 7 days = March 18
+- FIFTEEN_DAYS_BEFORE: March 25 - 15 days = March 10
+```
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Multiple Reminder Strategy" icon="layer-group">
+    Create multiple configurations with different timings for critical documents:
+    
+    - 15 days before (initial warning)
+    - 7 days before (follow-up)
+    - 1 day before (urgent reminder)
+    - On expiration day (critical alert)
+  </Accordion>
+  
+  <Accordion title="Reset After Updates" icon="rotate">
+    Always reset `sent_at` when updating the expiration date or scheduled date of the related document/service to ensure notifications are sent again.
+  </Accordion>
+  
+  <Accordion title="Disable Instead of Delete" icon="toggle-off">
+    Use `is_active: false` instead of deleting configs when temporarily disabling notifications. This preserves the configuration history.
+  </Accordion>
+  
+  <Accordion title="Monitor Sent Notifications" icon="chart-line">
+    Regularly query configs with `sent=true` to verify notifications are being sent as expected.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 400  | Bad request - validation error or duplicate config |
+| 401  | Unauthorized - authentication required |
+| 403  | Forbidden - insufficient permissions |
+| 404  | Notification config not found |
+| 500  | Internal server error |
+
+---
+
+## Example Workflows
+
+### Workflow 1: Configure License Expiration Notification
+
+```bash
+# 1. Create notification for 15 days before expiration
+curl -X POST https://api.sigsaho.com/api/notification-configs \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "notification_time": "FIFTEEN_DAYS_BEFORE",
+    "target_type": "USER_DOC",
+    "user_doc_id": 42,
+    "is_active": true
+  }'
+
+# 2. Add follow-up notification for 1 day before
+curl -X POST https://api.sigsaho.com/api/notification-configs \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "notification_time": "ONE_DAY_BEFORE",
+    "target_type": "USER_DOC",
+    "user_doc_id": 42,
+    "is_active": true
+  }'
+```
+
+### Workflow 2: Update Service Date and Reset Notification
+
+```bash
+# 1. Update service scheduled date (via Aircraft Services API)
+curl -X PUT https://api.sigsaho.com/api/aircraft-services/12 \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{"scheduled_date": "2024-05-15T00:00:00.000Z"}'
+
+# 2. Reset notification to trigger new send
+curl -X PATCH https://api.sigsaho.com/api/notification-configs/5/reset \
+  -b "cookies.txt"
+```

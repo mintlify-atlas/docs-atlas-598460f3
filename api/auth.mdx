@@ -1,0 +1,612 @@
+---
+title: 'Authentication API'
+description: 'Authenticate users and manage sessions with JWT tokens'
+---
+
+## Overview
+
+The Authentication API provides endpoints for user login, token refresh, logout, and retrieving the current authenticated user. All authentication is handled via httpOnly cookies containing JWT tokens for enhanced security.
+
+### Authentication Mechanism
+
+- **Access Token**: Short-lived JWT token (15 minutes) stored in httpOnly cookie
+- **Refresh Token**: Long-lived JWT token stored in httpOnly cookie
+- **Cookie Security**: All cookies use `httpOnly`, `secure` (in production), and `sameSite: strict` flags
+
+### Rate Limiting
+
+| Endpoint | Limit |
+|----------|-------|
+| `/auth/login` | 5 requests per 15 minutes per IP |
+| `/auth/refresh` | 10 requests per 15 minutes per IP |
+| `/auth/logout` | 20 requests per 15 minutes per IP |
+| `/auth/logout-all` | 20 requests per 15 minutes per IP |
+
+---
+
+## Login
+
+<Card title="POST /auth/login" icon="right-to-bracket">
+  Authenticate a user with username/email and password. Returns user data and sets authentication cookies.
+</Card>
+
+### Request
+
+<ParamField body="identifier" type="string" required>
+  Username or email address (3-255 characters)
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User password (1-255 characters)
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Authenticated user information
+  
+  <Expandable title="User object">
+    <ResponseField name="id" type="number">
+      User ID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User's first name
+    </ResponseField>
+    
+    <ResponseField name="last_name" type="string">
+      User's paternal last name
+    </ResponseField>
+    
+    <ResponseField name="second_last_name" type="string">
+      User's maternal last name
+    </ResponseField>
+    
+    <ResponseField name="username" type="string">
+      Username
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      Email address
+    </ResponseField>
+    
+    <ResponseField name="roles" type="array">
+      Array of role objects assigned to the user
+    </ResponseField>
+    
+    <ResponseField name="login_access" type="boolean">
+      Whether user has login permissions
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      User status (ACTIVE, DISABLED, etc.)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.com/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identifier": "admin",
+    "password": "SecurePass123!"
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "message": "Login exitoso",
+  "user": {
+    "id": 1,
+    "name": "Juan",
+    "last_name": "Pérez",
+    "second_last_name": "García",
+    "username": "admin",
+    "email": "admin@sigsaho.com",
+    "roles": [
+      {
+        "id": 1,
+        "name": "Administrator"
+      }
+    ],
+    "login_access": true,
+    "status": "ACTIVE"
+  }
+}
+```
+
+### Cookies Set
+
+- `accessToken`: JWT access token (httpOnly, expires in 15 minutes)
+- `refreshToken`: JWT refresh token (httpOnly, expires based on config)
+
+### Error Responses
+
+<ResponseField name="400" type="error">
+  **Bad Request** - Invalid request data
+  ```json
+  {
+    "error": "Se requiere identifier (username/email) y password"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="401" type="error">
+  **Unauthorized** - Invalid credentials
+  ```json
+  {
+    "error": "Credenciales inválidas"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="429" type="error">
+  **Too Many Requests** - Rate limit exceeded (5 attempts per 15 minutes)
+  ```json
+  {
+    "error": "Demasiados intentos de login"
+  }
+  ```
+</ResponseField>
+
+---
+
+## Refresh Token
+
+<Card title="POST /auth/refresh" icon="arrows-rotate">
+  Generate a new access token using the refresh token from cookies. No request body required.
+</Card>
+
+### Request
+
+No request body required. The refresh token is automatically read from the `refreshToken` cookie.
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  User information (same structure as login response)
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.com/auth/refresh \
+  -H "Content-Type: application/json" \
+  --cookie "refreshToken=YOUR_REFRESH_TOKEN"
+```
+
+### Example Response
+
+```json
+{
+  "message": "Token renovado exitosamente",
+  "user": {
+    "id": 1,
+    "name": "Juan",
+    "last_name": "Pérez",
+    "second_last_name": "García",
+    "username": "admin",
+    "email": "admin@sigsaho.com",
+    "roles": [
+      {
+        "id": 1,
+        "name": "Administrator"
+      }
+    ],
+    "login_access": true,
+    "status": "ACTIVE"
+  }
+}
+```
+
+### Cookies Updated
+
+- `accessToken`: New JWT access token (httpOnly, expires in 15 minutes)
+- `refreshToken`: New JWT refresh token (httpOnly)
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  **Unauthorized** - Invalid, expired, or missing refresh token
+  ```json
+  {
+    "error": "Refresh token no proporcionado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Refresh token inválido o expirado"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="429" type="error">
+  **Too Many Requests** - Rate limit exceeded (10 requests per 15 minutes)
+  ```json
+  {
+    "error": "Demasiadas solicitudes"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  Both cookies are cleared automatically if the refresh operation fails.
+</Note>
+
+---
+
+## Logout
+
+<Card title="POST /auth/logout" icon="right-from-bracket">
+  Invalidate the current session and clear authentication cookies.
+</Card>
+
+### Request
+
+No request body required. The refresh token is automatically read from cookies.
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.com/auth/logout \
+  -H "Content-Type: application/json" \
+  --cookie "refreshToken=YOUR_REFRESH_TOKEN"
+```
+
+### Example Response
+
+```json
+{
+  "message": "Sesión cerrada exitosamente"
+}
+```
+
+### Cookies Cleared
+
+- `accessToken`: Removed
+- `refreshToken`: Removed and invalidated in database
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  **Unauthorized** - Invalid or missing refresh token
+  ```json
+  {
+    "error": "Refresh token inválido o no proporcionado"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="429" type="error">
+  **Too Many Requests** - Rate limit exceeded (20 requests per 15 minutes)
+  ```json
+  {
+    "error": "Demasiadas solicitudes"
+  }
+  ```
+</ResponseField>
+
+<Note>
+  Logout is designed to be forgiving - cookies are cleared even if the token validation fails.
+</Note>
+
+---
+
+## Logout All Devices
+
+<Card title="POST /auth/logout-all" icon="right-from-bracket">
+  Invalidate all sessions for the authenticated user across all devices. Requires authentication.
+</Card>
+
+### Authentication Required
+
+This endpoint requires a valid access token in cookies.
+
+### Request
+
+No request body required.
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.com/auth/logout-all \
+  -H "Content-Type: application/json" \
+  --cookie "accessToken=YOUR_ACCESS_TOKEN; refreshToken=YOUR_REFRESH_TOKEN"
+```
+
+### Example Response
+
+```json
+{
+  "message": "Todas las sesiones cerradas exitosamente"
+}
+```
+
+### Cookies Cleared
+
+- `accessToken`: Removed
+- `refreshToken`: Removed and all refresh tokens for user invalidated in database
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  **Unauthorized** - Invalid, expired, or missing access token
+  ```json
+  {
+    "error": "Token de acceso no proporcionado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Token de acceso expirado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Usuario no autenticado"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403" type="error">
+  **Forbidden** - User is inactive or lacks login permissions
+  ```json
+  {
+    "error": "Usuario inactivo o eliminado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Usuario sin permisos de acceso"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="429" type="error">
+  **Too Many Requests** - Rate limit exceeded (20 requests per 15 minutes)
+  ```json
+  {
+    "error": "Demasiadas solicitudes"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500" type="error">
+  **Internal Server Error** - Server error during logout
+  ```json
+  {
+    "error": "Error al cerrar todas las sesiones"
+  }
+  ```
+</ResponseField>
+
+---
+
+## Get Current User
+
+<Card title="GET /auth/me" icon="user">
+  Retrieve information about the currently authenticated user. Requires authentication.
+</Card>
+
+### Authentication Required
+
+This endpoint requires a valid access token in cookies.
+
+### Request
+
+No request parameters required.
+
+### Response
+
+<ResponseField name="user" type="object">
+  Current user information
+  
+  <Expandable title="User object">
+    <ResponseField name="id" type="number">
+      User ID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      User's first name
+    </ResponseField>
+    
+    <ResponseField name="last_name" type="string">
+      User's paternal last name
+    </ResponseField>
+    
+    <ResponseField name="second_last_name" type="string">
+      User's maternal last name
+    </ResponseField>
+    
+    <ResponseField name="username" type="string">
+      Username
+    </ResponseField>
+    
+    <ResponseField name="email" type="string">
+      Email address
+    </ResponseField>
+    
+    <ResponseField name="roles" type="array">
+      Array of role objects assigned to the user
+    </ResponseField>
+    
+    <ResponseField name="login_access" type="boolean">
+      Whether user has login permissions
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      User status (ACTIVE, DISABLED, etc.)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET https://api.sigsaho.com/auth/me \
+  -H "Content-Type: application/json" \
+  --cookie "accessToken=YOUR_ACCESS_TOKEN"
+```
+
+### Example Response
+
+```json
+{
+  "user": {
+    "id": 1,
+    "name": "Juan",
+    "last_name": "Pérez",
+    "second_last_name": "García",
+    "username": "admin",
+    "email": "admin@sigsaho.com",
+    "roles": [
+      {
+        "id": 1,
+        "name": "Administrator"
+      }
+    ],
+    "login_access": true,
+    "status": "ACTIVE"
+  }
+}
+```
+
+### Error Responses
+
+<ResponseField name="401" type="error">
+  **Unauthorized** - Invalid, expired, or missing access token
+  ```json
+  {
+    "error": "Token de acceso no proporcionado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Token de acceso expirado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Token de acceso inválido"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Usuario no encontrado"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="403" type="error">
+  **Forbidden** - User is inactive or lacks login permissions
+  ```json
+  {
+    "error": "Usuario inactivo o eliminado"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Usuario sin permisos de acceso"
+  }
+  ```
+</ResponseField>
+
+<ResponseField name="500" type="error">
+  **Internal Server Error** - Server error
+  ```json
+  {
+    "error": "Error al obtener usuario actual"
+  }
+  ```
+</ResponseField>
+
+---
+
+## JWT Token Structure
+
+### Access Token Payload
+
+```json
+{
+  "id": 1,
+  "email": "admin@sigsaho.com",
+  "username": "admin",
+  "roles": ["Administrator"],
+  "iat": 1234567890,
+  "exp": 1234568790
+}
+```
+
+### Token Verification
+
+The JWT middleware (`jwtMiddleware`) performs the following checks:
+
+1. Verifies the token signature using the secret key
+2. Checks token expiration
+3. Loads the user from the database
+4. Verifies user status is `ACTIVE`
+5. Verifies user has `login_access` enabled
+
+### Cookie Configuration
+
+All authentication cookies use the following security settings:
+
+- `httpOnly: true` - Prevents JavaScript access to cookies
+- `secure: true` - Cookies only sent over HTTPS (in production)
+- `sameSite: 'strict'` - Prevents CSRF attacks
+- `maxAge`: 
+  - Access token: 15 minutes (900,000 ms)
+  - Refresh token: Configured value (typically days)
+
+---
+
+## Security Notes
+
+<Warning>
+  **Password Requirements**: When creating users with login access, passwords must:
+  - Be at least 8 characters long
+  - Include at least one uppercase letter
+  - Include at least one lowercase letter
+  - Include at least one number
+  - Include at least one special character (@$!%*?&#^()_+=-{}[]:;"'&lt;&gt;,.?/\|`~)
+</Warning>
+
+<Info>
+  **Rate Limiting**: All authentication endpoints are rate-limited to prevent brute force attacks. If you exceed the limit, you'll receive a 429 error and must wait 15 minutes before trying again.
+</Info>
+
+<Tip>
+  **Token Refresh**: Access tokens expire after 15 minutes. Implement automatic token refresh in your client application using the `/auth/refresh` endpoint to maintain user sessions without requiring re-login.
+</Tip>

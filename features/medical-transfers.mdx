@@ -1,0 +1,369 @@
+---
+title: Medical Transfers
+description: Manage aeromedical patient transfers with comprehensive medical records, patient tracking, and crew coordination
+icon: 'ambulance'
+---
+
+## Overview
+
+The Medical Transfers module enables healthcare coordinators and flight crews to manage complete aeromedical operations, from patient intake through flight completion. This system handles both emergency and scheduled medical evacuations with full patient record management.
+
+<Note>
+  Medical transfers support **both two-phase operations** (patient registration followed by flight completion) and **single-phase direct entry** for completed missions.
+</Note>
+
+## User Workflows
+
+### Creating a Medical Transfer
+
+Medical transfers follow a structured workflow that captures both medical and flight information:
+
+<Steps>
+  <Step title="Access Medical Transfers">
+    Navigate to **Registro de Servicios > Traslados Médicos** from the main menu. The system displays a paginated list of all medical transfers with filters for status, diagnosis type, and transfer type.
+  </Step>
+  
+  <Step title="Initiate New Transfer">
+    Click **"Nuevo Traslado"** to open the medical transfer creation form. Choose between:
+    - **Phase 1 Registration**: Record patient details immediately (for active missions)
+    - **Complete Entry**: Enter all details for already-completed transfers
+  </Step>
+  
+  <Step title="Enter Medical Information">
+    Complete the medical details section:
+    
+    **Hospital Information**
+    - Origin hospital/facility
+    - Destination hospital/facility
+    
+    **Transfer Classification**
+    - Medical transfer type (Primary, Secondary, Tertiary, Inter-hospital)
+    - Diagnosis type (Trauma, Medical, Obstetric, Pediatric, etc.)
+    - Detailed diagnosis description
+  </Step>
+  
+  <Step title="Add Patient Records">
+    Register one or more patients for this transfer:
+    
+    **Patient Demographics**
+    - Full name
+    - Birthdate and age
+    - Gender
+    - Phone contact
+    - Family member name
+    
+    **Medical Details**
+    - Medical record number
+    - Locality/origin location
+    - Clinical notes
+  </Step>
+  
+  <Step title="Flight Details (Phase 2 or Direct Entry)">
+    Enter operational flight information:
+    
+    - **Date and time** of transfer
+    - **Flight duration** (in minutes)
+    - **Aircraft** assignment (from active fleet)
+    - **Origin and destination** localities
+    - **Crew assignment** (pilots, medical personnel)
+    - **Logbook folio** number
+    - **Fuel consumption**
+    - **Transfer route** description
+    - **Additional passengers** (if any)
+  </Step>
+</Steps>
+
+### Managing Medical Transfer Status
+
+Medical transfers progress through distinct status stages:
+
+<CardGroup cols={3}>
+  <Card title="In Process" icon="clock">
+    Initial registration phase. Patient details recorded, flight pending or in progress.
+  </Card>
+  <Card title="Finished" icon="check-circle">
+    Transfer completed successfully. All flight and medical data finalized.
+  </Card>
+  <Card title="Canceled" icon="x-circle">
+    Transfer canceled due to weather, patient condition, or operational reasons.
+  </Card>
+</CardGroup>
+
+### Two-Phase Operation Workflow
+
+For active missions, SIGSAHO supports a two-phase workflow:
+
+<Accordion title="Phase 1: Patient Registration">
+  When a medical mission is activated:
+  
+  1. Coordinator creates a new medical transfer record
+  2. Enters patient medical information and diagnosis
+  3. Records hospital origin and destination
+  4. System saves with status **"In Process"**
+  5. Transfer appears in active missions dashboard
+  
+  This allows immediate patient tracking while the flight is being prepared.
+</Accordion>
+
+<Accordion title="Phase 2: Flight Completion">
+  After the flight is completed:
+  
+  1. User locates the transfer record (status: In Process)
+  2. Clicks **"Complete Transfer"** action
+  3. Enters final flight details:
+     - Actual flight time and route
+     - Aircraft and crew assignments
+     - Fuel consumption
+     - Logbook folio
+  4. Updates patient information if needed
+  5. System updates status to **"Finished"**
+  
+  All flight hours are automatically logged to aircraft maintenance tracking.
+</Accordion>
+
+## Key Features
+
+### Patient Management
+
+<Card title="Multiple Patients Per Transfer" icon="users">
+  **Support for Multi-Patient Missions**
+  
+  A single medical transfer can transport multiple patients (common in inter-hospital transfers). Each patient has:
+  
+  - Individual medical records
+  - Separate diagnosis and demographics
+  - Independent locality tracking
+  - Unique patient identifiers
+  
+  **Actions Available:**
+  - Add patients during or after transfer creation
+  - Update patient information (medical records, contact details)
+  - Remove patients if incorrectly assigned
+</Card>
+
+### Crew Assignment and Management
+
+<Card title="Crew Coordination" icon="user-group">
+  **Assign Flight and Medical Personnel**
+  
+  Medical transfers require specialized crew:
+  
+  - **Pilots**: Captain and first officer
+  - **Medical personnel**: Doctors, paramedics, nurses
+  - **Support staff**: As needed
+  
+  **Crew Management:**
+  - Select crew members from active personnel roster
+  - System validates crew certifications and availability
+  - Track crew hours for regulatory compliance
+  - Reassign crew members if needed before completion
+</Card>
+
+### Search and Filtering
+
+The medical transfers table provides powerful filtering:
+
+<CardGroup cols={2}>
+  <Card title="By Status" icon="filter">
+    - In Process
+    - Finished
+    - Canceled
+  </Card>
+  <Card title="By Medical Classification" icon="stethoscope">
+    - Medical transfer type
+    - Diagnosis category
+    - Date range
+    - Aircraft used
+  </Card>
+</CardGroup>
+
+**Search Capabilities:**
+- Search by requestor name
+- Search by patient name
+- Search by hospital
+- Search by logbook folio
+
+### Data Export and Reporting
+
+<Card title="Excel Export" icon="download">
+  **Export Medical Transfer Reports**
+  
+  Generate comprehensive Excel reports for:
+  - Specific date ranges
+  - Filtered by diagnosis type or transfer category
+  - Complete patient and flight details
+  - Formatted for regulatory submissions
+  
+  **Usage:**
+  1. Select date range using the calendar picker
+  2. Apply any additional filters
+  3. Click **"Exportar Excel"**
+  4. System generates and downloads formatted spreadsheet
+</Card>
+
+## Interface Components
+
+### Medical Transfers Table
+
+**Screenshot Description:**
+The main table displays:
+- Transfer number and date
+- Hospital origin → destination
+- Medical transfer type badge
+- Diagnosis type badge
+- Number of patients
+- Flight duration
+- Status indicator
+- Action menu (View, Edit, Complete, Cancel)
+
+**Pagination:**
+- Server-side pagination (10, 25, 50, 100 records per page)
+- Total record count displayed
+- Quick navigation controls
+
+### Transfer Detail View
+
+**Screenshot Description:**
+Detailed view organized in sections:
+
+1. **Transfer Header**
+   - Transfer ID and status badge
+   - Date and time
+   - Requesting authority
+
+2. **Medical Information Card**
+   - Hospital origin and destination
+   - Transfer and diagnosis types
+   - Detailed diagnosis description
+
+3. **Patients List**
+   - Table of all patients on transfer
+   - Demographics and medical record numbers
+   - Edit/remove actions per patient
+
+4. **Flight Details Card**
+   - Aircraft information with registration
+   - Flight route and duration
+   - Origin and destination localities
+   - Fuel consumption
+
+5. **Crew Roster**
+   - List of assigned crew members
+   - Roles and certifications
+   - Add/remove crew actions
+
+## Permissions and Access Control
+
+<Warning>
+  Access to medical transfers is role-based and respects patient privacy regulations.
+</Warning>
+
+**Permission Levels:**
+
+| Role | View | Create | Edit | Complete | Delete |
+|------|------|--------|------|----------|--------|
+| Medical Coordinator | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Flight Dispatcher | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Pilot | ✓ | ✗ | ✗ | ✓ | ✗ |
+| Administrator | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Viewer | ✓ | ✗ | ✗ | ✗ | ✗ |
+
+## Integration with Other Modules
+
+<CardGroup cols={2}>
+  <Card title="Aircraft Management" icon="plane">
+    Medical transfers automatically:
+    - Update aircraft flight hours
+    - Log fuel consumption
+    - Track maintenance intervals
+  </Card>
+  
+  <Card title="Personnel Tracking" icon="id-card">
+    Crew assignments:
+    - Validate certifications
+    - Log crew flight hours
+    - Track duty time limits
+  </Card>
+  
+  <Card title="Dashboard Analytics" icon="chart-bar">
+    Medical statistics feed:
+    - Total transfers by type
+    - Diagnosis distribution
+    - Response time metrics
+  </Card>
+  
+  <Card title="General Transfers" icon="route">
+    Shares base transfer entity:
+    - Common flight logging
+    - Unified crew management
+    - Consistent status tracking
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<Accordion title="Patient Privacy and Data Security">
+  - Patient names and medical records are **encrypted at rest**
+  - Access logs track all views of patient information
+  - Export reports should be handled per HIPAA/privacy regulations
+  - Only enter minimum necessary patient identifiers
+</Accordion>
+
+<Accordion title="Accurate Medical Classification">
+  - Select the most specific diagnosis type available
+  - Include detailed diagnosis descriptions for clinical reference
+  - Use standardized hospital names for consistency
+  - Verify patient demographics before finalizing
+</Accordion>
+
+<Accordion title="Flight Data Integrity">
+  - Enter actual flight times, not scheduled times
+  - Record precise fuel consumption for cost tracking
+  - Complete logbook folio immediately after flight
+  - Verify crew assignments match actual personnel on board
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Cannot Complete Transfer">
+  **Possible causes:**
+  - Missing required flight information
+  - No aircraft assigned
+  - No crew members assigned
+  - Invalid flight duration
+  
+  **Solution:** Ensure all required fields are filled before marking as Finished.
+</Accordion>
+
+<Accordion title="Patient Not Appearing in List">
+  **Possible causes:**
+  - Patient record not saved properly
+  - Database synchronization delay
+  
+  **Solution:** Refresh the page. If issue persists, re-add the patient record.
+</Accordion>
+
+<Accordion title="Export Contains No Data">
+  **Possible causes:**
+  - Date range has no matching records
+  - Filters too restrictive
+  
+  **Solution:** Adjust date range and remove restrictive filters, then retry export.
+</Accordion>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" href="/features/flight-operations">
+    Learn about general flight logging and operations
+  </Card>
+  <Card title="Aircraft Management" href="/features/aircraft-management">
+    Understand aircraft assignment and tracking
+  </Card>
+  <Card title="User Management" href="/features/user-management">
+    Configure crew members and permissions
+  </Card>
+  <Card title="Dashboard Analytics" href="/features/dashboard-analytics">
+    View medical transfer statistics and trends
+  </Card>
+</CardGroup>

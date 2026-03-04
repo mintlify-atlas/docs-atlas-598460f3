@@ -1,0 +1,581 @@
+---
+title: 'Aircraft Maintenance'
+description: 'Manage aircraft maintenance schedules, services, and track maintenance status in SIGSAHO'
+icon: 'plane-engines'
+---
+
+## Overview
+
+SIGSAHO provides comprehensive aircraft maintenance tracking, supporting both date-based and flight-hours-based maintenance schedules. This guide covers creating services, tracking progress, and managing maintenance notifications.
+
+## Aircraft Service Types
+
+SIGSAHO supports various aircraft service types:
+
+<CardGroup cols={2}>
+  <Card title="Scheduled Maintenance" icon="calendar-check">
+    Regular maintenance based on time intervals (e.g., 100-hour inspection, annual inspection).
+  </Card>
+  
+  <Card title="Preventive Maintenance" icon="shield-check">
+    Proactive maintenance to prevent issues (e.g., component replacements, system checks).
+  </Card>
+  
+  <Card title="Corrective Maintenance" icon="wrench">
+    Repairs addressing identified issues or defects.
+  </Card>
+  
+  <Card title="Emergency Maintenance" icon="triangle-exclamation">
+    Urgent unscheduled repairs required for safety or airworthiness.
+  </Card>
+</CardGroup>
+
+## Creating a Maintenance Service
+
+<Steps>
+  <Step title="Navigate to Aircraft Services">
+    Go to **Seguimiento** > **Servicios de Aeronaves** from the main menu.
+  </Step>
+  
+  <Step title="Click New Service">
+    Click the **Nuevo Servicio** button to open the service creation form.
+  </Step>
+  
+  <Step title="Select Service Type">
+    Choose the appropriate service type from the dropdown based on the maintenance required.
+  </Step>
+  
+  <Step title="Choose Scheduling Method">
+    SIGSAHO supports two scheduling methods:
+    
+    <Tabs>
+      <Tab title="Date-Based Scheduling">
+        Set a specific calendar date for the maintenance:
+        
+        **Scheduled Date** (`scheduled_at`): Target completion date
+        
+        Example: Annual inspection due on 2024-12-31
+      </Tab>
+      
+      <Tab title="Flight Hours-Based Scheduling">
+        Set maintenance due at a specific flight hour milestone:
+        
+        **Scheduled at Hours** (`scheduled_at_hours`): Target flight hours
+        
+        Example: 100-hour inspection due at 1500 flight hours
+        
+        <Tip>
+        The system captures current flight hours at creation time (`hours_snapshot_at_creation`) and tracks progress automatically as flight hours accumulate.
+        </Tip>
+      </Tab>
+    </Tabs>
+  </Step>
+  
+  <Step title="Select Aircraft">
+    Choose the aircraft that requires maintenance from the aircraft dropdown.
+  </Step>
+  
+  <Step title="Add Service Details">
+    Complete the service information:
+    
+    - **Description** (`description`): Detailed description of the maintenance work
+    - **Status** (`status`): Initial status (typically PENDING)
+    - **Notification Contacts**:
+      - **Emails to Notify** (`emails_to_notify`): Comma-separated email addresses
+      - **Phones to Notify** (`phones_to_notify`): Comma-separated phone numbers
+  </Step>
+  
+  <Step title="Attach Documents (Optional)">
+    Link relevant documents to the service:
+    - Maintenance manuals
+    - Service bulletins
+    - Previous maintenance records
+    
+    Provide document IDs in the `doc_ids` array.
+  </Step>
+  
+  <Step title="Save the Service">
+    Click **Guardar** to create the maintenance service. The service is now tracked in the system.
+  </Step>
+</Steps>
+
+## Service Status Workflow
+
+<Steps>
+  <Step title="PENDING">
+    Service is scheduled but not yet started.
+    
+    **Typical Duration:** From creation until work begins
+  </Step>
+  
+  <Step title="IN_PROGRESS">
+    Maintenance work is currently being performed.
+    
+    **Typical Duration:** From start of work until completion
+  </Step>
+  
+  <Step title="COMPLETED">
+    Service has been successfully completed.
+    
+    **Required:** Set `completed_at` timestamp when marking as completed
+  </Step>
+  
+  <Step title="CANCELED">
+    Service was canceled and will not be performed.
+    
+    **Common Reasons:** 
+    - Service no longer required
+    - Aircraft sold or retired
+    - Combined with another service
+  </Step>
+</Steps>
+
+### Updating Service Status
+
+```typescript
+PATCH /aircraft-services/:id/status
+
+// Request body
+{
+  "status": "IN_PROGRESS"
+}
+
+// For COMPLETED status, also include:
+{
+  "status": "COMPLETED",
+  "completed_at": "2024-03-15T10:30:00Z"
+}
+```
+
+<Steps>
+  <Step title="Open Service Details">
+    Click on the service you want to update from the services list.
+  </Step>
+  
+  <Step title="Click Status Badge">
+    Click the current status badge to open the status change menu.
+  </Step>
+  
+  <Step title="Select New Status">
+    Choose the appropriate new status. If selecting COMPLETED, you'll be prompted to enter the completion date and time.
+  </Step>
+  
+  <Step title="Confirm Change">
+    Click **Confirmar** to save the status change. Notification recipients will be updated automatically.
+  </Step>
+</Steps>
+
+## Completing a Service
+
+Completing a service triggers important system actions:
+
+```typescript
+PATCH /aircraft-services/:id/complete
+
+// Request body
+{
+  "completed_at": "2024-03-15T10:30:00Z",
+  "status": "COMPLETED",
+  "completion_notes": "All work completed successfully"
+}
+```
+
+<Accordion title="What happens when a service is completed?">
+  When you complete a maintenance service, SIGSAHO:
+  
+  1. **Updates Service Status** to COMPLETED
+  2. **Records Completion Time** for audit trail
+  3. **Executes Reset Logic** if applicable (e.g., resetting flight hours counters)
+  4. **Sends Notifications** to configured email/phone contacts
+  5. **Updates Aircraft Status** based on maintenance completion
+  6. **Archives Service Records** for historical tracking
+  
+  This ensures complete documentation and triggers any follow-up actions automatically.
+</Accordion>
+
+## Flight Hours-Based Maintenance
+
+### Understanding Hours Tracking
+
+For services scheduled by flight hours:
+
+```typescript
+{
+  "scheduled_at_hours": 1500,              // Due at 1500 flight hours
+  "hours_snapshot_at_creation": 1350,      // Aircraft had 1350 hours when service created
+  "aircraft": {
+    "total_lifetime_hours": 1420           // Aircraft current hours
+  }
+}
+```
+
+**Progress Calculation:**
+- **Hours needed:** 1500 (scheduled_at_hours)
+- **Hours at creation:** 1350
+- **Current hours:** 1420
+- **Hours to go:** 1500 - 1420 = 80 hours
+- **Progress:** (1420 - 1350) / (1500 - 1350) × 100 = 46.67%
+
+### Checking Hours Status
+
+```typescript
+GET /aircraft-services/:id/hours-status
+
+// Response
+{
+  "hoursStatus": {
+    "scheduled_at_hours": 1500,
+    "hours_snapshot_at_creation": 1350,
+    "current_hours": 1420,
+    "hours_remaining": 80,
+    "hours_elapsed": 70,
+    "progress_percentage": 46.67,
+    "is_due": false
+  }
+}
+```
+
+<Steps>
+  <Step title="Navigate to Service Details">
+    Open the flight hours-based service you want to check.
+  </Step>
+  
+  <Step title="View Hours Progress">
+    The service detail page shows:
+    - Current aircraft hours
+    - Scheduled service hours
+    - Hours remaining
+    - Progress bar
+  </Step>
+  
+  <Step title="Monitor Approaching Due Date">
+    The system highlights services that are:
+    - **Green:** More than 50 hours remaining
+    - **Yellow:** 10-50 hours remaining
+    - **Red:** Less than 10 hours remaining or overdue
+  </Step>
+</Steps>
+
+<Warning>
+Flight hours are automatically updated by the system when transfers are logged. If you notice incorrect flight hours, check that all transfers have been properly recorded with accurate flight times.
+</Warning>
+
+## Maintenance Notifications
+
+SIGSAHO automatically sends maintenance reminders based on configured schedules. See the [Notifications Guide](/guides/notifications) for detailed information on:
+
+- Setting up notification schedules
+- Configuring notification timing (15 days before, 7 days before, etc.)
+- Managing notification recipients
+- Troubleshooting notification delivery
+
+### Quick Notification Setup
+
+<Steps>
+  <Step title="Open Service">
+    Navigate to the service you want to configure notifications for.
+  </Step>
+  
+  <Step title="Click Manage Notifications">
+    Click the **Gestionar Notificaciones** button.
+  </Step>
+  
+  <Step title="Add Notification Rule">
+    Create a new notification configuration:
+    - **Notification Time:** When to send (15 days before, 7 days before, 1 day before, on due date)
+    - **Active:** Enable/disable the notification
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click **Guardar**. The system will automatically send notifications according to the schedule.
+  </Step>
+</Steps>
+
+## Filtering and Searching Services
+
+Find services quickly using filters:
+
+```typescript
+GET /aircraft-services?page=1&limit=10&status=PENDING&aircraft_id=5
+
+// Available filters:
+// - page: Page number
+// - limit: Results per page
+// - status: PENDING | IN_PROGRESS | COMPLETED | CANCELED
+// - type: Service type
+// - aircraft_id: Specific aircraft
+// - search: Search in description
+```
+
+### Common Filter Scenarios
+
+<AccordionGroup>
+  <Accordion title="Pending Services for an Aircraft">
+    ```typescript
+    GET /aircraft-services?aircraft_id=5&status=PENDING
+    ```
+    
+    Shows all pending maintenance for a specific aircraft.
+  </Accordion>
+  
+  <Accordion title="Overdue Services">
+    Filter services where:
+    - Date-based: `scheduled_at` < today
+    - Hours-based: `aircraft.total_lifetime_hours` >= `scheduled_at_hours`
+    
+    These automatically show in the "Overdue" tab in the UI.
+  </Accordion>
+  
+  <Accordion title="Services Due This Week">
+    ```typescript
+    GET /aircraft-services?status=PENDING&scheduled_at_from=2024-03-15&scheduled_at_to=2024-03-22
+    ```
+  </Accordion>
+  
+  <Accordion title="In-Progress Services">
+    ```typescript
+    GET /aircraft-services?status=IN_PROGRESS
+    ```
+    
+    Shows all currently active maintenance work.
+  </Accordion>
+  
+  <Accordion title="Completed Services (Maintenance History)">
+    ```typescript
+    GET /aircraft-services?status=COMPLETED&aircraft_id=5
+    ```
+    
+    View maintenance history for an aircraft.
+  </Accordion>
+</AccordionGroup>
+
+## Automated Maintenance Tracking
+
+SIGSAHO includes automated cronjobs that run maintenance-related tasks:
+
+### Service Notifications Cronjob
+
+**File:** `check-service-notifications.cron.ts`
+
+**Function:** Checks for services requiring notification and sends alerts
+
+**Frequency:** Runs daily
+
+**Logic:**
+- Finds services with active notification configurations
+- Calculates if notification should be sent today
+- Sends email/SMS notifications to configured recipients
+- Marks notifications as sent to prevent duplicates
+
+### Scheduled Services Check
+
+**File:** `check-scheduled-services.cron.ts`
+
+**Function:** Identifies services approaching due dates
+
+**Frequency:** Runs daily
+
+**Logic:**
+- Checks date-based services against current date
+- Checks hours-based services against current flight hours
+- Updates service status if overdue
+- Generates alerts for maintenance personnel
+
+### Aircraft Status Update
+
+**File:** `update-aircraft-status.cron.ts`
+
+**Function:** Updates aircraft operational status based on maintenance
+
+**Frequency:** Runs hourly
+
+**Logic:**
+- Checks if aircraft has overdue maintenance
+- Updates aircraft availability status
+- Prevents scheduling of aircraft with pending critical maintenance
+
+## Maintenance Reset Logic
+
+Some maintenance services reset counters when completed:
+
+<Accordion title="What is a maintenance reset?">
+  A maintenance reset is an action that resets certain aircraft counters to zero when maintenance is completed. This is typically used for:
+  
+  **Common Reset Scenarios:**
+  - **100-Hour Inspection:** Resets the 100-hour counter
+  - **Annual Inspection:** Resets the annual inspection counter
+  - **Component Replacement:** Resets component-specific hour counters
+  - **Major Overhaul:** Resets multiple maintenance counters
+  
+  **Database Entity:** `maintenance-reset.entity.ts`
+  
+  ```typescript
+  {
+    "aircraft_service_id": 42,
+    "reset_type": "100_HOUR_INSPECTION",
+    "previous_hours": 1500,
+    "reset_at": "2024-03-15T10:30:00Z",
+    "reset_by_user_id": 10
+  }
+  ```
+  
+  The system automatically tracks what was reset, when, and by whom for complete audit trail.
+</Accordion>
+
+## Editing Services
+
+<Warning>
+Exercise caution when editing services that are IN_PROGRESS or COMPLETED. Changes to scheduled dates or hours may affect notification schedules and maintenance history reports.
+</Warning>
+
+### Editable Fields
+
+You can update:
+- Service description
+- Notification contacts (emails and phones)
+- Scheduled date or hours (for PENDING services)
+- Status
+- Associated documents
+
+### Cannot Edit
+
+- Aircraft assignment (create a new service instead)
+- Hours snapshot at creation (automatically set)
+- Service type (affects reporting)
+
+## Deleting Services
+
+SIGSAHO uses soft deletion for services:
+
+```typescript
+DELETE /aircraft-services/:id
+
+// Soft deletes the service (sets deleted_at)
+// Service remains in database for audit purposes
+```
+
+<Steps>
+  <Step title="Open Service Actions Menu">
+    Click the **⋮** menu on the service row.
+  </Step>
+  
+  <Step title="Select Delete">
+    Click **Eliminar Servicio**.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Confirm the deletion. Associated notifications will be deactivated.
+  </Step>
+</Steps>
+
+<Tip>
+Deleted services can be restored by administrators if needed. Soft deletion preserves maintenance history and audit trails.
+</Tip>
+
+## Parts Management
+
+SIGSAHO tracks parts used during maintenance:
+
+### Parts Status Tracking
+
+**File:** `update-parts-status.cron.ts`
+
+**Function:** Monitors aircraft parts and component status
+
+**Tracked Information:**
+- Part serial numbers
+- Installation dates
+- Time since installation
+- Part-specific maintenance requirements
+- Part status (SERVICEABLE, DUE, OVERDUE)
+
+### Linking Parts to Services
+
+When performing maintenance:
+
+1. Document which parts were inspected, repaired, or replaced
+2. Update part status in the system
+3. Link part records to the maintenance service
+4. System automatically tracks part lifecycles
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Service not showing in pending list">
+    **Possible Causes:**
+    - Service status is not PENDING
+    - Aircraft filter is applied
+    - Service is soft-deleted
+    
+    **Solution:** Clear filters and check service status.
+  </Accordion>
+  
+  <Accordion title="Flight hours not updating">
+    **Possible Causes:**
+    - Transfers not being logged properly
+    - Aircraft not linked correctly to transfers
+    - Flight time not recorded in transfers
+    
+    **Solution:** Verify that all transfers have:
+    - Correct aircraft assignment
+    - Valid time field (HH:MM format)
+    - Status set to FINISHED
+  </Accordion>
+  
+  <Accordion title="Notifications not being sent">
+    **Possible Causes:**
+    - Notification configuration inactive
+    - Email/phone numbers incorrect
+    - Notification already sent
+    - Service status prevents notifications
+    
+    **Solution:** Check notification configuration and verify contact information. See [Notifications Guide](/guides/notifications) for detailed troubleshooting.
+  </Accordion>
+  
+  <Accordion title="Cannot complete service">
+    **Possible Causes:**
+    - Missing required completion data
+    - Service already completed
+    - Insufficient permissions
+    
+    **Solution:** Ensure you have:
+    - Valid completion date
+    - Appropriate user role
+    - Service in PENDING or IN_PROGRESS status
+  </Accordion>
+  
+  <Accordion title="Hours status endpoint returns error">
+    **Error:** "Este servicio no tiene programación por horas de vuelo"
+    
+    **Cause:** Attempting to get hours status for a date-based service.
+    
+    **Solution:** This endpoint only works for services scheduled by flight hours (`scheduled_at_hours` is set).
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Proactive Scheduling" icon="calendar-plus">
+    Schedule maintenance well in advance. Create services as soon as the need is identified, not when they become urgent.
+  </Card>
+  
+  <Card title="Accurate Documentation" icon="file-lines">
+    Document all maintenance work thoroughly. Include detailed descriptions, parts used, and any observations.
+  </Card>
+  
+  <Card title="Regular Reviews" icon="magnifying-glass">
+    Review pending services weekly to ensure nothing is overdue or approaching critical status.
+  </Card>
+  
+  <Card title="Multiple Notifications" icon="bell-plus">
+    Set up multiple notification intervals (15 days, 7 days, 1 day) to ensure adequate warning time.
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+- [Notifications Guide](/guides/notifications)
+- [Reports and Statistics](/guides/reports-statistics)
+- [API Reference: Aircraft Services](/api/aircraft-services)
+- [API Reference: Aircraft](/api/aircraft)

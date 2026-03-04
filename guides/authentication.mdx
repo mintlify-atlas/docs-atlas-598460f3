@@ -1,0 +1,334 @@
+---
+title: 'Authentication Guide'
+description: 'Learn how to log in, manage your session, and troubleshoot authentication issues in SIGSAHO'
+icon: 'shield-check'
+---
+
+## Overview
+
+SIGSAHO uses a secure token-based authentication system with automatic session management. This guide covers login procedures, session handling, and common authentication scenarios.
+
+## Logging In
+
+<Steps>
+  <Step title="Navigate to Login Page">
+    Access the SIGSAHO login page at your organization's URL.
+  </Step>
+  
+  <Step title="Enter Your Credentials">
+    Provide your username or email address and password:
+    - **Username/Email**: Your registered username or email address
+    - **Password**: Your account password (case-sensitive)
+  </Step>
+  
+  <Step title="Optional: Keep Session Active">
+    Check the "Mantener sesión activa" (Keep session active) option if you want to remain logged in for an extended period.
+  </Step>
+  
+  <Step title="Click ACCEDER">
+    Click the **ACCEDER** button to log in.
+  </Step>
+</Steps>
+
+<Tip>
+The login form accepts both username and email address as identifiers, making it flexible for users who prefer either method.
+</Tip>
+
+## Authentication Flow
+
+SIGSAHO implements a dual-token authentication system:
+
+### Access Token
+- **Lifetime**: 15 minutes
+- **Storage**: HTTP-only secure cookies
+- **Purpose**: Authorizes API requests
+- **Auto-renewal**: Automatically refreshed when approaching expiration
+
+### Refresh Token
+- **Lifetime**: Configurable (default: 7 days)
+- **Storage**: HTTP-only secure cookies
+- **Purpose**: Generates new access tokens
+- **Security**: SHA-256 hashed in database
+
+```typescript
+// Authentication endpoints
+POST /auth/login        // Initial login
+POST /auth/refresh      // Renew access token
+POST /auth/logout       // End current session
+POST /auth/logout-all   // End all sessions
+GET  /auth/me           // Get current user info
+```
+
+## Session Management
+
+### Automatic Token Refresh
+
+SIGSAHO automatically refreshes your access token in the background. You don't need to manually log in again during active use.
+
+<Accordion title="How token rotation works">
+  When your access token expires:
+  1. The system automatically sends a refresh request using your refresh token
+  2. A new access token and refresh token are issued
+  3. The old refresh token is invalidated (token rotation for security)
+  4. Your session continues seamlessly
+</Accordion>
+
+### Logging Out
+
+<Tabs>
+  <Tab title="Single Session Logout">
+    Click your profile menu and select **Cerrar sesión** to log out from your current device only.
+    
+    **What happens:**
+    - Current refresh token is invalidated
+    - Access token cookies are cleared
+    - You're redirected to the login page
+  </Tab>
+  
+  <Tab title="All Sessions Logout">
+    Use **Cerrar todas las sesiones** to log out from all devices where you're currently logged in.
+    
+    **What happens:**
+    - All refresh tokens for your account are invalidated
+    - You'll need to log in again on all devices
+    - Useful if you suspect unauthorized access
+  </Tab>
+</Tabs>
+
+## User Permissions and Roles
+
+### Login Access Control
+
+Not all users have login permissions. SIGSAHO distinguishes between:
+
+<CardGroup cols={2}>
+  <Card title="System Users" icon="user-check">
+    Users with `login_access: true` can log into the system:
+    - ADMIN
+    - USER
+    - COORDINATOR
+    - OPERATOR
+  </Card>
+  
+  <Card title="Identification-Only Roles" icon="user-tag">
+    These roles are for identification purposes only and cannot log in:
+    - MEDICO (Doctor)
+    - PILOTO (Pilot)
+    - ENFERMERO (Nurse)
+    - TSUP (Technical Support)
+  </Card>
+</CardGroup>
+
+### User Status Requirements
+
+To successfully log in, your account must meet these conditions:
+
+- ✅ Status must be `ACTIVE`
+- ✅ `login_access` must be enabled
+- ✅ Account must not be soft-deleted
+- ✅ Must have at least one role with login permissions
+
+## Troubleshooting
+
+### Common Error Messages
+
+<AccordionGroup>
+  <Accordion title="Credenciales inválidas (Invalid Credentials)">
+    **Causes:**
+    - Incorrect username/email
+    - Incorrect password
+    - Account doesn't exist
+    
+    **Solutions:**
+    - Verify your username or email is correct
+    - Check that Caps Lock is off
+    - Contact your administrator if you've forgotten your password
+  </Accordion>
+  
+  <Accordion title="El usuario no tiene permisos para iniciar sesión">
+    **Cause:**
+    Your user account has `login_access` disabled.
+    
+    **Solution:**
+    Contact your system administrator to enable login access for your account.
+  </Accordion>
+  
+  <Accordion title="El usuario está inactivo o eliminado">
+    **Causes:**
+    - Account status is not ACTIVE
+    - Account has been soft-deleted
+    
+    **Solution:**
+    Contact your system administrator to reactivate your account.
+  </Accordion>
+  
+  <Accordion title="Este tipo de usuario no tiene permisos de inicio de sesión">
+    **Cause:**
+    Your account only has identification roles (MEDICO, PILOTO, ENFERMERO, TSUP) without system access roles.
+    
+    **Solution:**
+    Your account is for identification purposes only. Contact your administrator if you need system access.
+  </Accordion>
+  
+  <Accordion title="Refresh token expirado (Refresh Token Expired)">
+    **Cause:**
+    You haven't used the system for longer than the refresh token lifetime (typically 7 days).
+    
+    **Solution:**
+    Simply log in again with your credentials. Your session had expired for security reasons.
+  </Accordion>
+  
+  <Accordion title="Usuario inactivo o sin permisos de login">
+    **Cause:**
+    Your account was deactivated or login permissions were revoked while you were logged in.
+    
+    **Solution:**
+    Contact your system administrator. This usually happens when account permissions are changed.
+  </Accordion>
+</AccordionGroup>
+
+### Session Issues
+
+<Warning>
+If you're experiencing repeated logouts or session issues:
+
+1. Clear your browser cookies and cache
+2. Try a different browser
+3. Check that your system clock is correct (affects token validation)
+4. Ensure you're accessing the correct SIGSAHO URL
+5. Contact IT support if issues persist
+</Warning>
+
+### Network Connectivity
+
+Authentication requires a stable connection to the SIGSAHO server:
+
+- **Timeout**: Requests timeout after 2 minutes (120,000ms)
+- **Offline**: You'll see a "Network Error" if the server is unreachable
+- **VPN**: Ensure your VPN is connected if required by your organization
+
+## Security Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Strong Passwords" icon="lock">
+    Use a unique, strong password for your SIGSAHO account. Avoid reusing passwords from other services.
+  </Card>
+  
+  <Card title="Log Out When Done" icon="arrow-right-from-bracket">
+    Always log out when using shared or public computers to protect your account.
+  </Card>
+  
+  <Card title="Monitor Sessions" icon="eye">
+    Periodically use "Logout All Sessions" if you suspect unauthorized access to your account.
+  </Card>
+  
+  <Card title="Secure Connection" icon="shield">
+    Always access SIGSAHO through HTTPS (secure connection). Check for the lock icon in your browser.
+  </Card>
+</CardGroup>
+
+## API Reference
+
+For developers integrating with SIGSAHO authentication:
+
+### Login Endpoint
+
+```typescript
+POST /auth/login
+
+// Request Body
+{
+  "identifier": "username or email",
+  "password": "password"
+}
+
+// Response (200 OK)
+{
+  "message": "Login exitoso",
+  "user": {
+    "id": 1,
+    "name": "John",
+    "last_name": "Doe",
+    "username": "jdoe",
+    "email": "jdoe@example.com",
+    "roles": ["ADMIN"],
+    "login_access": true,
+    "status": "ACTIVE"
+  }
+}
+
+// Tokens set in HTTP-only cookies:
+// - accessToken (15 min)
+// - refreshToken (7 days)
+```
+
+### Get Current User
+
+```typescript
+GET /auth/me
+
+// Response (200 OK)
+{
+  "user": {
+    "id": 1,
+    "name": "John",
+    "last_name": "Doe",
+    "username": "jdoe",
+    "email": "jdoe@example.com",
+    "roles": ["ADMIN"],
+    "login_access": true,
+    "status": "ACTIVE"
+  }
+}
+```
+
+### Refresh Token
+
+```typescript
+POST /auth/refresh
+
+// Automatically called by frontend
+// Uses refreshToken from cookies
+
+// Response (200 OK)
+{
+  "message": "Token renovado exitosamente",
+  "user": { /* user object */ }
+}
+
+// New tokens set in cookies
+```
+
+### Logout
+
+```typescript
+POST /auth/logout
+
+// Response (200 OK)
+{
+  "message": "Sesión cerrada exitosamente"
+}
+
+// Cookies cleared
+```
+
+### Logout All Sessions
+
+```typescript
+POST /auth/logout-all
+
+// Requires authentication
+
+// Response (200 OK)
+{
+  "message": "Todas las sesiones cerradas exitosamente"
+}
+
+// All refresh tokens for user invalidated
+```
+
+## Related Resources
+
+- [User Management](/api/users)
+- [Roles and Permissions](/api/roles)
+- [User Management Feature](/features/user-management)

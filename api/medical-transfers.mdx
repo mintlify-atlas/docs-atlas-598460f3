@@ -1,0 +1,768 @@
+---
+title: "Medical Transfers API"
+description: "API endpoints for managing medical transfers including aeromedical, blood derivatives, organs/tissues transfers"
+---
+
+## Overview
+
+The Medical Transfers API manages all medical transfer operations in SIGSAHO. It supports a two-phase workflow:
+- **Phase 1 (Request)**: Register the transfer request with minimal required data
+- **Phase 2 (Execution)**: Complete the transfer with flight details after execution
+
+All endpoints require JWT authentication via cookies and appropriate permissions.
+
+## Create Medical Transfer
+
+<Note>
+This is Phase 1 of the two-phase workflow. Creates a transfer in `PROCESS` status with minimum required data.
+</Note>
+
+```http
+POST /medical-transfers
+```
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Request Body
+
+<ParamField body="date" type="string" required>
+Date and time of the transfer in ISO 8601 format (e.g., "2024-01-15T14:30:00")
+</ParamField>
+
+<ParamField body="request_by" type="string" required>
+Entity or department requesting the transfer (e.g., "Secretaría de Salud")
+</ParamField>
+
+<ParamField body="hospital_origin" type="string" required>
+Name of the origin hospital
+</ParamField>
+
+<ParamField body="hospital_destiny" type="string" required>
+Name of the destination hospital
+</ParamField>
+
+<ParamField body="medical_transfer_type" type="enum" required>
+Type of medical transfer. Options: `AEROMEDICAL`, `BLOOD_DERIVATIVE`, `ORGANS_TISSUES`, `OTHER`
+</ParamField>
+
+<ParamField body="diagnosis_type" type="enum" required>
+Type of diagnosis. Options: `TRAUMA`, `MATER_CODE`, `BURN`, `FRACTURE`, `OTHER`
+</ParamField>
+
+<ParamField body="diagnosis_detail" type="string" required>
+Detailed description of the diagnosis
+</ParamField>
+
+<ParamField body="patients" type="array" required>
+Array of patient objects. Each patient requires:
+- `name` (string, required): Patient full name
+- `birthdate` (string, required): Birth date in YYYY-MM-DD format
+- `age` (integer, required): Patient age
+- `gender` (string, required): Patient gender
+- `medical_record` (string, required): Medical record/history
+- `locality_id` (integer, required): Patient's locality ID
+- `phone` (string, optional): Contact phone number
+- `family_member_name` (string, optional): Accompanying family member name
+</ParamField>
+
+<ParamField body="time" type="string" optional>
+Transfer duration in H:MM format (e.g., "1:40" for 1 hour 40 minutes)
+</ParamField>
+
+<ParamField body="description" type="string" optional>
+Transfer description
+</ParamField>
+
+<ParamField body="logbook_folio" type="string" optional>
+Logbook folio reference (e.g., "BIT-2025-001")
+</ParamField>
+
+<ParamField body="fuel" type="integer" optional>
+Fuel in liters
+</ParamField>
+
+<ParamField body="transfer_route" type="string" optional>
+Transfer route description
+</ParamField>
+
+<ParamField body="travel_time_route" type="string" optional>
+Flight time in H:MM format
+</ParamField>
+
+<ParamField body="extra_passengers" type="string" optional>
+Description of extra passengers (e.g., "1 familiar acompañante")
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer" optional>
+Aircraft ID used for the transfer
+</ParamField>
+
+<ParamField body="origin_id" type="integer" optional>
+Origin locality ID
+</ParamField>
+
+<ParamField body="destination_id" type="integer" optional>
+Destination locality ID
+</ParamField>
+
+<ParamField body="crew_member_ids" type="array" optional>
+Array of crew member user IDs
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+Success message
+</ResponseField>
+
+<ResponseField name="medical_transfer" type="object">
+The created medical transfer object with all relations
+</ResponseField>
+
+<ResponseField name="medical_transfer.id" type="integer">
+Unique medical transfer identifier
+</ResponseField>
+
+<ResponseField name="medical_transfer.hospital_origin" type="string">
+Origin hospital name
+</ResponseField>
+
+<ResponseField name="medical_transfer.hospital_destiny" type="string">
+Destination hospital name
+</ResponseField>
+
+<ResponseField name="medical_transfer.medical_transfer_type" type="string">
+Medical transfer type (AEROMEDICAL, BLOOD_DERIVATIVE, ORGANS_TISSUES, OTHER)
+</ResponseField>
+
+<ResponseField name="medical_transfer.diagnosis_type" type="string">
+Diagnosis type (TRAUMA, MATER_CODE, BURN, FRACTURE, OTHER)
+</ResponseField>
+
+<ResponseField name="medical_transfer.diagnosis_detail" type="string">
+Detailed diagnosis information
+</ResponseField>
+
+<ResponseField name="medical_transfer.transfer" type="object">
+Associated transfer object with general transfer data
+</ResponseField>
+
+<ResponseField name="medical_transfer.patients" type="array">
+Array of patient objects associated with this transfer
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.gob.mx/medical-transfers \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your_jwt_token" \
+  -d '{
+    "date": "2024-01-15T14:30:00",
+    "request_by": "Secretaría de Salud",
+    "hospital_origin": "Hospital General de Guadalajara",
+    "hospital_destiny": "Hospital Civil de México",
+    "medical_transfer_type": "AEROMEDICAL",
+    "diagnosis_type": "TRAUMA",
+    "diagnosis_detail": "Paciente con traumatismo craneoencefálico severo",
+    "patients": [
+      {
+        "name": "Juan Pérez García",
+        "birthdate": "1980-05-15",
+        "age": 44,
+        "gender": "Masculino",
+        "medical_record": "Expediente médico con historial de traumatismo",
+        "locality_id": 1,
+        "phone": "3331234567",
+        "family_member_name": "María García"
+      }
+    ]
+  }'
+```
+
+### Example Response
+
+```json
+{
+  "message": "Traslado médico creado exitosamente",
+  "medical_transfer": {
+    "id": 123,
+    "hospital_origin": "Hospital General de Guadalajara",
+    "hospital_destiny": "Hospital Civil de México",
+    "medical_transfer_type": "AEROMEDICAL",
+    "diagnosis_type": "TRAUMA",
+    "diagnosis_detail": "Paciente con traumatismo craneoencefálico severo",
+    "created_at": "2024-01-15T14:30:00.000Z",
+    "updated_at": "2024-01-15T14:30:00.000Z",
+    "transfer": {
+      "id": 456,
+      "date": "2024-01-15T14:30:00.000Z",
+      "status": "PROCESS",
+      "type_transfer": "MEDICAL",
+      "request_by": "Secretaría de Salud"
+    },
+    "patients": [
+      {
+        "id": 789,
+        "name": "Juan Pérez García",
+        "phone": "3331234567",
+        "family_member_name": "María García",
+        "birthdate": "1980-05-15",
+        "age": 44,
+        "gender": "Masculino",
+        "medical_record": "Expediente médico con historial de traumatismo"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Complete Aeromedical Transfer
+
+<Note>
+This is Phase 2 of the workflow. Completes a transfer in `PROCESS` status with flight details and changes status to `FINISHED`.
+</Note>
+
+```http
+PUT /medical-transfers/:id/complete
+```
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID to complete
+</ParamField>
+
+### Request Body
+
+<ParamField body="time" type="string" required>
+Transfer duration in H:MM format (e.g., "1:40")
+</ParamField>
+
+<ParamField body="description" type="string" required>
+Transfer description
+</ParamField>
+
+<ParamField body="fuel" type="integer" required>
+Fuel consumed in liters
+</ParamField>
+
+<ParamField body="transfer_route" type="string" required>
+Flight route (e.g., "Guadalajara - México")
+</ParamField>
+
+<ParamField body="travel_time_route" type="string" required>
+Flight time in H:MM format
+</ParamField>
+
+<ParamField body="extra_passengers" type="string" required>
+Extra passengers description
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer" required>
+Aircraft ID
+</ParamField>
+
+<ParamField body="origin_id" type="integer" required>
+Origin locality ID
+</ParamField>
+
+<ParamField body="destination_id" type="integer" required>
+Destination locality ID
+</ParamField>
+
+<ParamField body="logbook_folio" type="string" optional>
+Logbook folio reference
+</ParamField>
+
+<ParamField body="crew_member_ids" type="array" optional>
+Array of crew member user IDs
+</ParamField>
+
+<ParamField body="update_patients" type="array" optional>
+Array of patient updates for optional fields not filled in Phase 1:
+- `patient_id` (integer, required): Patient ID to update
+- `phone` (string, optional): Patient phone
+- `family_member_name` (string, optional): Family member name
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X PUT https://api.sigsaho.gob.mx/medical-transfers/123/complete \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your_jwt_token" \
+  -d '{
+    "time": "1:40",
+    "description": "Traslado aeromédico completado exitosamente",
+    "logbook_folio": "BIT-2025-001",
+    "fuel": 400,
+    "transfer_route": "Guadalajara - México",
+    "travel_time_route": "1:15",
+    "extra_passengers": "1 familiar acompañante",
+    "aircraft_id": 1,
+    "origin_id": 1,
+    "destination_id": 2,
+    "crew_member_ids": [1, 2, 3]
+  }'
+```
+
+---
+
+## List Medical Transfers
+
+```http
+GET /medical-transfers
+```
+
+### Authentication
+Requires JWT authentication and `transfers:read` permission.
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+Page number (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+Records per page (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField query="status" type="enum">
+Filter by status. Options: `PROCESS`, `FINISHED`, `CANCELED`
+</ParamField>
+
+<ParamField query="medical_transfer_type" type="enum">
+Filter by medical transfer type. Options: `AEROMEDICAL`, `BLOOD_DERIVATIVE`, `ORGANS_TISSUES`, `OTHER`
+</ParamField>
+
+<ParamField query="diagnosis_type" type="enum">
+Filter by diagnosis type. Options: `TRAUMA`, `MATER_CODE`, `BURN`, `FRACTURE`, `OTHER`
+</ParamField>
+
+<ParamField query="aircraft_id" type="integer">
+Filter by aircraft ID
+</ParamField>
+
+<ParamField query="date_from" type="string">
+Filter from date (YYYY-MM-DD format)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+Filter to date (YYYY-MM-DD format)
+</ParamField>
+
+<ParamField query="search" type="string">
+Search in origin hospital, destination hospital, or diagnosis detail
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+Array of medical transfer objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+Pagination metadata
+</ResponseField>
+
+<ResponseField name="pagination.page" type="integer">
+Current page number
+</ResponseField>
+
+<ResponseField name="pagination.limit" type="integer">
+Records per page
+</ResponseField>
+
+<ResponseField name="pagination.total" type="integer">
+Total number of records
+</ResponseField>
+
+<ResponseField name="pagination.totalPages" type="integer">
+Total number of pages
+</ResponseField>
+
+<ResponseField name="pagination.hasNextPage" type="boolean">
+Whether there is a next page
+</ResponseField>
+
+<ResponseField name="pagination.hasPreviousPage" type="boolean">
+Whether there is a previous page
+</ResponseField>
+
+### Example Request
+
+```bash
+curl -X GET "https://api.sigsaho.gob.mx/medical-transfers?page=1&limit=10&status=FINISHED&medical_transfer_type=AEROMEDICAL" \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Get Medical Transfer by ID
+
+```http
+GET /medical-transfers/:id
+```
+
+### Authentication
+Requires JWT authentication and `transfers:read` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X GET https://api.sigsaho.gob.mx/medical-transfers/123 \
+  -H "Cookie: token=your_jwt_token"
+```
+
+---
+
+## Update Medical Transfer
+
+```http
+PUT /medical-transfers/:id
+```
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID to update
+</ParamField>
+
+### Request Body
+
+All fields are optional. Only include fields you want to update.
+
+<ParamField body="date" type="string">
+Transfer date and time (ISO 8601 format)
+</ParamField>
+
+<ParamField body="time" type="string">
+Duration in H:MM format
+</ParamField>
+
+<ParamField body="description" type="string">
+Transfer description
+</ParamField>
+
+<ParamField body="number_transfer" type="integer">
+Transfer number
+</ParamField>
+
+<ParamField body="logbook_folio" type="string">
+Logbook folio
+</ParamField>
+
+<ParamField body="request_by" type="string">
+Requesting entity
+</ParamField>
+
+<ParamField body="fuel" type="integer">
+Fuel in liters
+</ParamField>
+
+<ParamField body="transfer_route" type="string">
+Transfer route
+</ParamField>
+
+<ParamField body="travel_time_route" type="string">
+Flight time
+</ParamField>
+
+<ParamField body="extra_passengers" type="string">
+Extra passengers description
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer">
+Aircraft ID
+</ParamField>
+
+<ParamField body="origin_id" type="integer">
+Origin locality ID
+</ParamField>
+
+<ParamField body="destination_id" type="integer">
+Destination locality ID
+</ParamField>
+
+<ParamField body="hospital_origin" type="string">
+Origin hospital name
+</ParamField>
+
+<ParamField body="hospital_destiny" type="string">
+Destination hospital name
+</ParamField>
+
+<ParamField body="medical_transfer_type" type="enum">
+Medical transfer type
+</ParamField>
+
+<ParamField body="diagnosis_type" type="enum">
+Diagnosis type
+</ParamField>
+
+<ParamField body="diagnosis_detail" type="string">
+Diagnosis detail
+</ParamField>
+
+---
+
+## Update Transfer Status
+
+```http
+PATCH /medical-transfers/:id/status
+```
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="status" type="enum" required>
+New status. Options: `PROCESS`, `FINISHED`, `CANCELED`
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X PATCH https://api.sigsaho.gob.mx/medical-transfers/123/status \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your_jwt_token" \
+  -d '{
+    "status": "FINISHED"
+  }'
+```
+
+---
+
+## Delete Medical Transfer
+
+```http
+DELETE /medical-transfers/:id
+```
+
+Performs a soft delete of the medical transfer and associated patients.
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID to delete
+</ParamField>
+
+---
+
+## Add Patients
+
+```http
+POST /medical-transfers/:id/patients
+```
+
+Add one or more patients to an existing medical transfer.
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="patients" type="array" required>
+Array of patient objects. Each requires:
+- `name` (string, required)
+- `birthdate` (string, required): YYYY-MM-DD format
+- `age` (integer, required)
+- `gender` (string, required)
+- `medical_record` (string, required)
+- `locality_id` (integer, required)
+- `phone` (string, optional)
+- `family_member_name` (string, optional)
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.gob.mx/medical-transfers/123/patients \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your_jwt_token" \
+  -d '{
+    "patients": [
+      {
+        "name": "Ana López",
+        "birthdate": "1990-08-20",
+        "age": 34,
+        "gender": "Femenino",
+        "medical_record": "Expediente médico...",
+        "locality_id": 1,
+        "phone": "3339876543",
+        "family_member_name": "Pedro López"
+      }
+    ]
+  }'
+```
+
+---
+
+## Update Patient
+
+```http
+PUT /medical-transfers/:id/patients/:patientId
+```
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+<ParamField path="patientId" type="integer" required>
+Patient ID to update
+</ParamField>
+
+### Request Body
+
+All fields are optional. Only include fields to update.
+
+<ParamField body="name" type="string">
+Patient name
+</ParamField>
+
+<ParamField body="phone" type="string">
+Contact phone
+</ParamField>
+
+<ParamField body="family_member_name" type="string">
+Family member name
+</ParamField>
+
+<ParamField body="birthdate" type="string">
+Birth date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="age" type="integer">
+Patient age
+</ParamField>
+
+<ParamField body="gender" type="string">
+Patient gender
+</ParamField>
+
+<ParamField body="medical_record" type="string">
+Medical record
+</ParamField>
+
+<ParamField body="locality_id" type="integer">
+Locality ID
+</ParamField>
+
+---
+
+## Delete Patient
+
+```http
+DELETE /medical-transfers/:id/patients/:patientId
+```
+
+Performs a soft delete of the patient.
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+<ParamField path="patientId" type="integer" required>
+Patient ID to delete
+</ParamField>
+
+---
+
+## Assign Crew Members
+
+```http
+POST /medical-transfers/:id/crew
+```
+
+Assign or update crew members for a medical transfer. Replaces any existing crew.
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="user_ids" type="array" required>
+Array of user IDs representing crew members
+</ParamField>
+
+### Example Request
+
+```bash
+curl -X POST https://api.sigsaho.gob.mx/medical-transfers/123/crew \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your_jwt_token" \
+  -d '{
+    "user_ids": [1, 2, 3]
+  }'
+```
+
+---
+
+## Remove Crew Member
+
+```http
+DELETE /medical-transfers/:id/crew/:userId
+```
+
+Remove a specific crew member from the medical transfer.
+
+### Authentication
+Requires JWT authentication and `medical-transfers:write` permission.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+Medical transfer ID
+</ParamField>
+
+<ParamField path="userId" type="integer" required>
+User ID to remove from crew
+</ParamField>

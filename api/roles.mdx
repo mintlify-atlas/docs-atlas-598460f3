@@ -1,0 +1,412 @@
+---
+title: 'Roles API'
+description: 'Manage system roles and permissions'
+icon: 'shield-halved'
+---
+
+## Overview
+
+The Roles API provides endpoints for retrieving system roles. Roles define permissions and access levels for users in SIGSAHO.
+
+## Authentication
+
+All endpoints require authentication via JWT cookie (`cookieAuth`).
+
+## Base URL
+
+```
+/api/roles
+```
+
+---
+
+## Get All Roles
+
+Retrieve a list of all available roles in the system.
+
+<CodeGroup>
+```bash GET /roles
+curl -X GET https://api.sigsaho.com/api/roles \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Response
+
+<ResponseField name="roles" type="array">
+  Array of role objects
+  
+  <Expandable title="Role properties">
+    <ResponseField name="id" type="number">
+      Role ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Role name
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Creation timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+[
+  {
+    "id": 1,
+    "name": "ADMINISTRADOR",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "DIRECTOR",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "EDITOR-TM",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "name": "EDITOR-TG",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 5,
+    "name": "MANTENIMIENTO",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 6,
+    "name": "CAPACITACION",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 7,
+    "name": "DESPACHADOR",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 8,
+    "name": "MEDICO",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 9,
+    "name": "PILOTO",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 10,
+    "name": "ENFERMERO",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": 11,
+    "name": "TSUP",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  }
+]
+```
+
+```json 401 Unauthorized
+{
+  "error": "No autorizado"
+}
+```
+
+```json 500 Server Error
+{
+  "error": "Error al obtener los roles"
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required:** Valid JWT authentication (any authenticated user)
+
+---
+
+## Get Role by ID
+
+Retrieve a specific role by its ID.
+
+<CodeGroup>
+```bash GET /roles/:id
+curl -X GET https://api.sigsaho.com/api/roles/1 \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Role ID
+</ParamField>
+
+### Response
+
+<ResponseField name="role" type="object">
+  Role object with details
+  
+  <Expandable title="Role properties">
+    <ResponseField name="id" type="number">
+      Role ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Role name
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Creation timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "role": {
+    "id": 1,
+    "name": "ADMINISTRADOR",
+    "created_at": "2024-01-01T00:00:00.000Z"
+  }
+}
+```
+
+```json 400 Invalid ID
+{
+  "error": "ID inválido"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Rol no encontrado"
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required:** Valid JWT authentication (any authenticated user)
+
+---
+
+## System Roles
+
+SIGSAHO defines the following system roles with distinct permissions:
+
+### Administrative Roles
+
+<AccordionGroup>
+  <Accordion title="ADMINISTRADOR" icon="user-shield">
+    **Full system access**
+    
+    - Complete control over all modules
+    - User and role management
+    - System configuration
+    - Access to all data and operations
+    - Can create, read, update, and delete all resources
+    
+    **Login Access:** Yes
+  </Accordion>
+  
+  <Accordion title="DIRECTOR" icon="eye">
+    **Read-only access to all modules**
+    
+    - View-only permissions across the system
+    - Cannot modify, create, or delete resources
+    - Access to all reports and analytics
+    - Ideal for supervisory oversight
+    
+    **Login Access:** Yes
+  </Accordion>
+</AccordionGroup>
+
+### Operational Roles
+
+<AccordionGroup>
+  <Accordion title="EDITOR-TM" icon="helicopter">
+    **Medical Transfer Editor**
+    
+    - Edit and manage medical air transfers (Traslados Aeromédicos)
+    - View patient information
+    - Update transfer status and details
+    - Cannot access general transfers
+    
+    **Login Access:** Yes
+  </Accordion>
+  
+  <Accordion title="EDITOR-TG" icon="plane">
+    **General Transfer Editor**
+    
+    - Edit general transfers (Security, Civil Protection, Maintenance)
+    - Manage non-medical flight operations
+    - Cannot access medical transfers
+    
+    **Login Access:** Yes
+  </Accordion>
+  
+  <Accordion title="MANTENIMIENTO" icon="wrench">
+    **Maintenance Manager**
+    
+    - Manage aircraft maintenance operations
+    - Schedule and track aircraft services
+    - Manage parts inventory
+    - Configure maintenance notifications
+    
+    **Login Access:** Yes
+  </Accordion>
+  
+  <Accordion title="CAPACITACION" icon="graduation-cap">
+    **Training Manager**
+    
+    - Manage staff training programs
+    - Track certifications and qualifications
+    - Schedule training sessions
+    - Monitor training compliance
+    
+    **Login Access:** Yes
+  </Accordion>
+  
+  <Accordion title="DESPACHADOR" icon="tower-broadcast">
+    **Air Traffic Dispatcher**
+    
+    - Flight dispatch and control operations
+    - Manage flight plans
+    - Coordinate crew assignments
+    - Monitor active flights
+    
+    **Login Access:** Yes
+  </Accordion>
+</AccordionGroup>
+
+### Crew Identification Roles
+
+These roles are used for identification purposes only and do not have login access.
+
+<AccordionGroup>
+  <Accordion title="MEDICO" icon="user-doctor">
+    **Medical Doctor**
+    
+    - Identification role for medical personnel
+    - Used in crew member assignments
+    - No system login access
+    - Tracked for flight operations and compliance
+    
+    **Login Access:** No
+  </Accordion>
+  
+  <Accordion title="PILOTO" icon="user-pilot">
+    **Pilot**
+    
+    - Identification role for pilots
+    - Used in crew member assignments
+    - No system login access
+    - Tracked for flight hours and certifications
+    
+    **Login Access:** No
+  </Accordion>
+  
+  <Accordion title="ENFERMERO" icon="user-nurse">
+    **Nurse**
+    
+    - Identification role for nursing personnel
+    - Used in crew member assignments
+    - No system login access
+    - Tracked for flight operations
+    
+    **Login Access:** No
+  </Accordion>
+  
+  <Accordion title="TSUP" icon="user-gear">
+    **TSUP (Technical Support)**
+    
+    - Identification role for technical support personnel
+    - Used in crew member assignments
+    - No system login access
+    - Tracked for specialized operations
+    
+    **Login Access:** No
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Role Assignment
+
+Roles are assigned to users through the [Users API](/api/users). A user can have multiple roles assigned simultaneously.
+
+### Assignment Rules
+
+1. **Minimum Roles:** Every user must have at least one role
+2. **Maximum Roles:** A user can have up to 10 roles
+3. **Role Validation:** Only valid role IDs can be assigned
+4. **Login Access:** Users with crew identification roles (MEDICO, PILOTO, ENFERMERO, TSUP) should have `login_access` set to `false`
+
+### Example Assignment
+
+```json
+{
+  "name": "Juan",
+  "last_name": "García",
+  "email": "juan.garcia@example.com",
+  "roles": [1, 9],  // ADMINISTRADOR + PILOTO
+  "login_access": true
+}
+```
+
+---
+
+## Permission Matrix
+
+| Module | ADMIN | DIRECTOR | EDITOR-TM | EDITOR-TG | MANTENIMIENTO | CAPACITACION | DESPACHADOR |
+|--------|-------|----------|-----------|-----------|---------------|--------------|-------------|
+| Users | CRUD | Read | - | - | - | - | - |
+| Roles | Read | Read | - | - | - | - | - |
+| Medical Transfers | CRUD | Read | CRUD | - | - | - | Read |
+| General Transfers | CRUD | Read | - | CRUD | - | - | Read |
+| Aircraft Maintenance | CRUD | Read | - | - | CRUD | - | Read |
+| Training | CRUD | Read | - | - | - | CRUD | - |
+| Flight Dispatch | CRUD | Read | Read | Read | Read | - | CRUD |
+| Reports | CRUD | Read | Read | Read | Read | Read | Read |
+
+**Legend:**
+- CRUD: Create, Read, Update, Delete
+- Read: Read-only access
+- `-`: No access
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 400  | Invalid request - ID validation failed |
+| 401  | Unauthorized - authentication required |
+| 404  | Role not found |
+| 500  | Internal server error |
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Principle of Least Privilege" icon="lock">
+    Assign only the roles necessary for a user to perform their job functions.
+  </Card>
+  
+  <Card title="Regular Audits" icon="clipboard-check">
+    Periodically review user role assignments to ensure they remain appropriate.
+  </Card>
+  
+  <Card title="Separation of Duties" icon="users-between-lines">
+    Use different roles for different operational areas to maintain proper oversight.
+  </Card>
+  
+  <Card title="Role Combinations" icon="layer-group">
+    Carefully consider the implications when assigning multiple roles to a single user.
+  </Card>
+</CardGroup>

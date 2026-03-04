@@ -1,0 +1,625 @@
+---
+title: Dashboard & Analytics
+description: Real-time operational insights, KPI monitoring, and comprehensive statistics for data-driven decision making
+icon: 'chart-line'
+---
+
+## Overview
+
+The Dashboard & Analytics module provides comprehensive operational intelligence for SIGSAHO. Monitor fleet performance, track medical mission statistics, identify trends, and make data-driven decisions with real-time visualizations and detailed reports.
+
+<Note>
+  All dashboard metrics update in real-time as flight operations, transfers, and maintenance activities are logged in the system.
+</Note>
+
+## Dashboard Overview
+
+The main dashboard presents a consolidated view of operational status:
+
+### At-a-Glance KPI Cards
+
+The dashboard displays four primary KPI metrics prominently:
+
+<CardGroup cols={2}>
+  <Card title="Total Attentions" icon="users">
+    **Current Period Metrics**
+    
+    - Total medical transfers completed
+    - Total general transfers completed
+    - Combined service count
+    - Percentage change vs. previous period
+    
+    Visual indicator shows trend:
+    - 📈 Green arrow up: Increase in activity
+    - 📉 Red arrow down: Decrease in activity
+  </Card>
+  
+  <Card title="Flight Hours" icon="clock">
+    **Fleet Flight Time**
+    
+    - Total hours flown (all aircraft)
+    - Hours this month
+    - Hours this week
+    - Average daily utilization
+    
+    Displays formatted as "XXXh YYm"
+  </Card>
+  
+  <Card title="Active Aircraft" icon="plane">
+    **Fleet Status**
+    
+    - Number of aircraft with status "Active"
+    - Number in maintenance
+    - Number out of service
+    - Fleet availability percentage
+  </Card>
+  
+  <Card title="Active Missions" icon="route">
+    **In-Progress Operations**
+    
+    - Transfers with status "In Process"
+    - Medical missions in progress
+    - General transfers in progress
+    - Avg. mission duration
+  </Card>
+</CardGroup>
+
+## Analytics Features
+
+### Flight Statistics Widget
+
+<Card title="Flight Operations Overview" icon="chart-bar">
+  **Line Chart: Operations Over Time**
+  
+  Displays flight activity trends:
+  
+  **Time Ranges:**
+  - Last 7 days
+  - Last 30 days
+  - Last 90 days
+  - Custom date range
+  
+  **Data Series:**
+  - Total flights per day
+  - Medical transfers (red line)
+  - General transfers (blue line)
+  - Support operations (green line)
+  
+  **Interactive Features:**
+  - Hover to see exact counts
+  - Click legend to toggle series
+  - Zoom into date range
+  - Export chart as image
+</Card>
+
+### Medical Transfer Statistics
+
+Comprehensive aeromedical analytics:
+
+<Accordion title="Transfers by Category">
+  **Donut Chart Breakdown**
+  
+  Medical transfers segmented by type:
+  - Primary transfers (scene to hospital)
+  - Secondary transfers (hospital to hospital)
+  - Tertiary transfers (specialized facility)
+  - Inter-hospital transfers
+  
+  Shows:
+  - Percentage of total for each category
+  - Absolute counts
+  - Color-coded segments
+  - Click segment to filter detailed view
+</Accordion>
+
+<Accordion title="Transfers by Diagnosis Type">
+  **Diagnosis Distribution**
+  
+  Medical conditions transported:
+  - Trauma (accidents, injuries)
+  - Medical (illness, chronic conditions)
+  - Obstetric (pregnancy-related)
+  - Pediatric (children)
+  - Cardiac (heart-related)
+  - Neurological (brain/nerve)
+  - Other
+  
+  Displays:
+  - Donut chart with percentages
+  - Total count per diagnosis type
+  - Trend indicators (increasing/decreasing)
+</Accordion>
+
+<Accordion title="Transfers by Age Group">
+  **Patient Demographics**
+  
+  Age distribution of transported patients:
+  - 0-17 years (Pediatric)
+  - 18-35 years (Young adult)
+  - 36-55 years (Adult)
+  - 56-70 years (Senior)
+  - 71+ years (Elderly)
+  
+  Useful for:
+  - Resource planning
+  - Equipment allocation
+  - Specialized crew scheduling
+</Accordion>
+
+<Accordion title="Top Hospitals">
+  **Hospital Utilization Rankings**
+  
+  Bar chart showing:
+  - Top 10 hospitals by transfer volume
+  - Origin vs. destination breakdown
+  - Total transfers per facility
+  - Geographic distribution
+  
+  Helps identify:
+  - Frequently served facilities
+  - Partner hospital relationships
+  - Coverage gaps
+</Accordion>
+
+### Fleet Performance Analytics
+
+<Accordion title="Top Aircraft by Hours">
+  **Aircraft Utilization Ranking**
+  
+  Lists aircraft by flight hours:
+  - Aircraft name and registration
+  - Total hours flown (current period)
+  - Number of missions
+  - Average mission duration
+  - Utilization percentage
+  
+  **Visual Indicators:**
+  - Bar chart representation
+  - Color-coded by aircraft type
+  - Sortable by hours or mission count
+</Accordion>
+
+<Accordion title="Beneficiaries Served">
+  **Total Patients Transported**
+  
+  KPI showing:
+  - Total unique patients served
+  - Patients this month
+  - Patients this year
+  - Growth vs. previous period
+  
+  Segmented by:
+  - Gender distribution
+  - Age demographics
+  - Diagnosis categories
+</Accordion>
+
+<Accordion title="Regional Statistics">
+  **Geographic Coverage Map**
+  
+  Map visualization showing:
+  - Transfers by region
+  - Coverage heat map
+  - Most frequent routes
+  - Underserved areas
+  
+  Interactive features:
+  - Click region for detailed stats
+  - Filter by date range
+  - Toggle transfer types
+</Accordion>
+
+### Crew Performance Metrics
+
+<Accordion title="Top Pilots by Hours">
+  **Pilot Activity Leaderboard**
+  
+  Lists pilots ranked by flight hours:
+  - Pilot name
+  - Total hours flown
+  - Number of missions
+  - Average mission duration
+  - Aircraft types flown
+  
+  **Use Cases:**
+  - Recognize high performers
+  - Ensure equitable workload distribution
+  - Plan training and certification renewals
+</Accordion>
+
+## Recent Activity Widgets
+
+### Last Flights Widget
+
+<Card title="Recent Flight Operations" icon="list">
+  **Real-Time Activity Feed**
+  
+  Table displaying most recent transfers:
+  
+  **Columns:**
+  - Date and time
+  - Transfer type badge
+  - Origin → Destination route
+  - Aircraft registration
+  - Flight duration
+  - Status indicator
+  
+  **Features:**
+  - Auto-refreshes every 60 seconds
+  - Shows last 10 operations
+  - Click row to view full transfer details
+  - Color-coded by status (green=finished, blue=in progress, red=canceled)
+</Card>
+
+### Urgent Alerts Widget
+
+<Card title="System Alerts and Notifications" icon="bell">
+  **Critical Attention Items**
+  
+  Displays urgent alerts requiring action:
+  
+  **Alert Categories:**
+  
+  **Aircraft Alerts:**
+  - Maintenance due (>80% of hours consumed)
+  - Maintenance overdue (>100% of hours)
+  - Documents expiring soon
+  - Inspections due
+  
+  **Personnel Alerts:**
+  - Certifications expiring within 30 days
+  - Medical certificates expiring
+  - Training requirements overdue
+  - Documents missing or expired
+  
+  **Operational Alerts:**
+  - Transfers in process for >24 hours
+  - Incomplete transfer records
+  - Missing logbook folios
+  
+  **Alert Format:**
+  - Icon indicating alert type
+  - Alert message
+  - Severity level (Critical, Warning, Info)
+  - Quick action button ("View Details", "Resolve")
+  
+  **Configurable Thresholds:**
+  Administrators can configure alert triggers:
+  - Days before document expiration
+  - Maintenance percentage threshold
+  - Training expiration warnings
+</Card>
+
+## Statistics Search and Reports
+
+Advanced analytics with custom filtering:
+
+### Search Statistics Page
+
+<Steps>
+  <Step title="Access Statistics Search">
+    Navigate to **Estadísticas > Búsqueda Estadística** for advanced analytics.
+  </Step>
+  
+  <Step title="Select Date Range">
+    Choose analysis period:
+    - Custom date range picker
+    - Quick presets (Last 7 days, Last 30 days, Last quarter, Last year)
+    - Year-to-date option
+  </Step>
+  
+  <Step title="Apply Filters">
+    Refine data with multiple filters:
+    
+    **Transfer Filters:**
+    - Transfer type (Medical, General, Support, Training)
+    - Status (Finished, Canceled, In Process)
+    - Aircraft used
+    - Origin/Destination region
+    
+    **Medical Filters (if applicable):**
+    - Diagnosis type
+    - Medical transfer category
+    - Hospital origin/destination
+    - Patient age range
+    
+    **Crew Filters:**
+    - Pilot in command
+    - Medical personnel
+    - Crew role
+  </Step>
+  
+  <Step title="View Results">
+    System displays comprehensive statistics:
+    
+    **Summary KPIs:**
+    - Total transfers matching filters
+    - Total flight hours
+    - Total patients (if medical)
+    - Average mission duration
+    - Total fuel consumed
+    
+    **Visualizations:**
+    - Timeline chart of activity
+    - Breakdown by type/category
+    - Geographic distribution map
+    - Top aircraft/pilots
+  </Step>
+  
+  <Step title="Export Report">
+    Generate downloadable reports:
+    - Excel export with raw data
+    - PDF summary report with charts
+    - CSV for further analysis
+    - Formatted for regulatory submission
+  </Step>
+</Steps>
+
+## Dashboard Permissions
+
+Dashboard visibility is role-based:
+
+| Role | Full Dashboard | Statistics | Export Reports | Configure Alerts |
+|------|----------------|------------|----------------|------------------|
+| Administrator | ✓ | ✓ | ✓ | ✓ |
+| Operations Manager | ✓ | ✓ | ✓ | ✗ |
+| Dispatcher | ✓ | ✓ | ✓ | ✗ |
+| Pilot | ✓* | ✓* | ✗ | ✗ |
+| Medical Coordinator | ✓* | ✓* | ✓** | ✗ |
+| Viewer | ✓ | ✓ | ✗ | ✗ |
+
+*Limited to relevant data (pilots see flight-related, medical coordinators see medical transfers)
+**Medical coordinators can only export medical transfer reports
+
+## Interface Components
+
+### Dashboard Layout
+
+**Screenshot Description:**
+The main dashboard is organized in a responsive grid:
+
+1. **Header Section**
+   - Page title: "Resumen Operativo"
+   - Current date (formatted: "lunes, 4 de marzo de 2026")
+   - Quick action buttons (optional)
+
+2. **KPI Cards Row** (4 columns on desktop, stacked on mobile)
+   - Total Attentions card (blue accent)
+   - Flight Hours card (green accent)
+   - Active Aircraft card (purple accent)
+   - Active Missions card (amber accent)
+   
+   Each card shows:
+   - Large primary metric
+   - Smaller secondary metric
+   - Trend indicator arrow
+   - Icon representing metric type
+
+3. **Main Content Grid** (2 columns on large screens)
+   
+   **Left Column (8/12 width):**
+   - Flight Statistics Widget (line chart, full width)
+   - Last Flights Widget (table, full width)
+   
+   **Right Column (4/12 width):**
+   - Urgent Alerts Widget (card with alert list)
+   - Total Attentions Widget (donut chart)
+   - Top Aircraft Widget (horizontal bar chart)
+
+4. **Footer Section** (optional)
+   - Last updated timestamp
+   - Data refresh controls
+
+### Statistics Widgets
+
+**Screenshot Description:**
+Each widget follows a consistent card design:
+
+1. **Widget Card Container**
+   - White background with subtle shadow
+   - Rounded corners (border-radius: 12px)
+   - Padding for content spacing
+
+2. **Widget Header**
+   - Widget title (left-aligned, semibold)
+   - Filter/options dropdown (right-aligned)
+   - Optional description text
+
+3. **Widget Content**
+   - Chart area (Chart.js or Recharts)
+   - Data table
+   - Loading skeleton when fetching data
+   - Error state with retry button
+
+4. **Widget Footer** (optional)
+   - "View Details" link
+   - Last updated timestamp
+   - Export options
+
+### Alert Styling
+
+**Alert Severity Colors:**
+- **Critical** (Red): Requires immediate action
+- **Warning** (Amber): Attention needed soon
+- **Info** (Blue): Informational, no action required
+
+**Alert Components:**
+- Icon on left (exclamation for critical, warning triangle for warnings)
+- Alert title (bold)
+- Alert description (normal weight)
+- Timestamp (small, muted)
+- Action button on right ("View" or "Resolve")
+
+## Data Refresh and Performance
+
+<Card title="Real-Time Updates" icon="sync">
+  **Dashboard Data Refresh Strategy**
+  
+  SIGSAHO uses intelligent caching for optimal performance:
+  
+  **Auto-Refresh:**
+  - Last Flights Widget: Updates every 60 seconds
+  - Urgent Alerts Widget: Updates every 30 seconds
+  - KPI Cards: Updates every 5 minutes
+  - Charts: Updates on page load and manual refresh
+  
+  **Manual Refresh:**
+  - Click refresh icon to force update
+  - Useful after logging new operations
+  
+  **Cache Strategy:**
+  - React Query handles caching automatically
+  - Stale time: 5 minutes for statistics
+  - Stale time: 1 minute for alerts
+  - Background refetching when window regains focus
+</Card>
+
+## Best Practices
+
+<Accordion title="Interpreting Dashboard Metrics">
+  - Compare current period metrics to previous periods for context
+  - Look for unusual spikes or dips in flight activity
+  - Monitor alert trends - increasing alerts may indicate systemic issues
+  - Use filters to isolate specific aircraft or transfer types
+</Accordion>
+
+<Accordion title="Using Statistics for Planning">
+  - Identify peak activity periods for crew scheduling
+  - Analyze aircraft utilization for fleet optimization
+  - Review medical transfer patterns for resource allocation
+  - Track seasonal trends for budgeting and forecasting
+</Accordion>
+
+<Accordion title="Alert Management">
+  - Review urgent alerts daily (morning and end-of-day)
+  - Prioritize critical alerts (red) over warnings (amber)
+  - Resolve alerts promptly to maintain compliance
+  - Configure alert thresholds based on operational needs
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Dashboard Shows No Data">
+  **Possible Causes:**
+  - No flight operations logged yet
+  - Date range filter excludes all data
+  - User permissions restrict data visibility
+  
+  **Solution:**
+  1. Verify date range includes actual operations
+  2. Remove restrictive filters
+  3. Check user role and permissions
+  4. Manually refresh the dashboard
+</Accordion>
+
+<Accordion title="Charts Not Loading">
+  **Possible Causes:**
+  - Network connectivity issue
+  - Backend API error
+  - Browser compatibility issue
+  
+  **Solution:**
+  1. Check network connection
+  2. Refresh the page
+  3. Clear browser cache
+  4. Try a different browser (Chrome, Firefox, Edge)
+</Accordion>
+
+<Accordion title="Statistics Seem Incorrect">
+  **Possible Causes:**
+  - Data not yet synced from recent operations
+  - Cache not invalidated
+  - Incomplete transfer records (status still "In Process")
+  
+  **Solution:**
+  1. Wait a few minutes for data to sync
+  2. Manually refresh dashboard
+  3. Verify recent transfers have status "Finished"
+  4. Check for incomplete records and finalize them
+</Accordion>
+
+## Alert Configuration
+
+### Configuring Alert Thresholds
+
+Administrators can customize when alerts trigger:
+
+<Steps>
+  <Step title="Access Alert Settings">
+    Navigate to **Seguimiento > Configuración de Alertas**.
+  </Step>
+  
+  <Step title="Configure Document Expiration Warnings">
+    Set number of days before expiration to trigger alerts:
+    - User documents (licenses, passports, medicals): Default 30 days
+    - Aircraft documents (registration, insurance): Default 60 days
+    - Training certifications: Default 30 days
+  </Step>
+  
+  <Step title="Configure Maintenance Thresholds">
+    Set percentage thresholds for maintenance alerts:
+    - Warning threshold: Default 70% (amber alert)
+    - Critical threshold: Default 85% (red alert)
+    - Overdue: 100%+ (critical red alert)
+  </Step>
+  
+  <Step title="Configure Training Alerts">
+    Set training expiration warnings:
+    - Initial warning: 60 days before expiration
+    - Urgent warning: 30 days before expiration
+    - Overdue: Past expiration date
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click **"Guardar Configuración"** to apply new thresholds. Changes take effect immediately.
+  </Step>
+</Steps>
+
+## Integration with Other Modules
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" icon="plane-departure">
+    Dashboard displays:
+    - Real-time transfer counts
+    - Flight hours by aircraft
+    - Recent operations feed
+  </Card>
+  
+  <Card title="Medical Transfers" icon="ambulance">
+    Medical statistics:
+    - Patient demographics
+    - Diagnosis distribution
+    - Hospital utilization
+  </Card>
+  
+  <Card title="Aircraft Management" icon="plane">
+    Fleet metrics:
+    - Aircraft availability
+    - Maintenance alerts
+    - Utilization rates
+  </Card>
+  
+  <Card title="User Management" icon="users">
+    Personnel alerts:
+    - Certification expiration
+    - Training requirements
+    - Document status
+  </Card>
+</CardGroup>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" href="/features/flight-operations">
+    Understand how operations data flows to analytics
+  </Card>
+  <Card title="Medical Transfers" href="/features/medical-transfers">
+    Learn about medical statistics tracking
+  </Card>
+  <Card title="Aircraft Management" href="/features/aircraft-management">
+    Configure aircraft for proper hour tracking
+  </Card>
+  <Card title="User Management" href="/features/user-management">
+    Set up user permissions for dashboard access
+  </Card>
+</CardGroup>

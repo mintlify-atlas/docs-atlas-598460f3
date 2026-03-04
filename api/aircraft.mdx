@@ -1,0 +1,681 @@
+---
+title: 'Aircraft API'
+description: 'Manage aircraft resources including creation, updates, status changes, and image management'
+---
+
+## Create Aircraft
+
+<Note>
+  Requires authentication with `requireDespachoWrite` permission
+</Note>
+
+Create a new aircraft with an image upload.
+
+<CodeGroup>
+```bash cURL
+curl -X POST https://api.sigsaho.com/aircrafts \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -F "name=Bell 407" \
+  -F "registration=XA-ABC" \
+  -F "description=Bell 407 helicopter for executive transport" \
+  -F "aircraft_category=ROTARY_WING" \
+  -F "number_of_engines=1" \
+  -F "manufacturer=Bell Helicopter" \
+  -F "model=407" \
+  -F "time_limit_m1=100" \
+  -F "cicle_limit_m1=500" \
+  -F "weight_empty=2700" \
+  -F "cg_empty=150.5" \
+  -F "moment_empty=406350" \
+  -F "max_passengers=6" \
+  -F "current_time_flying=0" \
+  -F "current_cycles=0" \
+  -F "total_lifetime_hours=5000" \
+  -F "hours_before_lastMantt=0" \
+  -F "total_lifetime_cycles=0" \
+  -F "image=@aircraft.jpg"
+```
+</CodeGroup>
+
+### Request
+
+<ParamField body="name" type="string" required>
+  Aircraft name
+</ParamField>
+
+<ParamField body="registration" type="string" required>
+  Aircraft registration number (e.g., XA-ABC)
+</ParamField>
+
+<ParamField body="image" type="file" required>
+  Aircraft image (JPEG, PNG, or WebP). Maximum 10MB. Image is automatically optimized to 85% quality.
+</ParamField>
+
+<ParamField body="description" type="string" required>
+  Aircraft description
+</ParamField>
+
+<ParamField body="aircraft_category" type="enum" required>
+  Aircraft category: `FIXED_WING` or `ROTARY_WING`
+</ParamField>
+
+<ParamField body="number_of_engines" type="integer" required>
+  Number of engines (default: 1)
+</ParamField>
+
+<ParamField body="manufacturer" type="string">
+  Aircraft manufacturer
+</ParamField>
+
+<ParamField body="model" type="string">
+  Aircraft model
+</ParamField>
+
+<ParamField body="time_limit_m1" type="number" required>
+  Time limit for engine 1 (hours)
+</ParamField>
+
+<ParamField body="time_limit_m2" type="number">
+  Time limit for engine 2 (hours, if applicable)
+</ParamField>
+
+<ParamField body="cicle_limit_m1" type="integer" required>
+  Cycle limit for engine 1
+</ParamField>
+
+<ParamField body="cicle_limit_m2" type="integer">
+  Cycle limit for engine 2 (if applicable)
+</ParamField>
+
+<ParamField body="weight_empty" type="number" required>
+  Empty weight (kg)
+</ParamField>
+
+<ParamField body="cg_empty" type="number" required>
+  Center of gravity when empty
+</ParamField>
+
+<ParamField body="moment_empty" type="number" required>
+  Moment when empty
+</ParamField>
+
+<ParamField body="max_passengers" type="integer" required>
+  Maximum number of passengers
+</ParamField>
+
+<ParamField body="current_time_flying" type="number">
+  Current flight hours accumulated (default: 0)
+</ParamField>
+
+<ParamField body="current_cycles" type="integer">
+  Current cycles accumulated (default: 0)
+</ParamField>
+
+<ParamField body="last_major_maintenance_date" type="date">
+  Date of last major maintenance (YYYY-MM-DD)
+</ParamField>
+
+<ParamField body="total_lifetime_hours" type="number">
+  Total lifetime hours (default: 0)
+</ParamField>
+
+<ParamField body="total_lifetime_cycles" type="integer">
+  Total lifetime cycles (default: 0)
+</ParamField>
+
+<ParamField body="status" type="enum">
+  Aircraft status: `ACTIVE`, `INACTIVE`, `ELIMINATED`, `APPROACHING_MAINTENANCE`, `MAINTENANCE`, `GROUNDED`, `OUT_OF_SERVICE`
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="aircraft" type="object">
+  The created aircraft object with all fields including virtual fields:
+  
+  <Expandable title="Aircraft Object">
+    <ResponseField name="id" type="integer">
+      Aircraft ID
+    </ResponseField>
+    
+    <ResponseField name="name" type="string">
+      Aircraft name
+    </ResponseField>
+    
+    <ResponseField name="registration" type="string">
+      Aircraft registration
+    </ResponseField>
+    
+    <ResponseField name="img_url" type="string">
+      Aircraft image URL
+    </ResponseField>
+    
+    <ResponseField name="status" type="string">
+      Aircraft status
+    </ResponseField>
+    
+    <ResponseField name="aircraft_category" type="string">
+      Aircraft category
+    </ResponseField>
+    
+    <ResponseField name="available_time" type="number">
+      Virtual field: Available time calculated as (total_lifetime_hours - current_time_flying)
+    </ResponseField>
+    
+    <ResponseField name="maintenance_due_percentage" type="number">
+      Virtual field: Percentage of maintenance due
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="datetime">
+      Creation timestamp
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="datetime">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Aeronave creada exitosamente",
+  "aircraft": {
+    "id": 1,
+    "name": "Bell 407",
+    "registration": "XA-ABC",
+    "img_url": "https://storage.sigsaho.com/aircraft/1234567890.jpg",
+    "description": "Bell 407 helicopter for executive transport",
+    "status": "ACTIVE",
+    "aircraft_category": "ROTARY_WING",
+    "number_of_engines": 1,
+    "manufacturer": "Bell Helicopter",
+    "model": "407",
+    "time_limit_m1": 100,
+    "time_limit_m2": null,
+    "cicle_limit_m1": 500,
+    "cicle_limit_m2": null,
+    "weight_empty": 2700,
+    "cg_empty": 150.5,
+    "moment_empty": 406350,
+    "max_passengers": 6,
+    "current_time_flying": 0,
+    "current_cycles": 0,
+    "last_major_maintenance_date": null,
+    "total_lifetime_hours": 5000,
+    "hours_before_lastMantt": 0,
+    "total_lifetime_cycles": 0,
+    "available_time": 5000.00,
+    "maintenance_due_percentage": 0.00,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## List Aircraft
+
+<Note>
+  Requires authentication with `requireDespachoRead` permission
+</Note>
+
+Get a paginated list of aircraft with optional filters.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/aircrafts?page=1&limit=10&status=ACTIVE&search=Bell" \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField query="status" type="enum">
+  Filter by status: `ACTIVE`, `INACTIVE`, `ELIMINATED`, `APPROACHING_MAINTENANCE`, `MAINTENANCE`, `GROUNDED`, `OUT_OF_SERVICE`
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name or registration
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of aircraft objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination Object">
+    <ResponseField name="page" type="integer">
+      Current page
+    </ResponseField>
+    
+    <ResponseField name="limit" type="integer">
+      Records per page
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      Total records
+    </ResponseField>
+    
+    <ResponseField name="totalPages" type="integer">
+      Total pages
+    </ResponseField>
+    
+    <ResponseField name="hasNextPage" type="boolean">
+      Whether there is a next page
+    </ResponseField>
+    
+    <ResponseField name="hasPreviousPage" type="boolean">
+      Whether there is a previous page
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Bell 407",
+      "registration": "XA-ABC",
+      "img_url": "https://storage.sigsaho.com/aircraft/1234567890.jpg",
+      "status": "ACTIVE",
+      "aircraft_category": "ROTARY_WING",
+      "available_time": 5000.00,
+      "maintenance_due_percentage": 0.00,
+      "created_at": "2026-03-04T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 1,
+    "totalPages": 1,
+    "hasNextPage": false,
+    "hasPreviousPage": false
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Aircraft by ID
+
+<Note>
+  Requires authentication with `requireDespachoRead` permission
+</Note>
+
+Get detailed information about a specific aircraft including virtual fields.
+
+<CodeGroup>
+```bash cURL
+curl -X GET https://api.sigsaho.com/aircrafts/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft ID
+</ParamField>
+
+### Response
+
+<ResponseField name="aircraft" type="object">
+  The aircraft object with all details and virtual calculated fields
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "aircraft": {
+    "id": 1,
+    "name": "Bell 407",
+    "registration": "XA-ABC",
+    "img_url": "https://storage.sigsaho.com/aircraft/1234567890.jpg",
+    "description": "Bell 407 helicopter for executive transport",
+    "status": "ACTIVE",
+    "aircraft_category": "ROTARY_WING",
+    "number_of_engines": 1,
+    "manufacturer": "Bell Helicopter",
+    "model": "407",
+    "time_limit_m1": 100,
+    "time_limit_m2": null,
+    "cicle_limit_m1": 500,
+    "cicle_limit_m2": null,
+    "weight_empty": 2700,
+    "cg_empty": 150.5,
+    "moment_empty": 406350,
+    "max_passengers": 6,
+    "current_time_flying": 50,
+    "current_cycles": 100,
+    "last_major_maintenance_date": "2025-01-15",
+    "total_lifetime_hours": 5000,
+    "hours_before_lastMantt": 0,
+    "total_lifetime_cycles": 100,
+    "available_time": 4950.00,
+    "maintenance_due_percentage": 1.00,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Search Aircraft by Registration
+
+<Note>
+  Requires authentication with `requireDespachoRead` permission
+</Note>
+
+Search for aircraft by registration number (partial match with LIKE).
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/aircrafts/search/registration?registration=ABC&page=1&limit=10" \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="registration" type="string" required>
+  Text to search within registration (partial match)
+</ParamField>
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page (maximum: 100)
+</ParamField>
+
+### Response
+
+Returns paginated list of aircraft matching the registration search.
+
+---
+
+## Get Deleted Aircraft
+
+<Note>
+  Requires authentication with `requireDespachoRead` permission
+</Note>
+
+Get history of logically deleted aircraft for audit purposes.
+
+<CodeGroup>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/aircrafts/deleted?page=1&limit=10" \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page (maximum: 100)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name or registration
+</ParamField>
+
+---
+
+## Update Aircraft
+
+<Note>
+  Requires authentication with `requireDespachoWrite` permission
+</Note>
+
+Update an existing aircraft's information.
+
+<CodeGroup>
+```bash cURL
+curl -X PUT https://api.sigsaho.com/aircrafts/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Bell 407 Updated",
+    "description": "Updated description",
+    "status": "ACTIVE"
+  }'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft ID
+</ParamField>
+
+### Request Body
+
+All fields are optional. Only provided fields will be updated.
+
+<ParamField body="name" type="string">
+  Aircraft name
+</ParamField>
+
+<ParamField body="registration" type="string">
+  Aircraft registration
+</ParamField>
+
+<ParamField body="description" type="string">
+  Aircraft description
+</ParamField>
+
+<ParamField body="status" type="enum">
+  Aircraft status
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Aeronave actualizada exitosamente",
+  "aircraft": {
+    "id": 1,
+    "name": "Bell 407 Updated",
+    "description": "Updated description",
+    "status": "ACTIVE"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Aircraft Status
+
+<Note>
+  Requires authentication with `requireDespachoWrite` permission
+</Note>
+
+Change the status of an aircraft.
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/aircrafts/1/status \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "MAINTENANCE"}'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="status" type="enum" required>
+  New status: `ACTIVE`, `INACTIVE`, `MAINTENANCE`, `GROUNDED`, `OUT_OF_SERVICE`
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Status de la aeronave actualizado exitosamente",
+  "aircraft": {
+    "id": 1,
+    "status": "MAINTENANCE"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Aircraft Image
+
+<Note>
+  Requires authentication with `requireDespachoWrite` permission
+</Note>
+
+Update the image of an existing aircraft. The previous image is automatically deleted.
+
+<CodeGroup>
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/aircrafts/1/image \
+  -H "Cookie: token=YOUR_JWT_TOKEN" \
+  -F "image=@new-aircraft.jpg"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft ID
+</ParamField>
+
+### Request
+
+<ParamField body="image" type="file" required>
+  New aircraft image (JPEG, PNG, or WebP). Maximum 10MB.
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="aircraft" type="object">
+  Updated aircraft object
+</ResponseField>
+
+<ResponseField name="upload" type="object">
+  Upload information including filename, URL, and file sizes
+</ResponseField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Imagen de aeronave actualizada exitosamente",
+  "aircraft": {
+    "id": 1,
+    "img_url": "https://storage.sigsaho.com/aircraft/9876543210.jpg"
+  },
+  "upload": {
+    "filename": "9876543210.jpg",
+    "url": "https://storage.sigsaho.com/aircraft/9876543210.jpg",
+    "originalSize": 2048576,
+    "compressedSize": 1048576
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Delete Aircraft
+
+<Note>
+  Requires authentication with `requireDespachoWrite` permission
+</Note>
+
+Logically delete an aircraft (soft delete). Sets status to `ELIMINATED` and populates `deleted_at`.
+
+<CodeGroup>
+```bash cURL
+curl -X DELETE https://api.sigsaho.com/aircrafts/1 \
+  -H "Cookie: token=YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  Aircraft ID
+</ParamField>
+
+<ResponseExample>
+```json Response
+{
+  "message": "Aeronave eliminada exitosamente"
+}
+```
+</ResponseExample>
+
+---
+
+## Authentication
+
+All endpoints require authentication via JWT cookie. The API uses role-based access control:
+
+- **Read operations**: Require `requireDespachoRead` permission
+- **Write operations**: Require `requireDespachoWrite` permission
+
+## Error Responses
+
+<ResponseField name="error" type="string">
+  Error message describing what went wrong
+</ResponseField>
+
+<ResponseExample>
+```json 400 Bad Request
+{
+  "error": "ID inválido"
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "No autorizado"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Aeronave no encontrada"
+}
+```
+</ResponseExample>

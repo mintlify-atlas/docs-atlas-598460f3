@@ -1,0 +1,958 @@
+---
+title: 'Users API'
+description: 'Manage system users, staff members, and crew members'
+icon: 'users'
+---
+
+## Overview
+
+The Users API provides endpoints for managing system users, staff members, and crew members in SIGSAHO. It supports user creation, retrieval, updates, role assignment, and soft deletion.
+
+## Authentication
+
+All endpoints require authentication via JWT cookie (`cookieAuth`).
+
+## Base URL
+
+```
+/api/users
+```
+
+---
+
+## Create User
+
+Create a new system user with specified roles and login access.
+
+<CodeGroup>
+```bash POST /users
+curl -X POST https://api.sigsaho.com/api/users \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "name": "Juan",
+    "last_name": "García",
+    "second_last_name": "López",
+    "username": "jgarcia",
+    "email": "juan.garcia@example.com",
+    "phone": "+525512345678",
+    "password": "SecurePass123!",
+    "weight": 75,
+    "roles": [1, 3],
+    "login_access": true,
+    "birth_date": "1990-05-15T00:00:00.000Z",
+    "position": "Piloto Comercial",
+    "license_number": "PIL-2024-001"
+  }'
+```
+</CodeGroup>
+
+### Request Body
+
+<ParamField body="name" type="string" required>
+  User's first name (1-100 characters)
+</ParamField>
+
+<ParamField body="last_name" type="string" required>
+  User's paternal last name (1-100 characters)
+</ParamField>
+
+<ParamField body="second_last_name" type="string">
+  User's maternal last name (max 100 characters)
+</ParamField>
+
+<ParamField body="username" type="string" required>
+  Unique username (3-50 characters, alphanumeric with dots, hyphens, underscores)
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  Unique email address (max 255 characters)
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Phone number (10-15 digits, international format supported)
+</ParamField>
+
+<ParamField body="password" type="string">
+  Password (min 8 characters, must include uppercase, lowercase, number, and special character). **Required when `login_access` is `true`**
+</ParamField>
+
+<ParamField body="weight" type="number" required>
+  User's weight in kg (positive number, max 500)
+</ParamField>
+
+<ParamField body="roles" type="array" required>
+  Array of role IDs to assign (min 1, max 10)
+</ParamField>
+
+<ParamField body="login_access" type="boolean" required>
+  Whether the user can log into the system
+</ParamField>
+
+<ParamField body="birth_date" type="string">
+  Date of birth (ISO 8601 format)
+</ParamField>
+
+<ParamField body="position" type="string">
+  User's position/job title (max 100 characters)
+</ParamField>
+
+<ParamField body="license_number" type="string">
+  License number (max 50 characters)
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  The created user object
+  
+  <Expandable title="User properties">
+    <ResponseField name="id" type="number">
+      User ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      First name
+    </ResponseField>
+    <ResponseField name="last_name" type="string">
+      Paternal last name
+    </ResponseField>
+    <ResponseField name="second_last_name" type="string">
+      Maternal last name
+    </ResponseField>
+    <ResponseField name="username" type="string">
+      Username
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Email address
+    </ResponseField>
+    <ResponseField name="phone" type="string">
+      Phone number
+    </ResponseField>
+    <ResponseField name="login_access" type="boolean">
+      Login access status
+    </ResponseField>
+    <ResponseField name="weight" type="number">
+      Weight in kg
+    </ResponseField>
+    <ResponseField name="license_number" type="string">
+      License number
+    </ResponseField>
+    <ResponseField name="birth_date" type="string">
+      Date of birth
+    </ResponseField>
+    <ResponseField name="position" type="string">
+      Position/job title
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      User status: `ACTIVE`, `DISABLED`, or `ELIMINATED`
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      User type: `SYSTEM` or `STAFF`
+    </ResponseField>
+    <ResponseField name="roles" type="array">
+      Array of assigned role objects
+    </ResponseField>
+    <ResponseField name="created_at" type="string">
+      Creation timestamp
+    </ResponseField>
+    <ResponseField name="updated_at" type="string">
+      Last update timestamp
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseExample>
+```json 201 Success
+{
+  "message": "Usuario creado exitosamente",
+  "user": {
+    "id": 42,
+    "name": "Juan",
+    "last_name": "García",
+    "second_last_name": "López",
+    "username": "jgarcia",
+    "email": "juan.garcia@example.com",
+    "phone": "+525512345678",
+    "login_access": true,
+    "weight": 75,
+    "license_number": "PIL-2024-001",
+    "birth_date": "1990-05-15T00:00:00.000Z",
+    "position": "Piloto Comercial",
+    "status": "ACTIVE",
+    "type": "SYSTEM",
+    "roles": [
+      { "id": 1, "name": "ADMINISTRADOR" },
+      { "id": 3, "name": "PILOTO" }
+    ],
+    "created_at": "2024-03-15T10:30:00.000Z",
+    "updated_at": "2024-03-15T10:30:00.000Z"
+  }
+}
+```
+
+```json 400 Validation Error
+{
+  "error": "El correo electrónico ya está en uso"
+}
+```
+
+```json 403 Forbidden
+{
+  "error": "Acceso denegado. Requiere rol ADMINISTRADOR."
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+---
+
+## Create Staff User
+
+Create a staff user with optional document uploads (license, visa, passport, psycho-physical aptitude, RATARI).
+
+<CodeGroup>
+```bash POST /users/staff
+curl -X POST https://api.sigsaho.com/api/users/staff \
+  -b "cookies.txt" \
+  -F "name=María" \
+  -F "last_name=Rodríguez" \
+  -F "second_last_name=Pérez" \
+  -F "email=maria.rodriguez@example.com" \
+  -F "phone=+525587654321" \
+  -F "weight=65" \
+  -F "position=Enfermera" \
+  -F "license_file=@/path/to/license.pdf" \
+  -F "license_serial_number=LIC-2024-123" \
+  -F "license_expiration_date=2025-12-31T00:00:00.000Z"
+```
+</CodeGroup>
+
+### Request Body (multipart/form-data)
+
+<ParamField body="name" type="string" required>
+  User's first name
+</ParamField>
+
+<ParamField body="last_name" type="string" required>
+  Paternal last name
+</ParamField>
+
+<ParamField body="second_last_name" type="string">
+  Maternal last name
+</ParamField>
+
+<ParamField body="email" type="string" required>
+  Email address
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="weight" type="number" required>
+  Weight in kg
+</ParamField>
+
+<ParamField body="position" type="string">
+  Job position
+</ParamField>
+
+<ParamField body="license_file" type="file">
+  License document (PDF)
+</ParamField>
+
+<ParamField body="license_serial_number" type="string">
+  License serial number
+</ParamField>
+
+<ParamField body="license_expiration_date" type="string">
+  License expiration date (ISO 8601)
+</ParamField>
+
+<ParamField body="visa_file" type="file">
+  Visa document (PDF)
+</ParamField>
+
+<ParamField body="visa_serial_number" type="string">
+  Visa serial number
+</ParamField>
+
+<ParamField body="visa_expiration_date" type="string">
+  Visa expiration date
+</ParamField>
+
+<ParamField body="passport_file" type="file">
+  Passport document (PDF)
+</ParamField>
+
+<ParamField body="passport_serial_number" type="string">
+  Passport serial number
+</ParamField>
+
+<ParamField body="passport_expiration_date" type="string">
+  Passport expiration date
+</ParamField>
+
+<ParamField body="psycho_physical_aptitude_file" type="file">
+  Psycho-physical aptitude certificate (PDF)
+</ParamField>
+
+<ParamField body="psycho_physical_aptitude_serial_number" type="string">
+  Certificate serial number
+</ParamField>
+
+<ParamField body="psycho_physical_aptitude_expiration_date" type="string">
+  Certificate expiration date
+</ParamField>
+
+<ParamField body="ratari_file" type="file">
+  RATARI document (PDF)
+</ParamField>
+
+<ParamField body="ratari_serial_number" type="string">
+  RATARI serial number
+</ParamField>
+
+<ParamField body="ratari_expiration_date" type="string">
+  RATARI expiration date
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  The created staff user (type=STAFF, login_access=false)
+</ResponseField>
+
+<ResponseField name="docs" type="array">
+  Array of created document objects
+</ResponseField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+---
+
+## List Users
+
+Retrieve a paginated list of users with optional filters.
+
+<CodeGroup>
+```bash GET /users
+curl -X GET "https://api.sigsaho.com/api/users?page=1&limit=10&status=ACTIVE&search=juan" \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (min: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page (min: 1, max: 100)
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status: `ACTIVE`, `DISABLED`, or `ELIMINATED`
+</ParamField>
+
+<ParamField query="login_access" type="boolean">
+  Filter by login access (true/false)
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name, last name, username, or email
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of user objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  <Expandable title="Pagination info">
+    <ResponseField name="total" type="number">
+      Total number of users
+    </ResponseField>
+    <ResponseField name="page" type="number">
+      Current page
+    </ResponseField>
+    <ResponseField name="limit" type="number">
+      Results per page
+    </ResponseField>
+    <ResponseField name="totalPages" type="number">
+      Total number of pages
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR` or `DIRECTOR`
+
+---
+
+## Get User by ID
+
+Retrieve detailed information about a specific user.
+
+<CodeGroup>
+```bash GET /users/:id
+curl -X GET https://api.sigsaho.com/api/users/42 \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  User ID
+</ParamField>
+
+### Response
+
+<ResponseField name="user" type="object">
+  User object with full details including roles
+</ResponseField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR` or `DIRECTOR`
+
+---
+
+## Get Crew Members
+
+Retrieve active crew members grouped by role (MEDICO, PILOTO, ENFERMERO, TSUP).
+
+<CodeGroup>
+```bash GET /users/crew-members
+curl -X GET https://api.sigsaho.com/api/users/crew-members \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Response
+
+<ResponseField name="medicos" type="array">
+  Array of medical crew members
+</ResponseField>
+
+<ResponseField name="pilotos" type="array">
+  Array of pilot crew members
+</ResponseField>
+
+<ResponseField name="enfermeros" type="array">
+  Array of nurse crew members
+</ResponseField>
+
+<ResponseField name="tsup" type="array">
+  Array of TSUP crew members
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "medicos": [
+    {
+      "id": 15,
+      "name": "Carlos",
+      "last_name": "Hernández",
+      "status": "ACTIVE",
+      "roles": [{ "id": 8, "name": "MEDICO" }]
+    }
+  ],
+  "pilotos": [
+    {
+      "id": 3,
+      "name": "Juan",
+      "last_name": "García",
+      "status": "ACTIVE",
+      "roles": [{ "id": 9, "name": "PILOTO" }]
+    }
+  ],
+  "enfermeros": [],
+  "tsup": []
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required Permission:** Read access to Despacho module
+
+---
+
+## Get Staff Users
+
+Retrieve paginated list of staff users (type=STAFF) with their documents.
+
+<CodeGroup>
+```bash GET /users/staff
+curl -X GET "https://api.sigsaho.com/api/users/staff?page=1&limit=10" \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page (max: 100)
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name, last name, email, or position
+</ParamField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR` or `DIRECTOR`
+
+---
+
+## Get System Users
+
+Retrieve paginated list of system users (type=SYSTEM).
+
+<CodeGroup>
+```bash GET /users/system
+curl -X GET "https://api.sigsaho.com/api/users/system?page=1&limit=10&login_access=true" \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page
+</ParamField>
+
+<ParamField query="status" type="string">
+  Filter by status
+</ParamField>
+
+<ParamField query="login_access" type="boolean">
+  Filter by login access
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name, last name, username, or email
+</ParamField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR` or `DIRECTOR`
+
+---
+
+## Update User
+
+Update an existing user's information.
+
+<CodeGroup>
+```bash PUT /users/:id
+curl -X PUT https://api.sigsaho.com/api/users/42 \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{
+    "name": "Juan Carlos",
+    "email": "juancarlos.garcia@example.com",
+    "weight": 78
+  }'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  User ID
+</ParamField>
+
+### Request Body
+
+All fields are optional. Provide only the fields you want to update.
+
+<ParamField body="name" type="string">
+  First name
+</ParamField>
+
+<ParamField body="last_name" type="string">
+  Paternal last name
+</ParamField>
+
+<ParamField body="second_last_name" type="string">
+  Maternal last name
+</ParamField>
+
+<ParamField body="username" type="string">
+  Username
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address
+</ParamField>
+
+<ParamField body="phone" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="password" type="string">
+  New password (must meet security requirements)
+</ParamField>
+
+<ParamField body="weight" type="number">
+  Weight in kg
+</ParamField>
+
+<ParamField body="roles" type="array">
+  Array of role IDs
+</ParamField>
+
+<ParamField body="login_access" type="boolean">
+  Login access status
+</ParamField>
+
+<ParamField body="birth_date" type="string">
+  Date of birth
+</ParamField>
+
+<ParamField body="position" type="string">
+  Position/job title
+</ParamField>
+
+<ParamField body="license_number" type="string">
+  License number
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Updated user object
+</ResponseField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+**Note:** Cannot modify the admin user (ID 1)
+
+---
+
+## Toggle Login Access
+
+Toggle a user's login access status.
+
+<CodeGroup>
+```bash PATCH /users/:id/toggle-login-access
+curl -X PATCH https://api.sigsaho.com/api/users/42/toggle-login-access \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  User ID
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Updated user with toggled login_access
+</ResponseField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+---
+
+## Update User Status
+
+Change a user's status (ACTIVE/DISABLED).
+
+<CodeGroup>
+```bash PATCH /users/:id/status
+curl -X PATCH https://api.sigsaho.com/api/users/42/status \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{"status": "DISABLED"}'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  User ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="status" type="string" required>
+  New status: `ACTIVE` or `DISABLED`
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Updated user object
+</ResponseField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+---
+
+## Delete User
+
+Soft delete a user (sets status to ELIMINATED and populates deleted_at).
+
+<CodeGroup>
+```bash DELETE /users/:id
+curl -X DELETE https://api.sigsaho.com/api/users/42 \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  User ID
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Confirmation message
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success
+{
+  "message": "Usuario eliminado exitosamente"
+}
+```
+
+```json 403 Forbidden
+{
+  "error": "No se puede eliminar al único administrador del sistema"
+}
+```
+</ResponseExample>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+**Note:** Cannot delete the only remaining admin or the admin user (ID 1)
+
+---
+
+## Reset Password
+
+Reset a user's password to a new value or generate a temporary password.
+
+<CodeGroup>
+```bash POST /users/:id/reset-password
+curl -X POST https://api.sigsaho.com/api/users/42/reset-password \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{"password": "NewSecurePass123!"}'
+```
+
+```bash Generate Temporary Password
+curl -X POST https://api.sigsaho.com/api/users/42/reset-password \
+  -H "Content-Type: application/json" \
+  -b "cookies.txt" \
+  -d '{}'
+```
+</CodeGroup>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  User ID
+</ParamField>
+
+### Request Body
+
+<ParamField body="password" type="string">
+  New password (min 8 characters with complexity requirements). If omitted, a temporary password is generated.
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="temporaryPassword" type="string">
+  Generated temporary password (only present if password was not provided)
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  Updated user object
+</ResponseField>
+
+<ResponseExample>
+```json 200 Success (Generated Password)
+{
+  "message": "Contraseña restablecida exitosamente",
+  "temporaryPassword": "Abc123456@1x",
+  "user": {
+    "id": 42,
+    "name": "Juan",
+    "username": "jgarcia"
+  }
+}
+```
+
+```json 429 Rate Limit
+{
+  "error": "Demasiadas solicitudes - Rate limit crítico excedido (3/hora)"
+}
+```
+</ResponseExample>
+
+### Rate Limiting
+
+**Critical operation:** Limited to **3 requests per hour per IP**
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+**Note:** Cannot reset password for admin user (ID 1)
+
+---
+
+## Get Deleted Staff Users
+
+Retrieve history of soft-deleted staff users.
+
+<CodeGroup>
+```bash GET /users/staff/deleted
+curl -X GET "https://api.sigsaho.com/api/users/staff/deleted?page=1&limit=10" \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name, last name, email, or position
+</ParamField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+---
+
+## Get Deleted System Users
+
+Retrieve history of soft-deleted system users.
+
+<CodeGroup>
+```bash GET /users/system/deleted
+curl -X GET "https://api.sigsaho.com/api/users/system/deleted?page=1&limit=10" \
+  -b "cookies.txt"
+```
+</CodeGroup>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Results per page
+</ParamField>
+
+<ParamField query="search" type="string">
+  Search by name, last name, username, or email
+</ParamField>
+
+### Authorization
+
+**Required Role:** `ADMINISTRADOR`
+
+---
+
+## User Types
+
+### SYSTEM
+Users with login access to the system. Can have various roles and permissions.
+
+### STAFF
+General staff members without login access. Used for identification and document management.
+
+---
+
+## User Status Values
+
+- **ACTIVE**: User is active and operational
+- **DISABLED**: User is temporarily disabled
+- **ELIMINATED**: User has been soft-deleted
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 400  | Bad request - validation error |
+| 401  | Unauthorized - authentication required |
+| 403  | Forbidden - insufficient permissions |
+| 404  | User not found |
+| 409  | Conflict - duplicate email or username |
+| 429  | Rate limit exceeded |
+| 500  | Internal server error |

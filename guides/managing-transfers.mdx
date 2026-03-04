@@ -1,0 +1,586 @@
+---
+title: 'Managing Transfers'
+description: 'Complete guide to creating, tracking, and managing general and medical transfers in SIGSAHO'
+icon: 'plane-departure'
+---
+
+## Overview
+
+SIGSAHO provides comprehensive transfer management for both general and medical (aeromedical) operations. This guide covers the complete workflow for managing transfers in the system.
+
+## Transfer Types
+
+SIGSAHO supports multiple transfer types:
+
+<CardGroup cols={2}>
+  <Card title="Medical Transfers" icon="hospital">
+    Aeromedical transfers with patient information, diagnosis, and hospital details.
+  </Card>
+  
+  <Card title="Security Transfers" icon="shield">
+    Security-related operations and surveillance missions.
+  </Card>
+  
+  <Card title="Civil Defense" icon="tower-broadcast">
+    Emergency response and civil protection operations.
+  </Card>
+  
+  <Card title="Maintenance Transfers" icon="wrench">
+    Aircraft repositioning for maintenance purposes.
+  </Card>
+  
+  <Card title="Other Transfers" icon="plane">
+    General aviation operations not fitting other categories.
+  </Card>
+</CardGroup>
+
+## Creating a General Transfer
+
+<Steps>
+  <Step title="Access the Transfers Module">
+    Navigate to **Registro de Servicios** > **Traslados** from the main menu.
+  </Step>
+  
+  <Step title="Click Create New Transfer">
+    Click the **Nuevo Traslado** button to open the transfer creation form.
+  </Step>
+  
+  <Step title="Fill in Transfer Details">
+    Complete all required fields:
+    
+    **Basic Information:**
+    - **Date** (`date`): Transfer execution date
+    - **Time** (`time`): Departure time in HH:MM format
+    - **Transfer Type** (`type_transfer`): Select type (SECURITY, CIVIL_DEFENSE, MAINTENANCE, OTHER)
+    - **Requested By** (`request_by`): Person or entity requesting the transfer
+    
+    **Flight Details:**
+    - **Aircraft** (`aircraft_id`): Select the aircraft for this operation
+    - **Origin** (`origin_id`): Departure locality
+    - **Destination** (`destination_id`): Arrival locality
+    - **Route** (`transfer_route`): Detailed route description
+    - **Travel Time** (`travel_time_route`): Estimated flight duration
+    
+    **Additional Information:**
+    - **Description** (`description`): Operation details
+    - **Logbook Folio** (`logbook_folio`): Reference to aircraft logbook
+    - **Fuel** (`fuel`): Fuel consumed/required (in liters)
+    - **Extra Passengers** (`extra_passengers`): Non-crew passengers
+    - **Description Type** (`description_transfer_type`): Additional classification
+  </Step>
+  
+  <Step title="Assign Crew Members">
+    Select crew members from the available personnel list. You can assign multiple crew members including:
+    - Pilots
+    - Co-pilots
+    - Medical personnel (for medical transfers)
+    - Technical support staff
+  </Step>
+  
+  <Step title="Set Initial Status">
+    Choose the initial status for the transfer:
+    - **PROCESS**: Transfer is in progress or scheduled
+    - **FINISHED**: Transfer has been completed
+    - **CANCELED**: Transfer was canceled
+  </Step>
+  
+  <Step title="Save the Transfer">
+    Click **Guardar** to create the transfer. The system will automatically assign a unique transfer number based on the transfer type.
+  </Step>
+</Steps>
+
+<Tip>
+The system automatically generates sequential transfer numbers for each transfer type. For example, medical transfers get their own number sequence (e.g., MED-001, MED-002), separate from security transfers (SEC-001, SEC-002).
+</Tip>
+
+## Creating a Medical Transfer
+
+Medical transfers support a two-phase workflow for aeromedical operations:
+
+### Phase 1: Initial Registration
+
+<Steps>
+  <Step title="Start Medical Transfer">
+    Click **Nuevo Traslado Médico** from the transfers module.
+  </Step>
+  
+  <Step title="Enter Minimum Required Information">
+    For urgent medical transfers, you only need to provide:
+    
+    **Essential Fields:**
+    - **Date** (`date`): Transfer date
+    - **Requested By** (`request_by`): Requesting party
+    - **Transfer Type**: Automatically set to MEDICAL
+    - **Hospital Origin** (`hospital_origin`): Departing hospital
+    - **Hospital Destiny** (`hospital_destiny`): Destination hospital
+    - **Medical Transfer Type** (`medical_transfer_type`): Type of medical operation
+    - **Diagnosis Type** (`diagnosis_type`): Medical diagnosis category
+    - **Diagnosis Detail** (`diagnosis_detail`): Detailed diagnosis information
+  </Step>
+  
+  <Step title="Add Patient Information">
+    Add one or more patients to the transfer:
+    
+    ```typescript
+    // Patient fields
+    {
+      name: "Patient full name",
+      phone: "Contact phone",
+      family_member_name: "Emergency contact",
+      birthdate: "1990-01-01",
+      age: 34,
+      gender: "M" | "F" | "OTHER",
+      medical_record: "Hospital record number",
+      locality_id: 1  // Patient's locality
+    }
+    ```
+  </Step>
+  
+  <Step title="Save Initial Transfer">
+    Click **Guardar** to create the medical transfer. The transfer is created with minimal information, allowing you to complete flight details later.
+  </Step>
+</Steps>
+
+### Phase 2: Complete Flight Information
+
+<Steps>
+  <Step title="Open the Medical Transfer">
+    Find and open the medical transfer you created in Phase 1.
+  </Step>
+  
+  <Step title="Click Complete Transfer">
+    Click the **Completar Traslado** button to add flight details.
+  </Step>
+  
+  <Step title="Add Flight Information">
+    Complete the operational details:
+    - Time (`time`): Actual departure time
+    - Aircraft (`aircraft_id`): Aircraft used
+    - Origin/Destination localities
+    - Route, fuel, and crew information
+    - Logbook folio reference
+  </Step>
+  
+  <Step title="Update Patient Information (Optional)">
+    Modify patient details if needed using the `update_patients` array.
+  </Step>
+  
+  <Step title="Finalize Transfer">
+    Save the completed transfer. The transfer now has full flight details recorded.
+  </Step>
+</Steps>
+
+<Accordion title="Why use a two-phase workflow?">
+  Medical transfers often need to be registered immediately when a patient requires transport, but flight details (aircraft, exact route, fuel) may not be determined until later. The two-phase workflow allows:
+  
+  - Rapid registration of urgent medical cases
+  - Flexibility to assign aircraft and crew based on availability
+  - Accurate record-keeping of both medical and flight operations
+  - Compliance with medical transport documentation requirements
+</Accordion>
+
+## Managing Transfer Crew
+
+### Assigning Crew Members
+
+```typescript
+POST /transfers/:id/crew
+
+// Request body
+{
+  "user_ids": [1, 2, 3]  // Array of crew member user IDs
+}
+
+// Assigns multiple crew members at once
+```
+
+<Steps>
+  <Step title="Open Transfer Details">
+    Navigate to the transfer you want to modify.
+  </Step>
+  
+  <Step title="Click Manage Crew">
+    Click the **Gestionar Tripulación** button.
+  </Step>
+  
+  <Step title="Select Crew Members">
+    Choose crew members from the available personnel list. You can select multiple members.
+  </Step>
+  
+  <Step title="Save Changes">
+    Click **Guardar** to assign the selected crew members to the transfer.
+  </Step>
+</Steps>
+
+### Removing Crew Members
+
+To remove a crew member from a transfer:
+
+1. Open the transfer details
+2. Find the crew member in the crew list
+3. Click the **Remove** (❌) icon next to their name
+4. Confirm the removal
+
+```typescript
+DELETE /transfers/:id/crew/:userId
+
+// Removes a specific crew member from the transfer
+```
+
+## Updating Transfer Status
+
+Transfers can be in one of three statuses:
+
+<Tabs>
+  <Tab title="PROCESS">
+    **In Progress or Scheduled**
+    
+    The transfer is planned or currently being executed. Use this status for:
+    - Scheduled future transfers
+    - Transfers currently in flight
+    - Transfers awaiting completion
+  </Tab>
+  
+  <Tab title="FINISHED">
+    **Completed**
+    
+    The transfer has been successfully completed. Update to this status when:
+    - Aircraft has reached destination
+    - All crew has returned
+    - Documentation is complete
+  </Tab>
+  
+  <Tab title="CANCELED">
+    **Canceled**
+    
+    The transfer was canceled and did not occur. Use this status for:
+    - Weather cancellations
+    - Mechanical issues
+    - Request cancellations
+    - Any reason the transfer did not proceed
+  </Tab>
+</Tabs>
+
+### Updating Status via UI
+
+<Steps>
+  <Step title="Open Transfer">
+    Navigate to the transfer you want to update.
+  </Step>
+  
+  <Step title="Click Status Dropdown">
+    Click the current status badge to open the status menu.
+  </Step>
+  
+  <Step title="Select New Status">
+    Choose the appropriate status from the dropdown.
+  </Step>
+  
+  <Step title="Confirm Change">
+    The status is updated immediately. A confirmation message appears.
+  </Step>
+</Steps>
+
+### Updating Status via API
+
+```typescript
+PATCH /transfers/:id/status
+
+// Request body
+{
+  "status": "FINISHED"  // or "PROCESS", "CANCELED"
+}
+
+// Response
+{
+  "message": "Status del traslado actualizado exitosamente",
+  "transfer": { /* updated transfer object */ }
+}
+```
+
+## Editing Transfers
+
+<Warning>
+Be careful when editing transfers that have already been completed. Changes to flight information may affect reports and statistics. Always document the reason for any post-completion edits.
+</Warning>
+
+### Editable Fields
+
+You can update the following fields for existing transfers:
+
+**General Transfers:**
+- Date, time, description
+- Transfer number (manual override)
+- Logbook folio, requested by
+- Fuel, route, travel time
+- Extra passengers
+- Transfer type and description type
+- Aircraft, origin, destination
+
+**Medical Transfers:**
+- All general transfer fields
+- Hospital origin and destination
+- Medical transfer type
+- Diagnosis type and detail
+- Patient information
+
+### Update Process
+
+```typescript
+PUT /transfers/:id
+
+// Request body - include only fields to update
+{
+  "date": "2024-03-15",
+  "time": "14:30",
+  "fuel": 250,
+  "description": "Updated description"
+}
+
+// Response
+{
+  "message": "Traslado actualizado exitosamente",
+  "transfer": { /* updated transfer object */ }
+}
+```
+
+## Viewing and Filtering Transfers
+
+### Available Filters
+
+The transfers list supports multiple filters:
+
+```typescript
+GET /transfers?page=1&limit=10&status=PROCESS&type_transfer=MEDICAL
+
+// Query parameters:
+// - page: Page number (default: 1)
+// - limit: Results per page (default: 10)
+// - status: PROCESS | FINISHED | CANCELED
+// - type_transfer: MEDICAL | SECURITY | CIVIL_DEFENSE | MAINTENANCE | OTHER
+// - description_transfer_type: Additional classification
+// - aircraft_id: Filter by specific aircraft
+// - origin_id: Filter by origin locality
+// - destination_id: Filter by destination locality
+// - registered_by_id: Filter by registering user
+// - date_from: Start date (YYYY-MM-DD)
+// - date_to: End date (YYYY-MM-DD)
+// - search: Search in description, request_by, etc.
+```
+
+### Common Filter Scenarios
+
+<AccordionGroup>
+  <Accordion title="Active Transfers Today">
+    ```typescript
+    GET /transfers?status=PROCESS&date_from=2024-03-15&date_to=2024-03-15
+    ```
+  </Accordion>
+  
+  <Accordion title="Medical Transfers This Month">
+    ```typescript
+    GET /transfers?type_transfer=MEDICAL&date_from=2024-03-01&date_to=2024-03-31
+    ```
+  </Accordion>
+  
+  <Accordion title="Transfers by Aircraft">
+    ```typescript
+    GET /transfers?aircraft_id=5&date_from=2024-01-01
+    ```
+  </Accordion>
+  
+  <Accordion title="My Registered Transfers">
+    ```typescript
+    GET /transfers?registered_by_id=10
+    ```
+  </Accordion>
+  
+  <Accordion title="Search by Description">
+    ```typescript
+    GET /transfers?search=emergency&type_transfer=MEDICAL
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Managing Patients
+
+### Adding Patients to Medical Transfers
+
+```typescript
+POST /medical-transfers/:id/patients
+
+// Request body
+{
+  "patients": [
+    {
+      "name": "Juan Pérez",
+      "phone": "+52-123-456-7890",
+      "family_member_name": "María Pérez",
+      "birthdate": "1980-05-15",
+      "age": 44,
+      "gender": "M",
+      "medical_record": "MED-2024-001",
+      "locality_id": 10
+    }
+  ]
+}
+```
+
+### Updating Patient Information
+
+```typescript
+PUT /medical-transfers/:id/patients/:patientId
+
+// Request body - include only fields to update
+{
+  "name": "Juan Alberto Pérez",
+  "phone": "+52-123-456-7891"
+}
+```
+
+### Removing a Patient
+
+```typescript
+DELETE /medical-transfers/:id/patients/:patientId
+
+// Removes the patient from the transfer
+```
+
+<Warning>
+Removing a patient from a medical transfer permanently deletes their record from that transfer. This action cannot be undone. Only remove patients if they were added by mistake.
+</Warning>
+
+## Deleting Transfers
+
+SIGSAHO uses soft deletion for transfers, preserving data for audit purposes:
+
+```typescript
+DELETE /transfers/:id
+
+// Soft deletes the transfer (sets deleted_at timestamp)
+// Transfer is hidden from normal queries but remains in database
+```
+
+<Steps>
+  <Step title="Open Transfer Actions Menu">
+    Click the **⋮** (three dots) menu on the transfer row.
+  </Step>
+  
+  <Step title="Select Delete">
+    Click **Eliminar Traslado**.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Confirm that you want to delete the transfer. This action can be reversed by an administrator.
+  </Step>
+</Steps>
+
+<Tip>
+Soft-deleted transfers can be restored by system administrators if needed. Contact your administrator if you need to recover a deleted transfer.
+</Tip>
+
+## Time Format Handling
+
+SIGSAHO handles time in two formats:
+
+### Input Format
+When creating or updating transfers, provide time as a string:
+```typescript
+"time": "14:30"  // HH:MM format
+```
+
+### Storage Format
+Internally, time is stored as minutes since midnight:
+```typescript
+// "14:30" is stored as 870 minutes (14*60 + 30)
+```
+
+### Display Format
+The API returns both formats for convenience:
+```typescript
+{
+  "time": 870,
+  "time_formatted": "14:30"
+}
+```
+
+## Transfer Numbering
+
+Transfer numbers are automatically assigned using a type-specific sequence:
+
+- Medical transfers: Sequential within medical type
+- Security transfers: Sequential within security type
+- Each transfer type maintains its own counter
+
+**Example:**
+```typescript
+// Medical transfers
+Transfer #1 (MEDICAL) -> number_transfer: 1
+Transfer #2 (MEDICAL) -> number_transfer: 2
+
+// Security transfers
+Transfer #1 (SECURITY) -> number_transfer: 1
+Transfer #2 (SECURITY) -> number_transfer: 2
+```
+
+<Accordion title="How numbering prevents race conditions">
+  The system uses pessimistic locking during number assignment:
+  
+  ```typescript
+  // Locks the highest numbered transfer of this type
+  // Prevents concurrent requests from getting the same number
+  const lastTransfer = await manager
+    .createQueryBuilder(Transfers, 'transfer')
+    .where('transfer.type_transfer = :typeTransfer')
+    .orderBy('transfer.number_transfer', 'DESC')
+    .setLock('pessimistic_write')  // Database-level lock
+    .getOne();
+  
+  return (lastTransfer?.number_transfer || 0) + 1;
+  ```
+  
+  This ensures sequential numbering even with simultaneous transfer creation.
+</Accordion>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Cannot create transfer - validation error">
+    **Cause:** Missing required fields.
+    
+    **Solution:** Ensure all required fields are provided:
+    - For general transfers: All fields are required
+    - For medical transfers (Phase 1): Only date, request_by, hospital info, and patient data are required
+  </Accordion>
+  
+  <Accordion title="Aircraft not found">
+    **Cause:** Selected aircraft doesn't exist or was deleted.
+    
+    **Solution:** Refresh the aircraft list and select a valid aircraft. Contact your administrator if the aircraft should be available.
+  </Accordion>
+  
+  <Accordion title="Crew member assignment fails">
+    **Cause:** One or more selected users don't exist or don't have crew roles.
+    
+    **Solution:** Verify that the crew members have active accounts and appropriate roles (PILOTO, MEDICO, etc.).
+  </Accordion>
+  
+  <Accordion title="Transfer not appearing in list">
+    **Cause:** Filters are hiding the transfer, or it was soft-deleted.
+    
+    **Solution:** Clear all filters and check the date range. If still not visible, the transfer may have been deleted.
+  </Accordion>
+  
+  <Accordion title="Cannot complete medical transfer">
+    **Cause:** Transfer doesn't exist or is not a medical transfer.
+    
+    **Solution:** Verify you're editing the correct transfer ID and that it has type MEDICAL.
+  </Accordion>
+</AccordionGroup>
+
+## Related Resources
+
+- [Reports and Statistics](/guides/reports-statistics)
+- [Aircraft Management](/guides/aircraft-maintenance)
+- [Medical Transfers Feature](/features/medical-transfers)
+- [API Reference: Medical Transfers](/api/medical-transfers)

@@ -1,0 +1,673 @@
+---
+title: Flight Operations
+description: Comprehensive flight logging, weight & balance management, and operational transfer tracking for all flight activities
+icon: 'plane-departure'
+---
+
+## Overview
+
+The Flight Operations module manages all flight activities in SIGSAHO, from general transfers to weight & balance calculations. It provides complete operational logging, crew coordination, and regulatory compliance for all flight types.
+
+<Note>
+  Flight operations automatically integrate with aircraft management, updating flight hours, maintenance schedules, and crew duty time tracking.
+</Note>
+
+## Types of Flight Operations
+
+SIGSAHO handles multiple categories of flight operations:
+
+<CardGroup cols={2}>
+  <Card title="Medical Transfers" icon="ambulance">
+    Aeromedical patient transport with full medical record integration. See [Medical Transfers](/features/medical-transfers) for details.
+  </Card>
+  
+  <Card title="General Transfers" icon="route">
+    Non-medical operational flights including:
+    - Personnel transport
+    - Cargo/freight
+    - Administrative missions
+    - Training flights
+    - Positioning flights
+  </Card>
+  
+  <Card title="Support Operations" icon="hands-helping">
+    Specialized government support:
+    - Search and rescue
+    - Disaster response
+    - Law enforcement support
+    - Emergency evacuations
+    - Humanitarian missions
+  </Card>
+  
+  <Card title="Training Operations" icon="graduation-cap">
+    Flight training activities:
+    - Pilot proficiency training
+    - Crew resource management
+    - Emergency procedures
+    - Checkrides and evaluations
+  </Card>
+</CardGroup>
+
+## User Workflows
+
+### Creating a General Transfer
+
+<Steps>
+  <Step title="Access Transfer Registration">
+    Navigate to **Registro de Servicios > Traslados Generales** from the main menu.
+  </Step>
+  
+  <Step title="Initiate New Transfer">
+    Click **"Nuevo Traslado"** to open the transfer creation form.
+  </Step>
+  
+  <Step title="Select Transfer Type">
+    Choose the transfer classification:
+    
+    **Transfer Types:**
+    - General (personnel/cargo transport)
+    - Support (government assistance)
+    - Training (flight instruction)
+    - Positioning (ferry flight)
+    
+    **Description Type:**
+    - Official mission
+    - Training exercise
+    - Humanitarian aid
+    - Emergency response
+  </Step>
+  
+  <Step title="Enter Flight Details">
+    Complete operational information:
+    
+    **Date and Time**
+    - Flight date and time
+    - Flight duration (minutes)
+    
+    **Locations**
+    - Origin locality/airport
+    - Destination locality/airport
+    - Route description
+    - Travel time on route
+    
+    **Aircraft and Crew**
+    - Aircraft assignment (from active fleet)
+    - Crew member selection (pilots, flight crew)
+    
+    **Operational Data**
+    - Requesting authority ("Solicitado por")
+    - Logbook folio number
+    - Fuel consumption (liters/gallons)
+    - Additional passengers (if any)
+  </Step>
+  
+  <Step title="Add Description and Notes">
+    Enter mission description:
+    - Purpose of flight
+    - Cargo/passenger details
+    - Special instructions
+    - Operational notes
+  </Step>
+  
+  <Step title="Assign Crew Members">
+    Select crew for the mission:
+    - Pilot in command
+    - First officer (if applicable)
+    - Flight crew/attendants
+    - Observers/passengers
+  </Step>
+  
+  <Step title="Save and Complete">
+    Choose completion status:
+    - **In Process**: Flight planned but not completed
+    - **Finished**: Flight completed, log immediately
+    - **Canceled**: Flight canceled before execution
+  </Step>
+</Steps>
+
+### Weight & Balance Operations
+
+Weight and Balance (W&B) calculations are critical for flight safety:
+
+<Steps>
+  <Step title="Access W&B Management">
+    Navigate to **Control Aéreo > Peso y Balance** to view all W&B records.
+  </Step>
+  
+  <Step title="Create New W&B Sheet">
+    Click **"Nueva Hoja de Carga"** and select the aircraft from the dropdown menu. Each aircraft requires its own W&B calculation.
+  </Step>
+  
+  <Step title="Pre-Flight Information Auto-Fills">
+    The system automatically populates:
+    
+    **Aircraft Empty Weight Data** (from aircraft specifications):
+    - Operating empty weight
+    - Empty CG (center of gravity)
+    - Empty moment
+    
+    **Flight Information**:
+    - Date of calculation
+    - Pilot in command selection
+    - First officer selection (optional)
+  </Step>
+  
+  <Step title="Add Load Details">
+    Enter all load items in the detail rows:
+    
+    **Fuel**:
+    - Fuel weight (gallons × fuel density)
+    - Fuel arm (distance from datum)
+    - Calculates fuel moment automatically
+    
+    **Crew**:
+    - Pilot weight and station
+    - Copilot weight and station
+    - Crew member weights and stations
+    
+    **Passengers**:
+    - Each passenger weight
+    - Assigned station/seat position
+    - Station arm from aircraft specifications
+    
+    **Cargo/Baggage**:
+    - Cargo weight
+    - Cargo compartment location
+    - Compartment arm
+  </Step>
+  
+  <Step title="Review Calculated Totals">
+    System automatically computes:
+    
+    **Operating with Fuel (Subtotals)**:
+    - Total weight with fuel
+    - CG with fuel loaded
+    - MAC percentage (Mean Aerodynamic Chord)
+    
+    **Takeoff Totals**:
+    - Total takeoff weight
+    - Takeoff CG
+    - Takeoff moment
+    - Takeoff MAC percentage
+    
+    **Landing Totals**:
+    - Landing weight (after fuel burn)
+    - Landing CG
+    - Landing moment
+    - Landing MAC percentage
+  </Step>
+  
+  <Step title="Validate Weight & Balance">
+    System performs automatic validation:
+    
+    ✓ **Weight Checks**:
+    - Takeoff weight ≤ Maximum takeoff weight
+    - Landing weight ≤ Maximum landing weight
+    - No single station exceeds limit
+    
+    ✓ **CG Checks**:
+    - Takeoff CG within aircraft envelope
+    - Landing CG within aircraft envelope
+    - CG shift acceptable throughout flight
+    
+    **Visual Indicators**:
+    - Green checkmark: All limits satisfied
+    - Red warning: Limit exceeded, unsafe for flight
+  </Step>
+  
+  <Step title="Save and Print">
+    Once validated:
+    - Save W&B record to database
+    - Generate printable W&B sheet (PDF)
+    - Link to associated flight transfer
+    - File with flight documentation
+  </Step>
+</Steps>
+
+### Managing Transfer Status
+
+Transfers progress through operational stages:
+
+<CardGroup cols={3}>
+  <Card title="In Process" icon="clock">
+    **Flight Planned or In Progress**
+    
+    - Transfer created but not finalized
+    - Flight may be scheduled or actively in progress
+    - Can still edit details
+    - Does not count toward completed flight hours yet
+  </Card>
+  
+  <Card title="Finished" icon="check-circle">
+    **Flight Completed Successfully**
+    
+    - All flight details finalized
+    - Aircraft hours automatically updated
+    - Crew duty time logged
+    - Fuel consumption recorded
+    - Counts in operational statistics
+  </Card>
+  
+  <Card title="Canceled" icon="x-circle">
+    **Flight Canceled**
+    
+    - Transfer canceled due to weather, maintenance, or operational reasons
+    - No hours logged to aircraft
+    - Preserved for operational records
+    - Can include cancellation reason in notes
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Automatic Aircraft Hour Logging
+
+<Card title="Seamless Flight Hour Tracking" icon="clock">
+  **Integration with Aircraft Management**
+  
+  When a transfer is marked **"Finished"**:
+  
+  1. System extracts flight time (in minutes)
+  2. Converts to decimal hours
+  3. Adds to aircraft's `current_time_flying`
+  4. Recalculates `available_time` (hours until maintenance)
+  5. Updates `maintenance_due_percentage`
+  6. Triggers maintenance alerts if thresholds exceeded
+  
+  **Example:**
+  - Transfer duration: 75 minutes
+  - Converted to: 1.25 hours
+  - Aircraft current hours: 245.50 hrs → 246.75 hrs
+  - Available hours: 53.25 hrs → 52.00 hrs
+  - Maintenance due: 82.2% → 83.0%
+  
+  All updates are **automatic and real-time** - no manual calculations needed.
+</Card>
+
+### Crew Assignment and Validation
+
+<Card title="Crew Management" icon="users">
+  **Role-Based Crew Selection**
+  
+  SIGSAHO validates crew assignments:
+  
+  **Crew Roles Available:**
+  - Pilot in Command (required)
+  - First Officer / Copilot (optional)
+  - Flight Crew (medical personnel, attendants)
+  - Passengers (non-crew)
+  
+  **Validation Checks:**
+  - User must have appropriate role (Pilot, Medical Personnel)
+  - User must have `status = ACTIVE`
+  - User certifications must be current
+  - Duty time limits not exceeded
+  
+  **Crew Tracking:**
+  - Each crew member linked via `crew_members_transfer` table
+  - Tracks crew member's role on specific flight
+  - Logs crew duty hours for regulatory compliance
+  - Supports multiple crew members per transfer
+</Card>
+
+### Geographic Locality Management
+
+<Card title="Origin and Destination Tracking" icon="map-marked-alt">
+  **Hierarchical Geographic Structure**
+  
+  Flight locations use a structured geography system:
+  
+  **Hierarchy:**
+  - **State** (Estado)
+  - **Region** (Región)
+  - **Municipality** (Municipio)
+  - **Locality** (Localidad) - used for transfers
+  
+  **Locality Details:**
+  - Locality name
+  - Municipality and region
+  - Coordinates (lat/long)
+  - Elevation
+  - Airport/heliport code (if applicable)
+  
+  **Usage in Transfers:**
+  - Origin locality dropdown (searchable)
+  - Destination locality dropdown (searchable)
+  - Route automatically calculated from origin → destination
+  - Distance and estimated time computed
+</Card>
+
+### Search and Filtering
+
+The transfers table provides comprehensive filtering:
+
+<CardGroup cols={2}>
+  <Card title="By Status" icon="filter">
+    - In Process
+    - Finished
+    - Canceled
+  </Card>
+  
+  <Card title="By Classification" icon="tags">
+    - Transfer type
+    - Description type
+    - Aircraft used
+    - Date range
+  </Card>
+</CardGroup>
+
+**Search Capabilities:**
+- Search by requestor ("Solicitado por")
+- Search by logbook folio
+- Search by origin or destination
+- Search by crew member name
+
+### Data Export and Reporting
+
+<Card title="Excel Export" icon="download">
+  **Generate Flight Operation Reports**
+  
+  Export comprehensive flight logs:
+  - Filter by date range
+  - Filter by transfer type or aircraft
+  - Include all flight details (hours, fuel, crew)
+  - Export to Excel format for analysis
+  
+  **Report Contents:**
+  - Transfer number and date
+  - Aircraft and registration
+  - Origin and destination
+  - Flight duration (formatted as HH:MM)
+  - Crew roster
+  - Fuel consumption
+  - Status
+  
+  Perfect for:
+  - Regulatory submissions
+  - Operational analysis
+  - Billing/cost allocation
+  - Flight hour summaries
+</Card>
+
+## Weight & Balance Calculations
+
+### Understanding W&B Components
+
+<Accordion title="Weight Terminology">
+  **Operating Empty Weight (OEW)**
+  - Aircraft structure
+  - Engines and fixed equipment
+  - Unusable fuel
+  - Hydraulic fluids and oil
+  - Emergency equipment
+  
+  **Takeoff Weight**
+  - OEW + Fuel + Crew + Passengers + Cargo
+  
+  **Landing Weight**
+  - Takeoff Weight - Fuel Burned
+</Accordion>
+
+<Accordion title="Center of Gravity (CG)">
+  **What is CG?**
+  - The point where aircraft balances
+  - Measured in inches from reference datum
+  - Changes as fuel burns and weight shifts
+  
+  **Why CG Matters:**
+  - Forward CG: Heavy elevator forces, reduced range
+  - Aft CG: Unstable, potential loss of control
+  - Must remain within envelope throughout flight
+  
+  **CG Calculation:**
+  ```
+  CG = Total Moment / Total Weight
+  ```
+</Accordion>
+
+<Accordion title="Moment">
+  **Definition:**
+  - Weight × Arm (distance from datum)
+  - Measured in pound-inches (lb-in)
+  
+  **Purpose:**
+  - Represents rotational force around datum
+  - Used to calculate CG position
+  
+  **Example:**
+  - Passenger weight: 180 lbs
+  - Seat arm: 120 inches
+  - Moment: 180 × 120 = 21,600 lb-in
+</Accordion>
+
+<Accordion title="Mean Aerodynamic Chord (MAC)">
+  **What is MAC?**
+  - Reference chord of the wing
+  - Represents average wing width
+  - Used to express CG as percentage
+  
+  **MAC Percentage:**
+  - CG expressed as % MAC
+  - Easier to compare across aircraft types
+  - Standard format for CG limits
+  
+  **Example:**
+  - CG at 25% MAC: CG is at 25% of wing chord
+  - Typical limits: 15% - 35% MAC
+</Accordion>
+
+## Interface Components
+
+### General Transfers Table
+
+**Screenshot Description:**
+The main transfers table displays:
+- Transfer number and date
+- Transfer type and description type badges
+- Origin → Destination route
+- Flight duration (formatted as "2h 15m")
+- Aircraft registration
+- Status indicator
+- Requesting authority
+- Action menu (View, Edit, Complete, Cancel)
+
+**Features:**
+- Server-side pagination (10/25/50/100 per page)
+- Sortable columns (date, duration, status)
+- Faceted filters (status, type, aircraft, date range)
+- Search by requestor or logbook folio
+
+### Transfer Detail View
+
+**Screenshot Description:**
+Comprehensive transfer detail page:
+
+1. **Transfer Header**
+   - Transfer ID and status badge
+   - Date, time, and duration
+   - Requesting authority
+
+2. **Route Information Card**
+   - Origin locality with municipality
+   - Destination locality with municipality
+   - Route description
+   - Travel time
+
+3. **Aircraft Card**
+   - Aircraft name and registration
+   - Aircraft image thumbnail
+   - Link to aircraft dispatch page
+
+4. **Flight Details Card**
+   - Logbook folio number
+   - Fuel consumption
+   - Additional passengers count
+   - Description/notes
+
+5. **Crew Roster**
+   - Table of assigned crew members
+   - Crew member names and roles
+   - Add/remove crew actions
+
+### Weight & Balance Form
+
+**Screenshot Description:**
+Interactive W&B calculation form:
+
+1. **Header Section**
+   - Aircraft selection dropdown
+   - Flight date picker
+   - Pilot selection dropdowns
+
+2. **Pre-Filled Aircraft Data (Read-Only)**
+   - Operating empty weight
+   - Empty CG
+   - Empty moment
+
+3. **Load Details Table**
+   - Dynamic rows for fuel, crew, passengers, cargo
+   - Columns: Description, Weight, Arm, Moment
+   - Add/remove row buttons
+   - Real-time moment calculation
+
+4. **Subtotals Section (Auto-Calculated)**
+   - Operating weight with fuel
+   - CG with fuel
+   - Fuel moment
+   - MAC percentage
+
+5. **Takeoff Totals (Auto-Calculated)**
+   - Total takeoff weight
+   - Takeoff CG (with limit indicators)
+   - Takeoff moment
+   - Takeoff MAC (with safe range visualization)
+
+6. **Landing Totals (Auto-Calculated)**
+   - Landing weight (after fuel burn)
+   - Landing CG
+   - Landing moment
+   - Landing MAC
+
+7. **Validation Indicators**
+   - Green checkmarks: Within limits
+   - Red warnings: Exceeds limits with explanation
+
+## Permissions and Access Control
+
+| Role | View Transfers | Create | Edit | Complete | Delete | W&B |
+|------|----------------|--------|------|----------|--------|-----|
+| Pilot | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ |
+| Flight Dispatcher | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ |
+| Medical Coordinator | ✓ | ✓* | ✓* | ✓* | ✗ | ✗ |
+| Administrator | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Viewer | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+
+*Medical coordinators can only manage medical transfers.
+
+## Integration with Other Modules
+
+<CardGroup cols={2}>
+  <Card title="Aircraft Management" icon="plane">
+    Transfers automatically:
+    - Update aircraft flight hours
+    - Increment engine cycles
+    - Log fuel consumption
+    - Trigger maintenance alerts
+  </Card>
+  
+  <Card title="User Management" icon="user">
+    Crew assignments:
+    - Validate active status
+    - Check certifications
+    - Track duty hours
+    - Log crew flight time
+  </Card>
+  
+  <Card title="Dashboard Analytics" icon="chart-bar">
+    Transfer statistics:
+    - Total flights by type
+    - Flight hours by aircraft
+    - Top pilots by hours
+    - Utilization trends
+  </Card>
+  
+  <Card title="Medical Transfers" icon="ambulance">
+    Shared transfer base:
+    - Common data model
+    - Unified status tracking
+    - Consistent crew management
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<Accordion title="Accurate Flight Time Logging">
+  - Record **actual** flight time, not scheduled time
+  - Use Hobbs meter or tach time from aircraft
+  - Include only block-to-block time (engine start to shutdown)
+  - Do not include ground taxi time separately
+</Accordion>
+
+<Accordion title="Weight & Balance Safety">
+  - **Always** calculate W&B before flight
+  - Verify passenger weights (use actual, not estimates)
+  - Account for all cargo and baggage
+  - Recalculate if passenger/cargo changes
+  - Do not exceed any weight or CG limit - ever
+</Accordion>
+
+<Accordion title="Crew Assignment Accuracy">
+  - Assign actual crew who flew the mission
+  - Verify pilot certifications are current
+  - Check duty time limits before scheduling
+  - Log crew changes if substitutions occur
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="W&B Shows Weight Limit Exceeded">
+  **Cause:** Total weight exceeds maximum takeoff or landing weight
+  
+  **Solution:**
+  1. Reduce fuel load (calculate minimum required + reserve)
+  2. Reduce passenger count
+  3. Reduce cargo weight
+  4. Use a larger aircraft if available
+</Accordion>
+
+<Accordion title="W&B Shows CG Out of Limits">
+  **Cause:** Center of gravity outside safe envelope
+  
+  **Solution:**
+  1. Redistribute passengers to different seats
+  2. Move cargo to different compartments
+  3. Adjust fuel load (check if fuel affects CG)
+  4. Recalculate with actual passenger weights
+</Accordion>
+
+<Accordion title="Cannot Mark Transfer as Finished">
+  **Cause:** Missing required fields or invalid data
+  
+  **Solution:**
+  1. Verify aircraft is assigned
+  2. Ensure at least one crew member assigned
+  3. Check flight duration is > 0
+  4. Verify origin and destination are selected
+</Accordion>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Medical Transfers" href="/features/medical-transfers">
+    Specialized aeromedical operations
+  </Card>
+  <Card title="Aircraft Management" href="/features/aircraft-management">
+    Fleet management and maintenance tracking
+  </Card>
+  <Card title="Dashboard Analytics" href="/features/dashboard-analytics">
+    Flight operations statistics and trends
+  </Card>
+  <Card title="User Management" href="/features/user-management">
+    Crew member configuration and roles
+  </Card>
+</CardGroup>

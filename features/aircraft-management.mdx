@@ -1,0 +1,514 @@
+---
+title: Aircraft Management
+description: Comprehensive fleet management with maintenance tracking, flight hour monitoring, and technical specifications
+icon: 'plane'
+---
+
+## Overview
+
+The Aircraft Management module provides complete lifecycle management for your aviation fleet. Track technical specifications, monitor flight hours, schedule maintenance, and maintain regulatory compliance for all aircraft in your organization.
+
+<Note>
+  All aircraft data integrates seamlessly with flight operations, automatically updating flight hours, cycles, and maintenance schedules.
+</Note>
+
+## User Workflows
+
+### Registering a New Aircraft
+
+<Steps>
+  <Step title="Access Aircraft Configuration">
+    Navigate to **Configuración > Aeronaves** from the main menu. The system displays your current fleet with status indicators and maintenance alerts.
+  </Step>
+  
+  <Step title="Create Aircraft Record">
+    Click **"Nueva Aeronave"** to open the aircraft registration form.
+  </Step>
+  
+  <Step title="Enter Basic Information">
+    Complete the aircraft identification:
+    
+    **Identification**
+    - Aircraft name (e.g., "BELL 407")
+    - Registration/Tail number (e.g., "XC-XAO")
+    - Description
+    - Aircraft category (Rotary Wing / Fixed Wing)
+    
+    **Manufacturer Details**
+    - Manufacturer name
+    - Model designation
+    - Number of engines (1 or 2)
+  </Step>
+  
+  <Step title="Configure Technical Specifications">
+    Enter weight and balance parameters:
+    
+    **Empty Weight Configuration**
+    - Weight empty (lbs)
+    - Center of gravity empty (inches)
+    - Moment empty (lb-in)
+    - Maximum passengers capacity
+    
+    **Engine Limits**
+    - Time limit motor 1 (hours)
+    - Time limit motor 2 (hours, if applicable)
+    - Cycle limit motor 1
+    - Cycle limit motor 2 (if applicable)
+  </Step>
+  
+  <Step title="Set Maintenance Parameters">
+    Configure maintenance tracking:
+    
+    **Current Status**
+    - Current flight hours accumulated
+    - Current cycles accumulated
+    - Date of last major maintenance
+    
+    **Lifetime Limits**
+    - Total lifetime hours (hours before next major maintenance)
+    - Hours accumulated before last maintenance
+    - Total lifetime cycles
+  </Step>
+  
+  <Step title="Upload Aircraft Image">
+    Upload a photo of the aircraft:
+    - Supported formats: JPEG, PNG
+    - Recommended size: 1920x1080px
+    - Images are automatically compressed for optimal performance
+  </Step>
+  
+  <Step title="Set Initial Status">
+    Select the aircraft's operational status:
+    - **Active**: Available for flight operations
+    - **Maintenance**: Undergoing scheduled or unscheduled maintenance
+    - **Out of Service**: Temporarily unavailable
+  </Step>
+</Steps>
+
+### Managing Aircraft Status
+
+Aircraft progress through various operational states:
+
+<CardGroup cols={4}>
+  <Card title="Active" icon="check-circle">
+    Aircraft is airworthy and available for assignments. Can be selected for flights and weight & balance calculations.
+  </Card>
+  <Card title="Maintenance" icon="wrench">
+    Aircraft is undergoing scheduled or unscheduled maintenance. Not available for flight operations.
+  </Card>
+  <Card title="Out of Service" icon="ban">
+    Temporarily unavailable due to regulatory, administrative, or operational reasons.
+  </Card>
+  <Card title="Eliminated" icon="trash">
+    Aircraft removed from active fleet. Soft-deleted for audit purposes.
+  </Card>
+</CardGroup>
+
+### Aircraft Dispatch Workflow
+
+The dispatch page provides real-time operational data for each aircraft:
+
+<Steps>
+  <Step title="Access Aircraft Dispatch">
+    Navigate to **Despacho > [Aircraft Name]** to view the aircraft-specific dispatch dashboard.
+  </Step>
+  
+  <Step title="Review Flight Status">
+    The dashboard displays three critical metrics:
+    
+    **Available Hours**
+    - Hours remaining until next scheduled maintenance
+    - Color-coded urgency indicator
+    - Formatted as hours and minutes
+    
+    **Current Accumulated Hours**
+    - Total flight time logged
+    - Includes historical hours from previous maintenance cycles
+    
+    **Next Inspection Due**
+    - Total lifetime hours limit
+    - Percentage of hours consumed
+    - Color-coded alert level:
+      - 🟢 **Green (0-49%)**: Within safe operating range
+      - 🟡 **Amber (50-79%)**: Schedule maintenance soon
+      - 🔴 **Red (80-100%)**: Critical - maintenance required
+  </Step>
+  
+  <Step title="View Recent Flight Records">
+    Access the flight history table showing:
+    - Recent transfers and operations
+    - Flight hours logged per mission
+    - Fuel consumption records
+    - Crew assignments
+  </Step>
+  
+  <Step title="Perform Dispatch Actions">
+    From the dispatch page, you can:
+    - Create new weight & balance calculation
+    - View aircraft documents
+    - Access maintenance records
+    - Register new service/inspection
+  </Step>
+</Steps>
+
+## Key Features
+
+### Automatic Maintenance Tracking
+
+<Card title="Real-Time Flight Hour Tracking" icon="clock">
+  **Automatic Hour Accumulation**
+  
+  Every time a flight operation is logged:
+  
+  1. Flight duration is automatically added to `current_time_flying`
+  2. System recalculates `available_time` (hours until maintenance)
+  3. Maintenance due percentage is updated
+  4. Dashboard alerts are triggered if thresholds exceeded
+  
+  **Virtual Getters:**
+  - `available_time = total_lifetime_hours - current_time_flying`
+  - `maintenance_due_percentage = (hours_used / total_interval) × 100`
+  
+  No manual intervention required - the system maintains accuracy automatically.
+</Card>
+
+### Multi-Engine Support
+
+<Card title="Independent Engine Tracking" icon="cog">
+  **Dual Engine Configuration**
+  
+  For multi-engine aircraft, SIGSAHO tracks each engine independently:
+  
+  - **Motor 1**: Primary engine time and cycle limits
+  - **Motor 2**: Secondary engine time and cycle limits (optional)
+  
+  Each engine has:
+  - Time limit (hours)
+  - Cycle limit (number of start/stop cycles)
+  - Independent maintenance schedules
+  
+  System alerts when either engine approaches limits.
+</Card>
+
+### Weight and Balance Integration
+
+<Card title="Technical Specifications for W&B" icon="balance-scale">
+  **Pre-Configured Parameters**
+  
+  Aircraft weight and balance data is used for:
+  
+  - Automatic empty weight calculation
+  - Center of gravity (CG) validation
+  - Maximum takeoff weight enforcement
+  - Passenger capacity limits
+  
+  When creating a new weight & balance sheet, the system:
+  1. Pre-fills aircraft empty weight, CG, and moment
+  2. Validates total weight against aircraft limits
+  3. Ensures CG remains within safe envelope
+  4. Prevents unsafe loading configurations
+</Card>
+
+### Fleet-Wide Search and Filtering
+
+The aircraft management table provides comprehensive filtering:
+
+<CardGroup cols={2}>
+  <Card title="By Status" icon="filter">
+    - Active
+    - Maintenance
+    - Out of Service
+    - Eliminated (audit trail)
+  </Card>
+  <Card title="By Search" icon="search">
+    - Search by aircraft name
+    - Search by registration
+    - Search by manufacturer
+    - Search by model
+  </Card>
+</CardGroup>
+
+### Aircraft Documents and Records
+
+<Card title="Document Management" icon="folder">
+  **Centralized Aircraft Documentation**
+  
+  Each aircraft maintains a complete document repository:
+  
+  **Registration Documents:**
+  - Certificate of Registration
+  - Airworthiness Certificate
+  - Insurance policies
+  
+  **Maintenance Records:**
+  - Inspection reports
+  - Service bulletins
+  - Maintenance logs
+  - Parts replacement history
+  
+  **Operational Manuals:**
+  - Flight manual
+  - Weight & balance data sheets
+  - Performance charts
+  
+  Documents are linked to the aircraft record and accessible from the dispatch dashboard.
+</Card>
+
+## Interface Components
+
+### Aircraft Fleet Table
+
+**Screenshot Description:**
+The main fleet table displays:
+- Aircraft name and registration (with thumbnail image)
+- Category (Rotary/Fixed wing) badge
+- Manufacturer and model
+- Current status indicator
+- Available flight hours
+- Maintenance due percentage (color-coded)
+- Action menu (View, Edit, Dispatch, Delete)
+
+**Quick Actions:**
+- Click aircraft name to open dispatch dashboard
+- Click status badge to change operational status
+- Click action menu for edit/delete options
+
+### Aircraft Dispatch Dashboard
+
+**Screenshot Description:**
+Dispatch page layout:
+
+1. **Header Section**
+   - Aircraft name and registration
+   - Quick action buttons (New W&B, Documents, Maintenance)
+
+2. **Aircraft Image Panel**
+   - Large aircraft photo
+   - Displays uploaded image or placeholder
+
+3. **Quick Stats Cards (3-column grid)**
+   - Available Hours (green check icon)
+   - Current Accumulated Hours (blue clock icon)
+   - Next Inspection (amber clock icon with percentage badge)
+
+4. **Flight Records Table**
+   - Recent transfers and operations
+   - Sortable columns
+   - Pagination controls
+
+### Aircraft Edit Form
+
+**Screenshot Description:**
+Comprehensive form organized in tabs:
+
+1. **Basic Information Tab**
+   - Name, registration, description
+   - Category and engine count
+   - Manufacturer and model
+
+2. **Specifications Tab**
+   - Weight and balance parameters
+   - Engine limits (time and cycles)
+   - Passenger capacity
+
+3. **Maintenance Tab**
+   - Current hours and cycles
+   - Last maintenance date
+   - Lifetime limits configuration
+
+4. **Image Tab**
+   - Image upload/replace
+   - Preview current image
+   - Drag-and-drop support
+
+## Maintenance History Tracking
+
+### Service Records
+
+<Card title="Aircraft Services" icon="clipboard-check">
+  **Scheduled and Unscheduled Maintenance**
+  
+  SIGSAHO tracks all maintenance activities:
+  
+  **Service Types:**
+  - 50-hour inspection
+  - 100-hour inspection
+  - Annual inspection
+  - Progressive inspection
+  - Unscheduled repairs
+  - Parts replacement
+  
+  **Service Record Details:**
+  - Service date and duration
+  - Hours/cycles at time of service
+  - Parts replaced
+  - Technician/mechanic assigned
+  - Service notes and findings
+  - Next due date calculation
+  
+  Services are automatically linked to the aircraft and displayed in the maintenance history.
+</Card>
+
+### Parts Tracking
+
+<Card title="Component Lifecycle" icon="cog">
+  **Aircraft Parts Management**
+  
+  Track critical components and parts:
+  
+  - **Serial-numbered parts**: Track individual component hours
+  - **Life-limited parts**: Monitor time remaining
+  - **Replacement schedule**: Automatic alerts for due parts
+  - **Parts inventory**: Link to available replacement parts
+  
+  Each part record includes:
+  - Part number and serial number
+  - Manufacturer and description
+  - Installation date and hours
+  - Time/cycle limits
+  - Next replacement due
+</Card>
+
+## Soft Deletion and Audit Trail
+
+<Warning>
+  Deleting an aircraft performs a **soft delete** - the record is marked as "Eliminated" but retained for audit purposes.
+</Warning>
+
+**Soft Deletion Behavior:**
+
+1. User clicks "Delete" on aircraft
+2. System prompts for confirmation
+3. Aircraft `status` is set to `ELIMINATED`
+4. `deleted_at` timestamp is recorded
+5. Aircraft removed from active fleet views
+6. Aircraft appears in "Historial de Bajas" (Deletion History)
+
+**Audit Trail Access:**
+- Navigate to **Configuración > Aeronaves**
+- Click **"Historial de Bajas"** toggle
+- View all soft-deleted aircraft with deletion dates
+- Records are read-only for compliance
+
+**Data Retention:**
+- Flight records remain linked to aircraft
+- Maintenance history preserved
+- Weight & balance records intact
+- Referenced in historical reports
+
+## Permissions and Access Control
+
+| Role | View | Create | Edit | Delete | Dispatch |
+|------|------|--------|------|--------|----------|
+| Fleet Manager | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Maintenance Tech | ✓ | ✗ | ✓* | ✗ | ✓ |
+| Dispatcher | ✓ | ✗ | ✗ | ✗ | ✓ |
+| Administrator | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Viewer | ✓ | ✗ | ✗ | ✗ | ✗ |
+
+*Maintenance technicians can only edit maintenance-related fields.
+
+## Integration with Other Modules
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" icon="route">
+    Every flight operation:
+    - Updates aircraft hours
+    - Increments cycle count
+    - Logs fuel consumption
+    - Updates maintenance percentage
+  </Card>
+  
+  <Card title="Weight & Balance" icon="balance-scale">
+    Aircraft specifications:
+    - Pre-fill W&B forms
+    - Validate weight limits
+    - Ensure safe CG range
+    - Calculate performance
+  </Card>
+  
+  <Card title="Maintenance Module" icon="wrench">
+    Service integration:
+    - Reset maintenance hours
+    - Log part replacements
+    - Schedule inspections
+    - Track discrepancies
+  </Card>
+  
+  <Card title="Dashboard Analytics" icon="chart-line">
+    Fleet statistics:
+    - Top aircraft by hours
+    - Utilization rates
+    - Maintenance compliance
+    - Availability metrics
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<Accordion title="Accurate Hour Tracking">
+  - Verify initial hours when registering aircraft
+  - Cross-check hours with aircraft logbook
+  - Update maintenance limits after major overhauls
+  - Monitor hour accumulation monthly
+</Accordion>
+
+<Accordion title="Proactive Maintenance Scheduling">
+  - Schedule maintenance when at 70-80% of limits
+  - Don't wait for red alerts (80%+)
+  - Plan maintenance during low-demand periods
+  - Keep maintenance window buffer for unexpected issues
+</Accordion>
+
+<Accordion title="Weight and Balance Accuracy">
+  - Update empty weight after major modifications
+  - Verify CG shifts after equipment changes
+  - Recalculate moment after weight changes
+  - Re-weigh aircraft annually per regulations
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Available Hours Showing Negative">
+  **Cause:** Current hours exceed total lifetime hours (maintenance overdue)
+  
+  **Solution:**
+  1. Ground aircraft immediately
+  2. Schedule required maintenance
+  3. After maintenance, update `total_lifetime_hours` and reset `hours_before_lastMantt`
+</Accordion>
+
+<Accordion title="Maintenance Percentage Not Updating">
+  **Cause:** Flight operations not properly closing/logging hours
+  
+  **Solution:**
+  1. Verify recent transfers have status "Finished"
+  2. Check aircraft assignment in transfer records
+  3. Manually refresh aircraft page
+</Accordion>
+
+<Accordion title="Cannot Set Aircraft to Active">
+  **Cause:** Aircraft may have overdue maintenance or missing required documents
+  
+  **Solution:**
+  1. Check maintenance due percentage (must be < 100%)
+  2. Verify all required documents uploaded
+  3. Ensure no open discrepancies
+</Accordion>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" href="/features/flight-operations">
+    Understand how flights update aircraft hours
+  </Card>
+  <Card title="Dashboard Analytics" href="/features/dashboard-analytics">
+    View fleet utilization statistics
+  </Card>
+  <Card title="User Management" href="/features/user-management">
+    Configure maintenance technician access
+  </Card>
+  <Card title="Medical Transfers" href="/features/medical-transfers">
+    Learn about aircraft assignment to medical missions
+  </Card>
+</CardGroup>

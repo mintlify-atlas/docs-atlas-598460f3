@@ -1,0 +1,251 @@
+---
+title: 'Dashboard API'
+description: 'System alerts and dashboard data endpoints'
+---
+
+## Overview
+
+The Dashboard API provides aggregated system alerts for operational monitoring. It returns prioritized alerts from multiple sources including expired documents, upcoming trainings, and aircraft parts status.
+
+<Note>
+All endpoints require JWT authentication via cookie and `stats:read` permission.
+</Note>
+
+## Get System Alerts
+
+<Api method="GET" path="/dashboard/alerts" />
+
+Retrieves prioritized system alerts grouped by criticality level. Alerts cover four categories of operational risk:
+
+- **Expired documents** (`critical`): Personnel documents with expiration date before current date (up to 10 records)
+- **Expiring documents** (`warning`): Documents expiring within configured window (default: 30 days, up to 10 records)
+- **Upcoming trainings** (`info`): Active trainings scheduled within configured window (default: 7 days, up to 10 records)
+- **Aircraft parts at limit** (`critical`/`warning`): Parts with status OVERDUE, NEAR_LIMIT, or APPROACHING_LIMIT (up to 10 records)
+
+Alerts are sorted by priority: `critical` > `warning` > `info`. The response is limited to a maximum of 20 total alerts.
+
+### Query Parameters
+
+<ParamField query="doc_warning_days" type="integer" default="30">
+  Days in advance to alert for expiring documents (minimum: 1)
+</ParamField>
+
+<ParamField query="training_warning_days" type="integer" default="7">
+  Days in advance to alert for upcoming trainings (minimum: 1)
+</ParamField>
+
+### Response
+
+<ResponseField name="alerts" type="array">
+  Array of alert objects sorted by priority
+  
+  <Expandable title="Alert object properties">
+    <ResponseField name="id" type="string">
+      Unique identifier for the alert (e.g., "expired-doc-123", "training-45")
+    </ResponseField>
+    
+    <ResponseField name="level" type="string">
+      Alert severity level: `critical`, `warning`, or `info`
+    </ResponseField>
+    
+    <ResponseField name="title" type="string">
+      Alert title describing the type of issue
+    </ResponseField>
+    
+    <ResponseField name="description" type="string">
+      Detailed description of the alert including relevant entity information
+    </ResponseField>
+    
+    <ResponseField name="timestamp" type="string">
+      ISO 8601 timestamp of the alert event (expiration date, training date, etc.)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+  Total number of alerts returned (maximum 20)
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/dashboard/alerts?doc_warning_days=30&training_warning_days=7" \
+  -H "Cookie: token=your-jwt-token"
+```
+
+```bash Default parameters
+curl -X GET https://api.sigsaho.com/dashboard/alerts \
+  -H "Cookie: token=your-jwt-token"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "alerts": [
+    {
+      "id": "expired-doc-342",
+      "level": "critical",
+      "title": "Documento vencido",
+      "description": "Juan Pérez - LICENCIA PILOTO COMERCIAL",
+      "timestamp": "2026-02-28T00:00:00.000Z"
+    },
+    {
+      "id": "part-89",
+      "level": "critical",
+      "title": "Parte: Límite excedido",
+      "description": "PT-5489 - Cessna 172 (XA-ABC)",
+      "timestamp": "2026-03-04T10:30:00.000Z"
+    },
+    {
+      "id": "expiring-doc-445",
+      "level": "warning",
+      "title": "Documento por vencer",
+      "description": "María González - CERTIFICADO MEDICO",
+      "timestamp": "2026-03-25T00:00:00.000Z"
+    },
+    {
+      "id": "part-92",
+      "level": "warning",
+      "title": "Parte: Cerca del límite",
+      "description": "PT-6701 - King Air 350 (XA-XYZ)",
+      "timestamp": "2026-03-04T10:30:00.000Z"
+    },
+    {
+      "id": "training-12",
+      "level": "info",
+      "title": "Capacitación próxima",
+      "description": "Seguridad Operacional SMS - 10/03/2026",
+      "timestamp": "2026-03-10T00:00:00.000Z"
+    }
+  ],
+  "total": 5
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "No autorizado. Se requiere sesión activa."
+}
+```
+
+```json 403 Forbidden
+{
+  "error": "Acceso denegado. Requiere permisos de estadísticas."
+}
+```
+
+```json 500 Internal Server Error
+{
+  "error": "Error al obtener alertas del dashboard"
+}
+```
+</ResponseExample>
+
+---
+
+## Alert Types Reference
+
+### Expired Documents
+
+<Card title="Critical Level" icon="circle-exclamation" color="#ef4444">
+  Personnel documents that have already expired. These require immediate attention to maintain regulatory compliance.
+  
+  **Format**: `{User Name} - {Document Type}`
+  
+  **Example**: "Juan Pérez - LICENCIA PILOTO COMERCIAL"
+</Card>
+
+### Expiring Documents
+
+<Card title="Warning Level" icon="triangle-exclamation" color="#f59e0b">
+  Documents approaching expiration within the configured warning period (default 30 days). Provides advance notice for renewal.
+  
+  **Format**: `{User Name} - {Document Type}`
+  
+  **Example**: "María González - CERTIFICADO MEDICO"
+</Card>
+
+### Upcoming Trainings
+
+<Card title="Info Level" icon="circle-info" color="#3b82f6">
+  Active trainings scheduled within the configured period (default 7 days). Helps with training attendance planning.
+  
+  **Format**: `{Training Name} - {Date}`
+  
+  **Example**: "Seguridad Operacional SMS - 10/03/2026"
+</Card>
+
+### Aircraft Parts Status
+
+<Card title="Critical/Warning Level" icon="wrench" color="#ef4444">
+  Aircraft parts that are overdue (critical) or approaching limits (warning) for maintenance or replacement.
+  
+  **Format**: `{Part Number} - {Aircraft Name} ({Registration})`
+  
+  **Status Labels**:
+  - **OVERDUE** (critical): "Límite excedido"
+  - **NEAR_LIMIT** (warning): "Cerca del límite"
+  - **APPROACHING_LIMIT** (warning): "Aproximándose al límite"
+  
+  **Example**: "PT-5489 - Cessna 172 (XA-ABC)"
+</Card>
+
+---
+
+## Configuration Recommendations
+
+### Document Warning Period
+
+The `doc_warning_days` parameter controls how far in advance you receive alerts for expiring documents.
+
+<CodeGroup>
+```json Conservative (60 days)
+{
+  "doc_warning_days": 60
+}
+```
+
+```json Balanced (30 days)
+{
+  "doc_warning_days": 30
+}
+```
+
+```json Urgent only (7 days)
+{
+  "doc_warning_days": 7
+}
+```
+</CodeGroup>
+
+<Tip>
+For aviation documents that require external validation (licenses, medical certificates), use 45-60 days to allow time for appointments and processing.
+</Tip>
+
+### Training Warning Period
+
+The `training_warning_days` parameter controls advance notice for scheduled trainings.
+
+<CodeGroup>
+```json Two weeks notice
+{
+  "training_warning_days": 14
+}
+```
+
+```json One week notice
+{
+  "training_warning_days": 7
+}
+```
+
+```json Minimal notice
+{
+  "training_warning_days": 3
+}
+```
+</CodeGroup>
+
+<Warning>
+Ensure your training warning period aligns with your organization's scheduling and notification policies.
+</Warning>

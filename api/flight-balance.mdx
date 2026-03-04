@@ -1,0 +1,607 @@
+---
+title: 'Flight Balance API'
+description: 'Flight weight and balance calculation endpoints for aircraft operations'
+---
+
+## Overview
+
+The Flight Balance API manages weight and balance calculations for aircraft. These calculations are critical for flight safety, ensuring the aircraft operates within structural limits and the center of gravity is within the permitted range.
+
+<Note>
+All endpoints require JWT authentication via cookie and appropriate permissions:
+- Read operations require `despacho:read` permission
+- Write operations require `despacho:write` permission
+</Note>
+
+## Create Flight Balance
+
+<Api method="POST" path="/flight-balances" />
+
+Creates a new weight and balance calculation for an aircraft. Includes all subtotals, totals, and detail items (rows in the W&B table). The registering user is automatically obtained from the JWT token.
+
+### Request Body
+
+<ParamField body="subtotal_operating_empty_weight" type="number" required>
+  Operating empty weight in pounds
+</ParamField>
+
+<ParamField body="subtotal_operating_empty_cg" type="number" required>
+  Operating empty center of gravity
+</ParamField>
+
+<ParamField body="subtotal_operating_empty_moment" type="number" required>
+  Operating empty moment (weight x arm)
+</ParamField>
+
+<ParamField body="subtotal_operating_fuel_weight" type="number" required>
+  Operating weight with fuel in pounds
+</ParamField>
+
+<ParamField body="subtotal_operating_fuel_cg" type="number" required>
+  Center of gravity with fuel
+</ParamField>
+
+<ParamField body="subtotal_operating_fuel_moment" type="number" required>
+  Moment with fuel
+</ParamField>
+
+<ParamField body="subtotal_operating_fuel_mac" type="number" required>
+  Mean Aerodynamic Chord (MAC) with fuel in percentage
+</ParamField>
+
+<ParamField body="total_take_off_weight" type="number" required>
+  Total takeoff weight in pounds
+</ParamField>
+
+<ParamField body="total_take_off_cg" type="number" required>
+  Center of gravity at takeoff
+</ParamField>
+
+<ParamField body="total_take_off_moment" type="number" required>
+  Total moment at takeoff
+</ParamField>
+
+<ParamField body="total_take_off_mac" type="number" required>
+  MAC at takeoff in percentage
+</ParamField>
+
+<ParamField body="total_landing_weight" type="number" required>
+  Total landing weight in pounds
+</ParamField>
+
+<ParamField body="total_landing_cg" type="number" required>
+  Center of gravity at landing
+</ParamField>
+
+<ParamField body="total_landing_moment" type="number" required>
+  Total moment at landing
+</ParamField>
+
+<ParamField body="total_landing_mac" type="number" required>
+  MAC at landing in percentage
+</ParamField>
+
+<ParamField body="aircraft_id" type="integer" required>
+  ID of the aircraft
+</ParamField>
+
+<ParamField body="pilot_command_id" type="integer" required>
+  ID of the pilot in command
+</ParamField>
+
+<ParamField body="pilot_officer_id" type="integer">
+  ID of the first officer (optional)
+</ParamField>
+
+<ParamField body="details" type="array" required>
+  Array of detail items for the calculation
+  
+  <Expandable title="Detail object properties">
+    <ParamField body="item" type="string" required>
+      Item description (e.g., "Piloto Cmte.", "Pasajero 1")
+    </ParamField>
+    
+    <ParamField body="weight" type="number" required>
+      Weight of the item in pounds
+    </ParamField>
+    
+    <ParamField body="cg" type="number" required>
+      Center of gravity position (arm) in inches
+    </ParamField>
+    
+    <ParamField body="moment" type="number" required>
+      Calculated moment (weight x arm)
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="flightBalance" type="object">
+  The created flight balance object with all fields and relationships
+  
+  <Expandable title="Flight balance properties">
+    <ResponseField name="id" type="integer">
+      Unique identifier for the calculation
+    </ResponseField>
+    
+    <ResponseField name="subtotal_operating_empty_weight" type="number">
+      Operating empty weight in pounds
+    </ResponseField>
+    
+    <ResponseField name="created_at" type="string">
+      Creation timestamp (ISO 8601)
+    </ResponseField>
+    
+    <ResponseField name="updated_at" type="string">
+      Last update timestamp (ISO 8601)
+    </ResponseField>
+    
+    <ResponseField name="details" type="array">
+      Array of detail items included in the calculation
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST https://api.sigsaho.com/flight-balances \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your-jwt-token" \
+  -d '{
+    "subtotal_operating_empty_weight": 2500,
+    "subtotal_operating_empty_cg": 120.5,
+    "subtotal_operating_empty_moment": 301250,
+    "subtotal_operating_fuel_weight": 3000,
+    "subtotal_operating_fuel_cg": 118.2,
+    "subtotal_operating_fuel_moment": 354600,
+    "subtotal_operating_fuel_mac": 25.5,
+    "total_take_off_weight": 3500,
+    "total_take_off_cg": 119.0,
+    "total_take_off_moment": 416500,
+    "total_take_off_mac": 26.2,
+    "total_landing_weight": 3200,
+    "total_landing_cg": 118.5,
+    "total_landing_moment": 379200,
+    "total_landing_mac": 25.8,
+    "aircraft_id": 1,
+    "pilot_command_id": 2,
+    "pilot_officer_id": 3,
+    "details": [
+      {
+        "item": "Piloto Cmte.",
+        "weight": 85,
+        "cg": 45.5,
+        "moment": 3867.5
+      },
+      {
+        "item": "Pasajero 1",
+        "weight": 75,
+        "cg": 48.0,
+        "moment": 3600
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 Created
+{
+  "message": "Calculo de peso y balance creado exitosamente",
+  "flightBalance": {
+    "id": 123,
+    "subtotal_operating_empty_weight": 2500,
+    "subtotal_operating_empty_cg": 120.5,
+    "subtotal_operating_empty_moment": 301250,
+    "total_take_off_weight": 3500,
+    "created_at": "2026-03-04T10:30:00.000Z",
+    "updated_at": "2026-03-04T10:30:00.000Z",
+    "details": [
+      {
+        "id": 1,
+        "item": "Piloto Cmte.",
+        "weight": 85,
+        "cg": 45.5,
+        "moment": 3867.5
+      }
+    ]
+  }
+}
+```
+
+```json 400 Bad Request
+{
+  "error": "Validation error message"
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "Usuario no autenticado"
+}
+```
+</ResponseExample>
+
+---
+
+## List Flight Balances
+
+<Api method="GET" path="/flight-balances" />
+
+Retrieves a paginated list of flight balance calculations with optional filters.
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField query="aircraft_id" type="integer">
+  Filter by aircraft ID
+</ParamField>
+
+<ParamField query="registered_by_id" type="integer">
+  Filter by registering user ID
+</ParamField>
+
+<ParamField query="pilot_command_id" type="integer">
+  Filter by pilot in command ID
+</ParamField>
+
+<ParamField query="date_from" type="string">
+  Filter from date (format: YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="date_to" type="string">
+  Filter to date (format: YYYY-MM-DD)
+</ParamField>
+
+### Response
+
+<ResponseField name="data" type="array">
+  Array of flight balance objects
+</ResponseField>
+
+<ResponseField name="pagination" type="object">
+  Pagination information
+  
+  <Expandable title="Pagination properties">
+    <ResponseField name="page" type="integer">
+      Current page number
+    </ResponseField>
+    
+    <ResponseField name="limit" type="integer">
+      Records per page
+    </ResponseField>
+    
+    <ResponseField name="total" type="integer">
+      Total number of records
+    </ResponseField>
+    
+    <ResponseField name="totalPages" type="integer">
+      Total number of pages
+    </ResponseField>
+    
+    <ResponseField name="hasNextPage" type="boolean">
+      Whether there is a next page
+    </ResponseField>
+    
+    <ResponseField name="hasPreviousPage" type="boolean">
+      Whether there is a previous page
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/flight-balances?page=1&limit=10&aircraft_id=1" \
+  -H "Cookie: token=your-jwt-token"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "data": [
+    {
+      "id": 123,
+      "subtotal_operating_empty_weight": 2500,
+      "total_take_off_weight": 3500,
+      "total_landing_weight": 3200,
+      "aircraft_id": 1,
+      "pilot_command_id": 2,
+      "created_at": "2026-03-04T10:30:00.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 45,
+    "totalPages": 5,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Get Flight Balance by ID
+
+<Api method="GET" path="/flight-balances/{id}" />
+
+Retrieves details of a specific flight balance calculation.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the calculation
+</ParamField>
+
+### Response
+
+<ResponseField name="flightBalance" type="object">
+  Complete flight balance object with all details and relationships
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.sigsaho.com/flight-balances/123 \
+  -H "Cookie: token=your-jwt-token"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "flightBalance": {
+    "id": 123,
+    "subtotal_operating_empty_weight": 2500,
+    "subtotal_operating_empty_cg": 120.5,
+    "total_take_off_weight": 3500,
+    "aircraft": {
+      "id": 1,
+      "name": "Cessna 172",
+      "registration": "XA-ABC"
+    },
+    "pilot_command": {
+      "id": 2,
+      "name": "Juan",
+      "last_name": "Pérez"
+    },
+    "details": [
+      {
+        "id": 1,
+        "item": "Piloto Cmte.",
+        "weight": 85,
+        "cg": 45.5,
+        "moment": 3867.5
+      }
+    ],
+    "created_at": "2026-03-04T10:30:00.000Z"
+  }
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Calculo de peso y balance no encontrado"
+}
+```
+</ResponseExample>
+
+---
+
+## Get Flight Balances by Aircraft
+
+<Api method="GET" path="/flight-balances/aircraft/{aircraftId}" />
+
+Retrieves flight balance calculations for a specific aircraft with pagination.
+
+### Path Parameters
+
+<ParamField path="aircraftId" type="integer" required>
+  ID of the aircraft
+</ParamField>
+
+### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number
+</ParamField>
+
+<ParamField query="limit" type="integer" default="10">
+  Records per page
+</ParamField>
+
+### Response
+
+Returns paginated list of flight balances for the specified aircraft.
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.sigsaho.com/flight-balances/aircraft/1?page=1&limit=10" \
+  -H "Cookie: token=your-jwt-token"
+```
+</RequestExample>
+
+---
+
+## Get Statistics by Aircraft
+
+<Api method="GET" path="/flight-balances/stats/aircraft/{aircraftId}" />
+
+Retrieves statistical data for flight balance calculations of a specific aircraft.
+
+### Path Parameters
+
+<ParamField path="aircraftId" type="integer" required>
+  ID of the aircraft
+</ParamField>
+
+### Response
+
+<ResponseField name="stats" type="object">
+  Statistical data for the aircraft
+  
+  <Expandable title="Statistics properties">
+    <ResponseField name="totalCalculations" type="integer">
+      Total number of calculations for this aircraft
+    </ResponseField>
+    
+    <ResponseField name="avgTakeOffWeight" type="number">
+      Average takeoff weight
+    </ResponseField>
+    
+    <ResponseField name="avgLandingWeight" type="number">
+      Average landing weight
+    </ResponseField>
+    
+    <ResponseField name="lastCalculation" type="string">
+      Timestamp of the last calculation (ISO 8601)
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET https://api.sigsaho.com/flight-balances/stats/aircraft/1 \
+  -H "Cookie: token=your-jwt-token"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "stats": {
+    "totalCalculations": 45,
+    "avgTakeOffWeight": 3480.5,
+    "avgLandingWeight": 3150.2,
+    "lastCalculation": "2026-03-04T10:30:00.000Z"
+  }
+}
+```
+</ResponseExample>
+
+---
+
+## Update Flight Balance
+
+<Api method="PATCH" path="/flight-balances/{id}" />
+
+Partially updates an existing flight balance calculation. Implements PATCH semantics: only sent fields are updated. If details are sent, they replace all existing details.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the calculation to update
+</ParamField>
+
+### Request Body
+
+All fields from the create endpoint are optional. Only include fields you want to update.
+
+<ParamField body="subtotal_operating_empty_weight" type="number">
+  Operating empty weight in pounds
+</ParamField>
+
+<ParamField body="details" type="array">
+  If provided, replaces all existing details
+</ParamField>
+
+<Info>
+For a complete list of updatable fields, see the [Create Flight Balance](#create-flight-balance) section.
+</Info>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<ResponseField name="flightBalance" type="object">
+  The updated flight balance object
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X PATCH https://api.sigsaho.com/flight-balances/123 \
+  -H "Content-Type: application/json" \
+  -H "Cookie: token=your-jwt-token" \
+  -d '{
+    "total_take_off_weight": 3550,
+    "total_landing_weight": 3250
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "message": "Calculo de peso y balance actualizado exitosamente",
+  "flightBalance": {
+    "id": 123,
+    "total_take_off_weight": 3550,
+    "total_landing_weight": 3250,
+    "updated_at": "2026-03-04T11:00:00.000Z"
+  }
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Calculo de peso y balance no encontrado"
+}
+```
+</ResponseExample>
+
+---
+
+## Delete Flight Balance
+
+<Api method="DELETE" path="/flight-balances/{id}" />
+
+Deletes a flight balance calculation and all its details.
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  ID of the calculation to delete
+</ParamField>
+
+### Response
+
+<ResponseField name="message" type="string">
+  Success message
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE https://api.sigsaho.com/flight-balances/123 \
+  -H "Cookie: token=your-jwt-token"
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "message": "Calculo de peso y balance eliminado exitosamente"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Calculo de peso y balance no encontrado"
+}
+```
+</ResponseExample>

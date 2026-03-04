@@ -1,0 +1,642 @@
+---
+title: 'Notifications'
+description: 'Configure and manage automated notifications for maintenance, document expirations, and system alerts in SIGSAHO'
+icon: 'bell'
+---
+
+## Overview
+
+SIGSAHO provides automated notification system to alert personnel about upcoming maintenance, expiring documents, and critical events. This guide covers configuring, managing, and troubleshooting notifications.
+
+## Notification Types
+
+SIGSAHO supports notifications for two primary targets:
+
+<CardGroup cols={2}>
+  <Card title="Aircraft Service Notifications" icon="plane-engines">
+    Alerts for scheduled maintenance, inspections, and service due dates.
+    
+    **Target Type:** `AIRCRAFT_SERVICE`
+  </Card>
+  
+  <Card title="User Document Notifications" icon="id-card">
+    Reminders for expiring licenses, certifications, and personnel documents.
+    
+    **Target Type:** `USER_DOC`
+  </Card>
+</CardGroup>
+
+## Notification Timing Options
+
+Configure when notifications are sent relative to due dates:
+
+<Tabs>
+  <Tab title="15 Days Before">
+    **Enum Value:** `FIFTEEN_DAYS_BEFORE`
+    
+    **Use Case:** Early warning for complex maintenance or document renewals requiring significant preparation time.
+    
+    **Example:** Annual inspection scheduled for March 30th → notification sent March 15th
+  </Tab>
+  
+  <Tab title="7 Days Before">
+    **Enum Value:** `SEVEN_DAYS_BEFORE`
+    
+    **Use Case:** Standard advance notice for routine maintenance and document renewals.
+    
+    **Example:** Medical certificate expires April 5th → notification sent March 29th
+  </Tab>
+  
+  <Tab title="1 Day Before">
+    **Enum Value:** `ONE_DAY_BEFORE`
+    
+    **Use Case:** Final reminder before due date for urgent items.
+    
+    **Example:** 100-hour service due tomorrow → notification sent today
+  </Tab>
+  
+  <Tab title="On Expiration Day">
+    **Enum Value:** `ON_EXPIRATION_DAY`
+    
+    **Use Case:** Same-day notification for items due today.
+    
+    **Example:** License expires today → notification sent this morning
+  </Tab>
+</Tabs>
+
+<Tip>
+You can create multiple notification configurations for the same service or document with different timing. For example, set notifications at 15 days, 7 days, and 1 day before a critical inspection.
+</Tip>
+
+## Creating Notification Configurations
+
+### For Aircraft Services
+
+<Steps>
+  <Step title="Navigate to Aircraft Service">
+    Go to **Seguimiento** > **Servicios de Aeronaves** and open the service you want to configure notifications for.
+  </Step>
+  
+  <Step title="Click Manage Notifications">
+    Click the **Gestionar Notificaciones** button in the service details.
+  </Step>
+  
+  <Step title="Add New Notification">
+    Click **Nueva Notificación** to create a notification configuration.
+  </Step>
+  
+  <Step title="Configure Notification Timing">
+    Select when the notification should be sent:
+    - 15 days before scheduled date
+    - 7 days before scheduled date
+    - 1 day before scheduled date
+    - On the scheduled date
+  </Step>
+  
+  <Step title="Set Active Status">
+    Enable the notification by checking the **Activo** checkbox. Disabled notifications won't be sent.
+  </Step>
+  
+  <Step title="Save Configuration">
+    Click **Guardar**. The notification is now scheduled according to your configuration.
+  </Step>
+</Steps>
+
+**API Endpoint:**
+```typescript
+POST /notification-configs
+
+// Request body
+{
+  "notification_time": "SEVEN_DAYS_BEFORE",
+  "target_type": "AIRCRAFT_SERVICE",
+  "is_active": true,
+  "aircraft_service_id": 42
+}
+
+// Response
+{
+  "message": "Configuración de notificación creada exitosamente",
+  "notificationConfig": {
+    "id": 1,
+    "notification_time": "SEVEN_DAYS_BEFORE",
+    "target_type": "AIRCRAFT_SERVICE",
+    "is_active": true,
+    "sent_at": null,
+    "aircraft_service": { /* service details */ }
+  }
+}
+```
+
+### For User Documents
+
+<Steps>
+  <Step title="Navigate to User Document">
+    Go to **Usuarios** > select a user > **Documentos** tab.
+  </Step>
+  
+  <Step title="Open Document Details">
+    Click on the document you want to configure notifications for (e.g., pilot license, medical certificate).
+  </Step>
+  
+  <Step title="Click Notification Settings">
+    Click the **Configurar Notificaciones** button.
+  </Step>
+  
+  <Step title="Add Notification Rule">
+    Create a new notification configuration with desired timing.
+  </Step>
+  
+  <Step title="Save Configuration">
+    Save the notification rule. Reminders will be sent automatically as configured.
+  </Step>
+</Steps>
+
+**API Endpoint:**
+```typescript
+POST /notification-configs
+
+// Request body
+{
+  "notification_time": "FIFTEEN_DAYS_BEFORE",
+  "target_type": "USER_DOC",
+  "is_active": true,
+  "user_doc_id": 15
+}
+```
+
+<Warning>
+You can only create one notification configuration per timing option per target. For example, you cannot have two "7 days before" notifications for the same service. The system will prevent duplicate configurations.
+</Warning>
+
+## Notification Recipients
+
+Configure who receives notifications:
+
+### Aircraft Service Notifications
+
+Recipients are configured directly on the aircraft service:
+
+```typescript
+// When creating or updating an aircraft service
+{
+  "emails_to_notify": "maintenance@example.com,supervisor@example.com",
+  "phones_to_notify": "+52-123-456-7890,+52-098-765-4321"
+}
+```
+
+**Email Recipients:**
+- Comma-separated email addresses
+- All listed emails receive notification
+- Supports multiple recipients
+
+**Phone Recipients:**
+- Comma-separated phone numbers
+- SMS notifications sent to these numbers
+- Include country code for international numbers
+
+<Steps>
+  <Step title="Edit Aircraft Service">
+    Open the service you want to configure recipients for.
+  </Step>
+  
+  <Step title="Update Notification Contacts">
+    In the service form, update:
+    - **Emails to Notify**: Enter email addresses separated by commas
+    - **Phones to Notify**: Enter phone numbers separated by commas
+  </Step>
+  
+  <Step title="Save Changes">
+    Save the service. These contacts will receive all configured notifications for this service.
+  </Step>
+</Steps>
+
+### User Document Notifications
+
+For user documents, notifications are sent to:
+
+- The user's registered email address
+- The user's registered phone number
+- Additional supervisors or administrators (if configured)
+
+## How Notifications Work
+
+### Automated Notification System
+
+SIGSAHO runs automated cronjobs that check and send notifications:
+
+<Accordion title="Service Notification Cronjob">
+  **File:** `check-service-notifications.cron.ts`
+  
+  **Runs:** Daily at scheduled time (typically 6:00 AM)
+  
+  **Process:**
+  1. Queries all active notification configurations for aircraft services
+  2. Checks if today matches the notification date based on timing configuration
+  3. Filters for services in PENDING or IN_PROGRESS status
+  4. For date-based services: Calculates if notification should be sent today
+  5. For hours-based services: Checks if aircraft hours >= scheduled hours (ON_EXPIRATION_DAY only)
+  6. Sends notifications to configured email and phone recipients
+  7. Marks notifications as sent (sets `sent_at` timestamp)
+  
+  **Example Logic:**
+  ```typescript
+  // Service scheduled for 2024-04-15
+  // Notification configured for SEVEN_DAYS_BEFORE
+  // Today is 2024-04-08
+  
+  const daysOffset = 7;  // Seven days before
+  const notifyDate = new Date('2024-04-15');
+  notifyDate.setDate(notifyDate.getDate() - daysOffset);  // 2024-04-08
+  
+  // Today matches notify date → send notification
+  ```
+</Accordion>
+
+<Accordion title="User Document Notification Cronjob">
+  **File:** `check-user-doc-notifications.cron.ts`
+  
+  **Runs:** Daily at scheduled time
+  
+  **Process:**
+  1. Queries all active notification configurations for user documents
+  2. Checks if today matches the notification date for document expiration
+  3. Filters for documents with ACTIVE status
+  4. Calculates notification date based on expiration date and timing offset
+  5. Sends email/SMS to document owner
+  6. Marks notification as sent
+  
+  **Example:**
+  ```typescript
+  // Medical certificate expires 2024-05-01
+  // Notification configured for FIFTEEN_DAYS_BEFORE
+  // Today is 2024-04-16
+  
+  const expirationDate = new Date('2024-05-01');
+  const daysOffset = 15;
+  const notifyDate = new Date(expirationDate);
+  notifyDate.setDate(notifyDate.getDate() - daysOffset);  // 2024-04-16
+  
+  // Today matches notify date → send notification
+  ```
+</Accordion>
+
+### Flight Hours-Based Notifications
+
+For maintenance scheduled by flight hours:
+
+<Accordion title="Hours-based notification logic">
+  Hours-based notifications only apply to `ON_EXPIRATION_DAY` timing:
+  
+  ```typescript
+  // Service scheduled at 1500 flight hours
+  // Aircraft current hours: 1420
+  // Notification: ON_EXPIRATION_DAY
+  
+  const service = {
+    scheduled_at_hours: 1500,
+    aircraft: {
+      total_lifetime_hours: 1420
+    }
+  };
+  
+  // Check if due
+  const isDue = service.aircraft.total_lifetime_hours >= service.scheduled_at_hours;
+  // isDue = false (1420 < 1500)
+  
+  // When aircraft reaches 1500 hours:
+  const currentHours = 1500;
+  const isDue = currentHours >= 1500;  // true → send notification
+  ```
+  
+  **Why only ON_EXPIRATION_DAY?**
+  
+  Flight hours accumulate unpredictably, making "7 days before" impossible to calculate. The system can only notify when the target hours are reached or exceeded.
+  
+  **Workaround for Advance Notice:**
+  
+  Create a second service scheduled slightly before the actual due hours:
+  - Main service: 1500 hours (actual maintenance)
+  - Warning service: 1450 hours (50-hour advance warning)
+</Accordion>
+
+## Managing Notifications
+
+### Viewing Notification Configurations
+
+```typescript
+GET /notification-configs?page=1&limit=10
+
+// Filter by target type
+GET /notification-configs?target_type=AIRCRAFT_SERVICE
+
+// Filter by specific service
+GET /notification-configs?aircraft_service_id=42
+
+// Filter by active status
+GET /notification-configs?is_active=true
+
+// Filter by sent status
+GET /notification-configs?sent=false  // Pending notifications
+GET /notification-configs?sent=true   // Already sent
+```
+
+<Steps>
+  <Step title="Navigate to Notifications">
+    Go to **Configuración** > **Notificaciones** from the main menu.
+  </Step>
+  
+  <Step title="View All Configurations">
+    See a list of all notification configurations across the system.
+  </Step>
+  
+  <Step title="Filter by Type or Status">
+    Use filters to narrow down to specific notification types or statuses:
+    - Active vs. inactive
+    - Sent vs. pending
+    - By target type
+    - By specific service or document
+  </Step>
+</Steps>
+
+### Updating Notification Configurations
+
+```typescript
+PUT /notification-configs/:id
+
+// Request body
+{
+  "notification_time": "ONE_DAY_BEFORE",  // Change timing
+  "is_active": false                       // Or disable
+}
+```
+
+<Steps>
+  <Step title="Find Notification Configuration">
+    Locate the notification you want to modify.
+  </Step>
+  
+  <Step title="Click Edit">
+    Click the edit icon next to the notification.
+  </Step>
+  
+  <Step title="Modify Settings">
+    Update the timing or active status as needed.
+  </Step>
+  
+  <Step title="Save Changes">
+    Save the updated configuration. The notification schedule is updated immediately.
+  </Step>
+</Steps>
+
+<Warning>
+Changing notification timing or reactivating a sent notification does NOT automatically resend it. Use the "Reset Sent Status" feature if you need to resend.
+</Warning>
+
+### Resending Notifications
+
+If a notification needs to be resent:
+
+```typescript
+PATCH /notification-configs/:id/reset
+
+// Resets sent_at to null
+// Notification will be sent again on next cronjob run if conditions match
+```
+
+<Steps>
+  <Step title="Open Notification Details">
+    Find the notification that was already sent.
+  </Step>
+  
+  <Step title="Click Reset Sent Status">
+    Click **Resetear Estado de Envío**.
+  </Step>
+  
+  <Step title="Confirm Reset">
+    Confirm that you want to reset the sent status.
+  </Step>
+  
+  <Step title="Wait for Next Cronjob Run">
+    The notification will be resent during the next scheduled cronjob run if the date/hours conditions still match.
+  </Step>
+</Steps>
+
+<Tip>
+Use "Reset Sent Status" when:
+- The notification was sent but not received
+- Recipient information was incorrect and has been updated
+- You need to resend an important alert
+- Testing notification configuration
+</Tip>
+
+### Disabling Notifications
+
+Temporarily disable notifications without deleting the configuration:
+
+```typescript
+PUT /notification-configs/:id
+
+{
+  "is_active": false
+}
+```
+
+**Use Cases:**
+- Service postponed indefinitely
+- Maintenance completed early (before notification date)
+- Testing notification setup
+- Temporary suspension of alerts
+
+### Deleting Notification Configurations
+
+```typescript
+DELETE /notification-configs/:id
+
+// Soft deletes the configuration
+```
+
+<Steps>
+  <Step title="Find Configuration to Delete">
+    Locate the notification configuration you want to remove.
+  </Step>
+  
+  <Step title="Click Delete">
+    Click the delete icon or **Eliminar** button.
+  </Step>
+  
+  <Step title="Confirm Deletion">
+    Confirm that you want to delete the notification configuration.
+  </Step>
+</Steps>
+
+<Warning>
+Deleting a notification configuration is permanent (soft-deleted). Create a new configuration if you need notifications again for this service or document.
+</Warning>
+
+## Notification Delivery
+
+### Email Notifications
+
+**Content Includes:**
+- Notification subject (e.g., "Maintenance Due: 100-Hour Inspection")
+- Service or document details
+- Due date or hours
+- Aircraft or user information
+- Action required
+- Link to SIGSAHO for more details
+
+**Delivery:**
+- Sent via configured SMTP server
+- Supports HTML formatting
+- Includes organization branding
+- Reply-to address configured in system settings
+
+### SMS Notifications
+
+**Content Includes:**
+- Brief alert message
+- Due date or hours
+- Aircraft/document identifier
+- Contact number for more info
+
+**Delivery:**
+- Sent via SMS gateway API
+- Character limit: 160 characters
+- Plain text format
+- Sent to configured phone numbers
+
+<Accordion title="SMS gateway configuration">
+  SMS notifications require SMS gateway integration. Configure in your system settings:
+  
+  - SMS provider (Twilio, AWS SNS, etc.)
+  - API credentials
+  - Sender phone number
+  - Default country code
+  
+  Contact your system administrator for SMS setup.
+</Accordion>
+
+## Troubleshooting Notifications
+
+<AccordionGroup>
+  <Accordion title="Notifications not being sent">
+    **Possible Causes:**
+    1. Notification configuration is inactive (`is_active: false`)
+    2. Notification already sent (`sent_at` is set)
+    3. Service status is not PENDING or IN_PROGRESS
+    4. Document status is not ACTIVE
+    5. Date/hours conditions don't match today
+    6. Cronjob not running
+    
+    **Solutions:**
+    - Verify notification is active
+    - Check `sent_at` timestamp - use "Reset Sent Status" if needed
+    - Confirm service/document status is notifiable
+    - Verify date calculations match expected notification date
+    - Contact administrator to verify cronjobs are running
+  </Accordion>
+  
+  <Accordion title="Notification sent but not received">
+    **Possible Causes:**
+    1. Incorrect email address or phone number
+    2. Email in spam folder
+    3. SMS blocked or carrier issue
+    4. Email server configuration issue
+    5. SMS gateway quota exceeded
+    
+    **Solutions:**
+    - Verify recipient contact information is correct
+    - Check spam/junk folders
+    - Test with alternative email/phone
+    - Check email server logs (administrator)
+    - Verify SMS gateway status (administrator)
+  </Accordion>
+  
+  <Accordion title="Duplicate notifications received">
+    **Possible Causes:**
+    1. Multiple notification configurations with same timing
+    2. Cronjob running multiple times
+    3. Multiple recipients configured
+    4. Notification reset and resent
+    
+    **Solutions:**
+    - Review notification configurations for duplicates
+    - Contact administrator to check cronjob scheduling
+    - Verify only one configuration per timing per target
+  </Accordion>
+  
+  <Accordion title="Wrong notification timing">
+    **Possible Causes:**
+    1. Incorrect notification_time value
+    2. Service/document date incorrect
+    3. Timezone configuration issue
+    4. System clock incorrect
+    
+    **Solutions:**
+    - Verify notification_time setting matches desired timing
+    - Check that service scheduled_at or document expiration_date is correct
+    - Confirm server timezone is configured correctly
+    - Verify system date/time
+  </Accordion>
+  
+  <Accordion title="Hours-based notifications not working">
+    **Possible Causes:**
+    1. Using timing other than ON_EXPIRATION_DAY
+    2. Aircraft hours not updating
+    3. Incorrect scheduled_at_hours value
+    4. Hours not being tracked properly
+    
+    **Solutions:**
+    - Hours-based notifications only work with ON_EXPIRATION_DAY timing
+    - Verify aircraft flight hours are being updated when transfers are logged
+    - Check scheduled_at_hours is set correctly
+    - Ensure transfers have correct time values and are marked FINISHED
+  </Accordion>
+  
+  <Accordion title="Cannot create notification configuration">
+    **Error:** "Ya existe una configuración de notificación..."
+    
+    **Cause:** A notification configuration with the same timing already exists for this service/document.
+    
+    **Solution:** Either:
+    - Use a different notification timing
+    - Update the existing configuration instead of creating a new one
+    - Delete the existing configuration first (if no longer needed)
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Multiple Warning Levels" icon="layer-group">
+    Create notifications at multiple intervals (15 days, 7 days, 1 day) for critical services to ensure adequate preparation time.
+  </Card>
+  
+  <Card title="Test Notifications" icon="flask">
+    Test notification delivery by creating a test service with a near-future due date and verifying notifications are received.
+  </Card>
+  
+  <Card title="Keep Contacts Updated" icon="address-book">
+    Regularly review and update notification recipient emails and phone numbers to ensure alerts reach the right people.
+  </Card>
+  
+  <Card title="Monitor Sent Status" icon="eye">
+    Periodically review sent notifications to confirm the system is working and notifications are being delivered as expected.
+  </Card>
+  
+  <Card title="Document Notification Policies" icon="file-lines">
+    Maintain documentation of your organization's notification policies and timing standards for consistency.
+  </Card>
+  
+  <Card title="Disable When Not Needed" icon="toggle-off">
+    Disable notifications for completed or canceled services rather than deleting them, preserving configuration history.
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+- [Aircraft Maintenance](/guides/aircraft-maintenance)
+- [User Management](/api/users)
+- [API Reference: Notification Configs](/api/notifications)
+- [User Management Feature](/features/user-management)

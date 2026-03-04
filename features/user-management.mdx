@@ -1,0 +1,938 @@
+---
+title: User Management
+description: Comprehensive personnel management with role-based access, document tracking, training certifications, and compliance monitoring
+icon: 'users'
+---
+
+## Overview
+
+The User Management module provides complete lifecycle management for all personnel in SIGSAHO. Manage system users, aeronautical technical personnel, crew members, and support staff with integrated document tracking, certification management, and role-based access control.
+
+<Note>
+  SIGSAHO supports two distinct user types: **System Users** (with login access) and **Aeronautical Technical Personnel** (staff without system access). Both types can be crew members.
+</Note>
+
+## User Types
+
+SIGSAHO manages two categories of users:
+
+<CardGroup cols={2}>
+  <Card title="System Users" icon="user-shield">
+    **Personnel with Login Access**
+    
+    Users who access the SIGSAHO platform:
+    - Administrators
+    - Dispatchers
+    - Medical coordinators
+    - Operations managers
+    - Maintenance supervisors
+    
+    **Characteristics:**
+    - Have username and password
+    - Assigned specific roles and permissions
+    - Can log in to SIGSAHO
+    - Access restricted by role
+  </Card>
+  
+  <Card title="Aeronautical Technical Personnel" icon="user-hard-hat">
+    **Staff Without System Access**
+    
+    Personnel who perform duties but don't need system login:
+    - Pilots (not requiring dispatch access)
+    - Copilots
+    - Flight crew
+    - Medical personnel (paramedics, doctors, nurses)
+    - Maintenance technicians
+    - Support staff
+    
+    **Characteristics:**
+    - No username/password
+    - Cannot log in to SIGSAHO
+    - Can be assigned to flights as crew
+    - Documents and certifications tracked
+  </Card>
+</CardGroup>
+
+## User Workflows
+
+### Creating a System User
+
+<Steps>
+  <Step title="Access User Configuration">
+    Navigate to **Configuración > Usuarios** from the main menu.
+  </Step>
+  
+  <Step title="Create User Record">
+    Click **"Agregar Usuario"** to open the user creation form.
+  </Step>
+  
+  <Step title="Enter Basic Information">
+    Complete personal identification:
+    
+    **Personal Details:**
+    - Name (first name)
+    - Last name (first surname)
+    - Second last name (second surname)
+    - Email address (unique, required)
+    - Phone number
+    - Birth date
+    
+    **Physical Attributes:**
+    - Weight (kg) - required for weight & balance calculations
+  </Step>
+  
+  <Step title="Configure Login Credentials">
+    Set up system access:
+    
+    **Login Information:**
+    - Username (unique, required)
+    - Password (strong password required)
+    - Login access toggle (enable/disable)
+    
+    <Warning>
+      Username must be unique across all system users. Email must also be unique.
+    </Warning>
+  </Step>
+  
+  <Step title="Assign Roles">
+    Select one or more roles for the user:
+    
+    **Available Roles:**
+    - **Administrator**: Full system access, can manage all modules
+    - **Pilot**: Can view flights, create W&B, access dispatch
+    - **Copilot**: Similar to pilot with limited permissions
+    - **Medical Personnel**: Access to medical transfers
+    - **Dispatcher**: Can create and manage all transfers
+    - **Maintenance**: Access to aircraft maintenance modules
+    - **Viewer**: Read-only access to most modules
+    
+    Users can have multiple roles simultaneously.
+  </Step>
+  
+  <Step title="Enter Professional Information">
+    Add operational details:
+    
+    **Professional Data:**
+    - Position/title (e.g., "Captain", "Senior Dispatcher")
+    - License number (if applicable)
+    
+    This information appears in crew rosters and reports.
+  </Step>
+  
+  <Step title="Set Initial Status">
+    Choose user's operational status:
+    - **Active**: User is currently working and available
+    - **Inactive**: User temporarily unavailable (leave, temporary assignment)
+    - **On Leave**: User on official leave
+  </Step>
+</Steps>
+
+### Creating Aeronautical Technical Personnel (Staff)
+
+Staff users follow a specialized workflow with optional document uploads:
+
+<Steps>
+  <Step title="Access Personnel Management">
+    Navigate to **Seguimiento > Personal Técnico Aeronautico**.
+  </Step>
+  
+  <Step title="Create Staff Record">
+    Click **"Nuevo Personal"** to open the personnel wizard.
+  </Step>
+  
+  <Step title="Complete Step 1: General Information">
+    Enter basic personnel data:
+    
+    **Required Fields:**
+    - Name, last name, second last name
+    - Email (unique)
+    - Weight (kg)
+    
+    **Optional Fields:**
+    - Phone
+    - Birth date
+    - License number
+    - Position
+    
+    <Note>
+      Staff users do **not** have username, password, or login access fields.
+    </Note>
+  </Step>
+  
+  <Step title="Complete Step 2: Documentation">
+    Upload personnel documents with metadata:
+    
+    **Document Types Supported:**
+    
+    **License/Certification:**
+    - File upload (PDF/image)
+    - Serial number
+    - Expiration date
+    
+    **Visa:**
+    - File upload
+    - Serial number
+    - Expiration date
+    
+    **Passport:**
+    - File upload
+    - Serial number
+    - Expiration date
+    
+    **Psychophysical Aptitude Certificate:**
+    - File upload
+    - Serial number
+    - Expiration date
+    
+    **RATARI (Aeronautical Registry):**
+    - File upload
+    - Serial number
+    - Expiration date
+    
+    All documents are optional during creation but can be added later.
+  </Step>
+  
+  <Step title="Complete Step 3: Training Assignments">
+    Assign required training certifications:
+    
+    - Select from available training courses
+    - Mark completion status
+    - Enter completion date and certificate number
+    - Upload training certificates
+    
+    Training can also be assigned after personnel creation.
+  </Step>
+  
+  <Step title="Assign Roles (Optional)">
+    Staff can be assigned operational roles even without system access:
+    - Pilot
+    - Copilot
+    - Medical personnel
+    - Flight crew
+    - Maintenance technician
+    
+    Roles determine which flights they can be assigned to.
+  </Step>
+  
+  <Step title="Save and Finalize">
+    Review all information and click **"Crear Personal"**. Staff member is now available for crew assignments.
+  </Step>
+</Steps>
+
+## User Status Management
+
+Users and personnel progress through various states:
+
+<CardGroup cols={3}>
+  <Card title="Active" icon="check-circle">
+    **Currently Working**
+    
+    - Available for assignments
+    - Can be assigned to flights
+    - Appears in crew selection lists
+    - Full system access (if system user)
+  </Card>
+  
+  <Card title="Inactive" icon="pause-circle">
+    **Temporarily Unavailable**
+    
+    - Not available for assignments
+    - Cannot be assigned to new flights
+    - Hidden from crew selection
+    - System access disabled (if system user)
+  </Card>
+  
+  <Card title="On Leave" icon="calendar-minus">
+    **Official Leave Status**
+    
+    - User on vacation or official leave
+    - Not available for assignments
+    - Hidden from crew selection
+    - System access typically disabled
+  </Card>
+</CardGroup>
+
+**Status Change Actions:**
+- From user list, click status badge
+- Select new status from dropdown
+- Status changes immediately
+- User notified via email (if configured)
+
+### Soft Deletion (Eliminated Status)
+
+<Warning>
+  Deleting a user performs a **soft delete** - the record is marked as "Eliminated" but retained for audit and historical integrity.
+</Warning>
+
+**Soft Delete Behavior:**
+1. User status set to `ELIMINATED`
+2. `deleted_at` timestamp recorded
+3. User removed from active user views
+4. User appears in "Historial de Bajas" (Deletion History)
+5. Historical associations preserved (flights, assignments)
+
+**Special Protection:**
+- Cannot delete the last administrator in the system
+- System prevents deletion if it would leave zero admins
+
+## Document Management
+
+Comprehensive personnel document tracking:
+
+### Document Types
+
+<Accordion title="License/Certification Documents">
+  **Professional Licenses**
+  
+  Track pilot licenses, medical certifications, and professional credentials:
+  
+  **Fields:**
+  - Document type (Pilot license, Medical cert, etc.)
+  - Serial number / License number
+  - Issuing authority
+  - Issue date
+  - Expiration date
+  - File upload (PDF or image)
+  
+  **Automatic Alerts:**
+  - Yellow warning: 30 days before expiration
+  - Red alert: 7 days before expiration
+  - Critical alert: Expired
+</Accordion>
+
+<Accordion title="Passport and Visa">
+  **International Travel Documents**
+  
+  For personnel requiring international operations:
+  
+  **Passport:**
+  - Passport number
+  - Country of issue
+  - Expiration date
+  - File upload
+  
+  **Visa:**
+  - Visa number
+  - Visa type
+  - Valid from/to dates
+  - File upload
+  
+  Essential for cross-border medical evacuations.
+</Accordion>
+
+<Accordion title="Medical Certificates">
+  **Psychophysical Aptitude**
+  
+  Required medical clearance for aviation personnel:
+  
+  **Class 1 Medical** (Pilots):
+  - Certificate number
+  - Examining physician
+  - Issue date and expiration
+  - File upload
+  
+  **Class 2 Medical** (Other crew):
+  - Similar fields to Class 1
+  - Different expiration periods
+  
+  System alerts before expiration to maintain crew availability.
+</Accordion>
+
+<Accordion title="RATARI (Aeronautical Registry)">
+  **Mexican Aeronautical Registry Certificate**
+  
+  Official registry for Mexican aviation personnel:
+  
+  - RATARI number
+  - Category/type
+  - Expiration date
+  - File upload
+  
+  Required for regulatory compliance in Mexico.
+</Accordion>
+
+### Document Management Actions
+
+<Card title="Document Operations" icon="folder-open">
+  **Available Actions**
+  
+  **Upload Document:**
+  1. Navigate to user detail page
+  2. Click **"Documentos"** tab
+  3. Click **"Agregar Documento"**
+  4. Select document type
+  5. Enter metadata (serial number, expiration)
+  6. Upload file (PDF or image)
+  7. Save
+  
+  **Update Document:**
+  1. Locate document in user's document list
+  2. Click **"Editar"**
+  3. Update metadata or replace file
+  4. Save changes
+  
+  **Delete Document:**
+  1. Locate document in list
+  2. Click **"Eliminar"**
+  3. Confirm deletion
+  4. Document soft-deleted (retained in history)
+  
+  **Send Expiration Reminder:**
+  1. Locate document with upcoming expiration
+  2. Click **"Enviar Recordatorio"**
+  3. System sends email to user
+  4. Email includes expiration date and renewal instructions
+</Card>
+
+## Training and Certification Management
+
+Track required training courses and certifications:
+
+### Training Workflow
+
+<Steps>
+  <Step title="Define Training Courses">
+    Navigate to **Seguimiento > Capacitaciones** to manage training catalog.
+    
+    **Training Course Details:**
+    - Course name
+    - Course code
+    - Description
+    - Duration (hours)
+    - Validity period (months)
+    - Assigned roles (which roles require this training)
+  </Step>
+  
+  <Step title="Assign Training to Users">
+    From the training detail page:
+    
+    1. Click **"Asignar Usuarios"**
+    2. Select users who need this training
+    3. Set required completion date
+    4. Save assignments
+    
+    Users see assigned trainings in their profile.
+  </Step>
+  
+  <Step title="Record Training Completion">
+    When user completes training:
+    
+    1. Navigate to user's **"Capacitaciones"** tab
+    2. Locate assigned training
+    3. Click **"Marcar como Completado"**
+    4. Enter completion details:
+       - Completion date
+       - Certificate number
+       - Instructor name
+       - Upload certificate (PDF)
+    5. Save
+    
+    Training status changes to "Completed" with completion date.
+  </Step>
+  
+  <Step title="Monitor Training Expiration">
+    System tracks training validity:
+    
+    - Based on course validity period (e.g., 12 months)
+    - Alerts trigger before expiration
+    - Dashboard shows overdue training
+    - User notified via email
+  </Step>
+  
+  <Step title="Renew Expired Training">
+    For expired training certifications:
+    
+    1. User retakes the course
+    2. Assign new training instance
+    3. Record new completion
+    4. Previous completion preserved in history
+  </Step>
+</Steps>
+
+### Training Status Indicators
+
+<CardGroup cols={3}>
+  <Card title="Not Started" icon="circle">
+    Training assigned but not yet begun. Shows in user's pending training list.
+  </Card>
+  <Card title="In Progress" icon="spinner">
+    Training currently being undertaken. Partial completion may be tracked.
+  </Card>
+  <Card title="Completed" icon="check-circle">
+    Training successfully completed with valid certificate. Badge shows completion date.
+  </Card>
+  <Card title="Expired" icon="exclamation-triangle">
+    Training certification expired. User must retake. Red badge in user profile.
+  </Card>
+</CardGroup>
+
+## Role-Based Access Control (RBAC)
+
+SIGSAHO uses a flexible role-based permission system:
+
+### Available Roles
+
+<Accordion title="Administrator">
+  **Full System Access**
+  
+  **Permissions:**
+  - Manage all users (create, edit, delete)
+  - Configure system settings
+  - Access all modules
+  - View all data across organization
+  - Delete records (with audit trail)
+  - Configure alert thresholds
+  - Manage roles and permissions
+  
+  **Use Cases:**
+  - System administrators
+  - IT managers
+  - Senior operations managers
+</Accordion>
+
+<Accordion title="Pilot">
+  **Flight Operations and Dispatch**
+  
+  **Permissions:**
+  - View and create transfers
+  - Create weight & balance calculations
+  - Access aircraft dispatch dashboards
+  - View flight records
+  - Update own profile
+  - Cannot delete or modify other users
+  
+  **Use Cases:**
+  - Captains
+  - First officers
+  - Flight instructors
+</Accordion>
+
+<Accordion title="Medical Personnel">
+  **Medical Transfer Management**
+  
+  **Permissions:**
+  - View and create medical transfers
+  - Manage patient records
+  - Access medical statistics
+  - Cannot access general transfers or aircraft settings
+  - Cannot manage non-medical users
+  
+  **Use Cases:**
+  - Flight paramedics
+  - Flight nurses
+  - Medical coordinators
+</Accordion>
+
+<Accordion title="Dispatcher">
+  **Operational Coordination**
+  
+  **Permissions:**
+  - Create and manage all transfers (medical and general)
+  - Assign aircraft and crew
+  - View all flight operations
+  - Access dashboard and statistics
+  - Cannot modify aircraft or user settings
+  
+  **Use Cases:**
+  - Flight dispatchers
+  - Operations coordinators
+  - Duty officers
+</Accordion>
+
+<Accordion title="Maintenance">
+  **Aircraft and Maintenance Management**
+  
+  **Permissions:**
+  - View and edit aircraft records
+  - Create maintenance services
+  - Manage aircraft parts and inspections
+  - View flight hours and maintenance schedules
+  - Cannot create transfers or manage users
+  
+  **Use Cases:**
+  - Maintenance supervisors
+  - Aviation technicians
+  - Quality assurance inspectors
+</Accordion>
+
+<Accordion title="Viewer">
+  **Read-Only Access**
+  
+  **Permissions:**
+  - View all modules (read-only)
+  - View statistics and reports
+  - Cannot create, edit, or delete anything
+  - Cannot access user management
+  
+  **Use Cases:**
+  - Auditors
+  - External observers
+  - Reporting analysts
+</Accordion>
+
+### Multi-Role Users
+
+<Card title="Flexible Role Assignment" icon="user-tag">
+  **Users Can Have Multiple Roles**
+  
+  SIGSAHO supports assigning multiple roles to a single user:
+  
+  **Example Combinations:**
+  - Pilot + Dispatcher (pilot who also performs dispatch duties)
+  - Medical Personnel + Pilot (aeromedical pilot)
+  - Maintenance + Dispatcher (dual-role staff)
+  
+  **Permission Resolution:**
+  - User has **union of all assigned role permissions**
+  - Most permissive role takes precedence
+  - Example: Pilot + Administrator = Administrator permissions
+  
+  **Use Cases:**
+  - Small organizations with multi-role personnel
+  - Cross-trained staff
+  - Backup/contingency coverage
+</Card>
+
+## Crew Assignment and Scheduling
+
+### Crew Member Selection
+
+<Card title="Flight Crew Selection" icon="user-check">
+  **Assigning Crew to Flights**
+  
+  When creating transfers, crew members are selected from active personnel:
+  
+  **Selection Criteria:**
+  - User has `status = ACTIVE`
+  - User has appropriate role (Pilot, Medical Personnel, etc.)
+  - User's certifications are current (not expired)
+  - User's documents are valid
+  
+  **Crew Selection Interface:**
+  - Grouped by role (Pilots, Medical, Other Crew)
+  - Shows name, role, and weight
+  - Indicates certification status (green=valid, red=expired)
+  - Searchable by name
+  
+  **Automatic Validations:**
+  - Cannot assign user with expired medical certificate
+  - Cannot assign user with status Inactive or On Leave
+  - Warning if user approaching document expiration
+</Card>
+
+### Crew Member Weight Tracking
+
+<Card title="Weight for W&B Calculations" icon="weight">
+  **Importance of Accurate Weight**
+  
+  Each user's weight is critical for weight & balance:
+  
+  - Required field during user creation
+  - Used automatically in W&B calculations
+  - Should be updated regularly (quarterly recommended)
+  - Displayed in crew selection for dispatcher awareness
+  
+  **Updating Weight:**
+  1. Navigate to user profile
+  2. Click **"Editar"**
+  3. Update weight field (in kg)
+  4. Save
+  
+  Weight updates apply to all future W&B calculations automatically.
+</Card>
+
+## User Search and Filtering
+
+Powerful search and filtering on user management pages:
+
+<CardGroup cols={2}>
+  <Card title="By Status" icon="filter">
+    - Active
+    - Inactive
+    - On Leave
+    - Eliminated (audit trail)
+  </Card>
+  
+  <Card title="By Role" icon="user-tag">
+    - Administrator
+    - Pilot
+    - Copilot
+    - Medical Personnel
+    - Dispatcher
+    - Maintenance
+    - Viewer
+  </Card>
+</CardGroup>
+
+**Search Capabilities:**
+- Search by name (first, last, or second last name)
+- Search by username
+- Search by email
+- Search by license number
+
+## Automatic Alerts and Notifications
+
+### Document Expiration Alerts
+
+<Card title="Proactive Expiration Notifications" icon="bell">
+  **Automated Alert System**
+  
+  SIGSAHO monitors all user documents and sends alerts:
+  
+  **Alert Triggers:**
+  - **30 days before expiration**: Amber warning
+  - **7 days before expiration**: Red alert
+  - **On expiration date**: Critical alert
+  - **After expiration**: User marked unavailable for assignments
+  
+  **Alert Delivery:**
+  - Dashboard Urgent Alerts widget
+  - Email notification to user
+  - Email notification to administrator
+  - In-app notification badge
+  
+  **Affected Documents:**
+  - Pilot licenses
+  - Medical certificates
+  - Passports
+  - Visas
+  - Training certifications
+  - RATARI registrations
+</Card>
+
+### Training Expiration Alerts
+
+<Card title="Training Compliance Monitoring" icon="graduation-cap">
+  **Training Renewal Reminders**
+  
+  Similar to documents, training certifications trigger alerts:
+  
+  **Alert Thresholds:**
+  - 60 days before expiration: Initial reminder
+  - 30 days before expiration: Urgent reminder
+  - On expiration: Critical alert, user restricted from assignments requiring that training
+  
+  **Actions Available:**
+  - "Schedule Renewal" button (links to training calendar)
+  - "Mark as Renewed" (when completed)
+  - "Send Reminder to User" (manual email trigger)
+</Card>
+
+## Interface Components
+
+### User Management Table
+
+**Screenshot Description:**
+The main user table displays:
+- User's full name (last name, first name, second last name)
+- Username (system users only)
+- Email address
+- Role badges (color-coded chips)
+- Login access indicator (toggle icon)
+- Status badge (Active/Inactive/On Leave)
+- Action menu (Edit, View Details, Change Status, Delete)
+
+**Table Features:**
+- Server-side pagination (10/25/50/100 per page)
+- Multi-column sorting
+- Faceted filters (role, status, login access)
+- Search bar (searches name, username, email)
+- Bulk actions (change status for multiple users)
+
+### User Detail Page
+
+**Screenshot Description:**
+Comprehensive user profile organized in tabs:
+
+1. **General Information Tab**
+   - Personal details (name, email, phone, birth date)
+   - Weight for W&B
+   - Position and license number
+   - Status indicator
+   - Edit button
+
+2. **Documentos (Documents) Tab**
+   - Table of all uploaded documents
+   - Columns: Document type, Serial number, Expiration date, Status
+   - Expiration indicators (green=valid, yellow=expiring soon, red=expired)
+   - Actions: View, Download, Edit, Delete, Send Reminder
+   - "Add Document" button
+
+3. **Capacitaciones (Training) Tab**
+   - List of assigned training courses
+   - Completion status for each
+   - Certificate numbers and dates
+   - Expiration dates and alerts
+   - Actions: Mark Complete, Upload Certificate, View Details
+   - "Assign Training" button
+
+4. **Historial (History) Tab**
+   - Audit log of all changes to user record
+   - Flight assignments history
+   - Status changes log
+   - Document uploads/updates timeline
+
+### Personnel Wizard (Staff Creation)
+
+**Screenshot Description:**
+Multi-step wizard for creating aeronautical personnel:
+
+**Step 1: General Information**
+- Form with personal details
+- Required fields marked with asterisk
+- Real-time validation
+- "Next" button to proceed
+
+**Step 2: Documentation**
+- Accordion-style sections for each document type
+- Each section has:
+  - File upload dropzone
+  - Serial number field
+  - Expiration date picker
+- All sections optional (can skip)
+- "Previous" and "Next" buttons
+
+**Step 3: Training Assignments**
+- Multi-select list of available training courses
+- Shows required vs. optional training
+- Option to skip and assign later
+- "Previous" and "Create" buttons
+
+**Progress Indicator:**
+- Visual stepper at top showing current step (1/2/3)
+- Completed steps marked with checkmark
+
+## Permissions and Access Control
+
+| Role | View Users | Create | Edit | Delete | Manage Docs | Manage Training |
+|------|------------|--------|------|--------|-------------|------------------|
+| Administrator | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Dispatcher | ✓* | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Medical Coordinator | ✓* | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Viewer | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| Self | ✓** | ✗ | ✓** | ✗ | ✓** | ✗ |
+
+*Can only view active users for crew assignment purposes
+**Users can view and edit their own profile, upload their own documents
+
+## Best Practices
+
+<Accordion title="Accurate Personnel Data">
+  - Update user weights quarterly for W&B accuracy
+  - Keep email addresses current for alert delivery
+  - Verify license numbers against official documents
+  - Use consistent naming conventions (first, last, second last)
+</Accordion>
+
+<Accordion title="Proactive Document Management">
+  - Upload documents immediately upon user creation
+  - Set calendar reminders for renewal 90 days before expiration
+  - Maintain scanned copies of all physical documents
+  - Verify document authenticity before upload
+</Accordion>
+
+<Accordion title="Training Compliance">
+  - Assign required training within 30 days of hire
+  - Track completion deadlines rigorously
+  - Maintain training certificates for regulatory audits
+  - Schedule annual training refreshers
+</Accordion>
+
+<Accordion title="Role Assignment">
+  - Assign minimum roles necessary for job function
+  - Review role assignments quarterly
+  - Remove roles when staff changes positions
+  - Document reason for multi-role assignments
+</Accordion>
+
+## Troubleshooting
+
+<Accordion title="Cannot Assign User to Flight">
+  **Possible Causes:**
+  - User has status Inactive or On Leave
+  - User's medical certificate expired
+  - User has no appropriate role (e.g., not a Pilot)
+  - User's required training expired
+  
+  **Solution:**
+  1. Check user's status - must be Active
+  2. Verify documents tab - ensure all certs valid
+  3. Verify roles tab - ensure appropriate role assigned
+  4. Check training tab - ensure required training current
+</Accordion>
+
+<Accordion title="User Not Receiving Alert Emails">
+  **Possible Causes:**
+  - Email address incorrect or outdated
+  - Email marked as spam by user's email provider
+  - Email notifications disabled in settings
+  
+  **Solution:**
+  1. Verify email address in user profile
+  2. Ask user to check spam/junk folder
+  3. Check system email configuration (admin only)
+  4. Send test email using "Send Reminder" feature
+</Accordion>
+
+<Accordion title="Cannot Delete User">
+  **Possible Causes:**
+  - User is the last administrator in system
+  - User has associated flight records
+  - User has active transfers in progress
+  
+  **Solution:**
+  1. If last admin, promote another user to Administrator first
+  2. If user has flights, soft delete is allowed (preserves history)
+  3. If user has active transfers, complete or cancel them first, then delete
+</Accordion>
+
+## Integration with Other Modules
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" icon="plane-departure">
+    User data enables:
+    - Crew assignment to transfers
+    - Pilot selection for W&B
+    - Crew weight in calculations
+    - Duty time tracking
+  </Card>
+  
+  <Card title="Dashboard Analytics" icon="chart-bar">
+    User metrics feed:
+    - Top pilots by hours
+    - Crew utilization rates
+    - Certification compliance
+    - Document expiration alerts
+  </Card>
+  
+  <Card title="Medical Transfers" icon="ambulance">
+    Medical personnel:
+    - Medical crew assignment
+    - Specialized certifications
+    - Patient care qualifications
+  </Card>
+  
+  <Card title="Weight & Balance" icon="balance-scale">
+    W&B integration:
+    - Crew weight auto-population
+    - Pilot selection
+    - CG calculations
+  </Card>
+</CardGroup>
+
+## Related Documentation
+
+<CardGroup cols={2}>
+  <Card title="Flight Operations" href="/features/flight-operations">
+    Learn how users are assigned to flights
+  </Card>
+  <Card title="Dashboard Analytics" href="/features/dashboard-analytics">
+    View personnel statistics and alerts
+  </Card>
+  <Card title="Medical Transfers" href="/features/medical-transfers">
+    Understand medical crew requirements
+  </Card>
+  <Card title="Aircraft Management" href="/features/aircraft-management">
+    Configure maintenance technician access
+  </Card>
+</CardGroup>

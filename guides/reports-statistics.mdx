@@ -1,0 +1,693 @@
+---
+title: 'Reports and Statistics'
+description: 'Generate reports, analyze transfer statistics, and export data from SIGSAHO'
+icon: 'chart-line'
+---
+
+## Overview
+
+SIGSAHO provides comprehensive reporting and analytics capabilities for transfers, aircraft, users, and maintenance operations. This guide covers generating reports, viewing statistics, and exporting data.
+
+## Available Report Types
+
+<CardGroup cols={2}>
+  <Card title="Transfer Cards" icon="plane-departure">
+    Detailed PDF reports for individual general transfers including flight details, crew, and route information.
+  </Card>
+  
+  <Card title="Medical Transfer Cards" icon="hospital">
+    Comprehensive aeromedical transfer reports with patient information, diagnosis, and medical details.
+  </Card>
+  
+  <Card title="User Reports" icon="id-card">
+    Personnel technical files including certifications, documents, and training records.
+  </Card>
+  
+  <Card title="Aircraft Reports" icon="plane-engines">
+    Monthly aircraft status reports with maintenance history, flight hours, and service records.
+  </Card>
+</CardGroup>
+
+## Generating Transfer Reports
+
+### Transfer Information Card (Tarjeta de Traslado)
+
+Generate a detailed PDF report for any general transfer:
+
+<Steps>
+  <Step title="Navigate to Transfers">
+    Go to **Registro de Servicios** > **Traslados**.
+  </Step>
+  
+  <Step title="Find the Transfer">
+    Use filters or search to locate the transfer you want to report on.
+  </Step>
+  
+  <Step title="Open Transfer Actions">
+    Click the **⋮** (three dots) menu on the transfer row.
+  </Step>
+  
+  <Step title="Select Generate Card">
+    Click **Generar Tarjeta** or **Descargar PDF**.
+  </Step>
+  
+  <Step title="Download PDF">
+    The PDF report is generated and downloads automatically.
+  </Step>
+</Steps>
+
+**API Endpoint:**
+```typescript
+GET /reports/transfers/:id/card
+
+// Response: PDF file
+// Content-Type: application/pdf
+// Filename: tarjeta-traslado-{id}.pdf
+```
+
+**Report Contents:**
+- Transfer number and date
+- Aircraft details (registration, model)
+- Route information (origin → destination)
+- Flight time and distance
+- Crew members with roles
+- Fuel consumption
+- Logbook folio reference
+- Description and request details
+- Transfer status
+
+### Medical Transfer Card (Tarjeta de Traslado Médico)
+
+Generate specialized reports for medical transfers:
+
+<Steps>
+  <Step title="Navigate to Medical Transfers">
+    Go to **Registro de Servicios** > **Traslados Médicos**.
+  </Step>
+  
+  <Step title="Select Medical Transfer">
+    Click on the medical transfer you want to report.
+  </Step>
+  
+  <Step title="Generate Medical Card">
+    Click **Generar Tarjeta Médica** from the transfer details page.
+  </Step>
+  
+  <Step title="Download Report">
+    The comprehensive medical transfer PDF is generated and downloaded.
+  </Step>
+</Steps>
+
+**API Endpoint:**
+```typescript
+GET /reports/medical-transfers/:id/card
+
+// Response: PDF file
+// Content-Type: application/pdf
+// Filename: tarjeta-traslado-medico-{id}.pdf
+```
+
+**Report Contents:**
+- All standard transfer information
+- Medical transfer type
+- Hospital origin and destination
+- Diagnosis type and details
+- Patient information:
+  - Name, age, gender
+  - Medical record number
+  - Contact information
+  - Family member details
+  - Locality information
+- Medical crew assignments
+- Special medical equipment used
+
+<Tip>
+Medical transfer reports are formatted for regulatory compliance and can be used for medical documentation, insurance claims, and quality assurance reviews.
+</Tip>
+
+## User Reports
+
+### Personnel Technical File (Expediente Técnico)
+
+Generate comprehensive personnel reports:
+
+<Steps>
+  <Step title="Navigate to Users">
+    Go to **Usuarios** from the main menu.
+  </Step>
+  
+  <Step title="Find the User">
+    Search for or filter to find the user whose report you need.
+  </Step>
+  
+  <Step title="Open User Profile">
+    Click on the user's name to open their profile.
+  </Step>
+  
+  <Step title="Generate Report">
+    Click **Generar Expediente** or **Descargar Reporte**.
+  </Step>
+  
+  <Step title="Download PDF">
+    The user's technical file is generated as a PDF.
+  </Step>
+</Steps>
+
+**API Endpoint:**
+```typescript
+GET /reports/users/:id/card
+
+// Response: PDF file
+// Content-Type: application/pdf
+// Filename: expediente-personal-{id}.pdf
+```
+
+**Report Contents:**
+- Personal information
+- Contact details
+- Assigned roles
+- Certifications and licenses
+- Document expiration dates
+- Training records
+- Notification configurations
+- Activity history
+- Weight information (for crew calculations)
+
+<Accordion title="Use cases for user reports">
+  **Personnel Management:**
+  - Employee file documentation
+  - Training compliance verification
+  - License and certification tracking
+  
+  **Regulatory Compliance:**
+  - Aviation authority inspections
+  - Safety audits
+  - Crew qualification verification
+  
+  **Administrative:**
+  - HR records
+  - Performance reviews
+  - Credential management
+</Accordion>
+
+## Aircraft Reports
+
+### Aircraft Status Report (Reporte de Estado)
+
+Generate monthly status reports for aircraft:
+
+<Steps>
+  <Step title="Navigate to Aircraft">
+    Go to **Aeronaves** from the main menu.
+  </Step>
+  
+  <Step title="Select Aircraft">
+    Click on the aircraft you want to report on.
+  </Step>
+  
+  <Step title="Open Reports Section">
+    Navigate to the **Reportes** tab in the aircraft details.
+  </Step>
+  
+  <Step title="Generate Report">
+    Click **Generar Reporte Mensual** or select a date range.
+  </Step>
+  
+  <Step title="Download Report">
+    The aircraft status report is generated as a PDF.
+  </Step>
+</Steps>
+
+**API Endpoint:**
+```typescript
+GET /reports/aircraft/:id/card
+
+// Response: PDF file
+// Content-Type: application/pdf
+// Filename: reporte-aeronave-{id}.pdf
+```
+
+**Report Contents:**
+- Aircraft identification (registration, serial number)
+- Aircraft specifications (model, manufacturer)
+- Current status (operational, maintenance, etc.)
+- Total lifetime flight hours
+- Flight hours this period
+- Scheduled maintenance services
+- Completed maintenance this period
+- Parts status and replacements
+- Document expiration dates
+- Airworthiness status
+
+## Transfer Statistics
+
+View comprehensive transfer statistics and analytics:
+
+### Accessing Statistics Dashboard
+
+<Steps>
+  <Step title="Navigate to Statistics">
+    Go to **Estadísticas** > **Traslados** from the main menu.
+  </Step>
+  
+  <Step title="Select Date Range">
+    Choose the date range for your analysis:
+    - Today
+    - This Week
+    - This Month
+    - This Year
+    - Custom Range
+  </Step>
+  
+  <Step title="Apply Filters">
+    Filter statistics by:
+    - Transfer type (MEDICAL, SECURITY, etc.)
+    - Aircraft
+    - Status (PROCESS, FINISHED, CANCELED)
+    - Origin/destination localities
+  </Step>
+  
+  <Step title="View Analytics">
+    Review the statistics dashboard showing various metrics and visualizations.
+  </Step>
+</Steps>
+
+### Available Statistics
+
+**API Endpoint:**
+```typescript
+GET /transfer-statistics?date_from=2024-01-01&date_to=2024-12-31
+
+// Query parameters:
+// - date_from: Start date (YYYY-MM-DD)
+// - date_to: End date (YYYY-MM-DD)
+// - type_transfer: Filter by transfer type
+// - aircraft_id: Filter by aircraft
+// - status: Filter by status
+```
+
+<AccordionGroup>
+  <Accordion title="Transfer Count Statistics">
+    **Metrics:**
+    - Total transfers by type
+    - Transfers by status (completed, in progress, canceled)
+    - Transfers per aircraft
+    - Transfers per period (daily, weekly, monthly)
+    - Transfer completion rate
+    
+    **Visualizations:**
+    - Bar charts showing transfers by type
+    - Pie charts for status distribution
+    - Line graphs for trends over time
+  </Accordion>
+  
+  <Accordion title="Flight Operations Statistics">
+    **Metrics:**
+    - Total flight hours by aircraft
+    - Total distance traveled
+    - Average flight time per transfer
+    - Total fuel consumption
+    - Fuel efficiency metrics
+    - Utilization rates by aircraft
+    
+    **Example Data:**
+    ```typescript
+    {
+      "total_flight_hours": 450.5,
+      "total_transfers": 125,
+      "average_flight_time": "3:36",
+      "total_fuel_liters": 28500,
+      "average_fuel_per_hour": 63.2
+    }
+    ```
+  </Accordion>
+  
+  <Accordion title="Route Statistics">
+    **Metrics:**
+    - Most frequent routes
+    - Transfers by origin locality
+    - Transfers by destination locality
+    - Route utilization patterns
+    - Geographic distribution
+    
+    **Useful For:**
+    - Route planning
+    - Resource allocation
+    - Service coverage analysis
+    - Identifying high-demand areas
+  </Accordion>
+  
+  <Accordion title="Medical Transfer Statistics">
+    **Metrics:**
+    - Medical transfers by diagnosis type
+    - Hospital pairings (origin → destination)
+    - Patient demographics
+    - Medical transfer type distribution
+    - Average response times
+    
+    **Privacy Note:**
+    Statistics are aggregated and anonymized. Individual patient information is not included in statistics reports.
+  </Accordion>
+  
+  <Accordion title="Crew Statistics">
+    **Metrics:**
+    - Crew utilization by member
+    - Transfers per crew role
+    - Crew availability patterns
+    - Most active crew members
+    
+    **Useful For:**
+    - Workload balancing
+    - Crew scheduling
+    - Performance evaluation
+    - Resource planning
+  </Accordion>
+</AccordionGroup>
+
+## Exporting Data
+
+### Export Formats
+
+SIGSAHO supports multiple export formats:
+
+<Tabs>
+  <Tab title="PDF Reports">
+    Professional PDF documents generated using PDFMake:
+    
+    **Features:**
+    - Formatted layouts
+    - Tables and charts
+    - Headers and footers
+    - Organization branding
+    - Digital signatures (optional)
+    
+    **Use Cases:**
+    - Official documentation
+    - Regulatory submissions
+    - Printed records
+    - Email distribution
+  </Tab>
+  
+  <Tab title="Excel/CSV Export">
+    Tabular data export for analysis:
+    
+    **Features:**
+    - Raw data tables
+    - Multiple sheets
+    - Formulas and calculations
+    - Pivot table ready
+    
+    **Use Cases:**
+    - Data analysis
+    - Custom reporting
+    - Database imports
+    - Financial analysis
+  </Tab>
+  
+  <Tab title="JSON API">
+    Programmatic access to data:
+    
+    **Features:**
+    - RESTful API endpoints
+    - Pagination support
+    - Filtering and sorting
+    - Real-time data
+    
+    **Use Cases:**
+    - System integration
+    - Custom dashboards
+    - Mobile applications
+    - Third-party tools
+  </Tab>
+</Tabs>
+
+### Exporting Transfer Lists
+
+<Steps>
+  <Step title="Apply Desired Filters">
+    Configure filters to show only the transfers you want to export.
+  </Step>
+  
+  <Step title="Click Export Button">
+    Click the **Exportar** button above the transfers list.
+  </Step>
+  
+  <Step title="Select Format">
+    Choose export format:
+    - Excel (.xlsx)
+    - CSV (.csv)
+    - PDF (summary report)
+  </Step>
+  
+  <Step title="Download File">
+    The export file is generated and downloaded automatically.
+  </Step>
+</Steps>
+
+<Warning>
+Large exports (>1000 records) may take several minutes to generate. The system will show a progress indicator during export generation.
+</Warning>
+
+## Report Templates
+
+SIGSAHO uses customizable PDF templates:
+
+### Template Files
+
+- `transfer-pdf.template.ts` - General transfer cards
+- `medical-transfer-pdf.template.ts` - Medical transfer cards
+- `user-report-pdf.template.ts` - User technical files
+- `aircraft-report-pdf.template.ts` - Aircraft status reports
+
+### Customizing Templates
+
+Administrators can customize report templates:
+
+<Accordion title="Template customization options">
+  **Visual Customization:**
+  - Organization logo
+  - Color scheme
+  - Header and footer content
+  - Font styles and sizes
+  
+  **Content Customization:**
+  - Field selection
+  - Section ordering
+  - Additional fields
+  - Conditional sections
+  
+  **Implementation:**
+  Templates use PDFMake document definitions. Modify the template files in the backend codebase:
+  
+  ```typescript
+  // Example: Custom header in transfer template
+  export function generateTransferCardDefinition(transfer: Transfers) {
+    return {
+      header: {
+        text: 'Your Organization Name',
+        style: 'header',
+        alignment: 'center'
+      },
+      content: [
+        // Report content
+      ],
+      styles: {
+        // Custom styles
+      }
+    };
+  }
+  ```
+  
+  Contact your developer or system administrator for template customizations.
+</Accordion>
+
+## Dashboard Widgets
+
+The SIGSAHO dashboard provides at-a-glance statistics:
+
+### Dashboard Components
+
+**File:** `dashboard.controller.ts`
+
+<CardGroup cols={2}>
+  <Card title="Transfer Summary" icon="gauge-high">
+    - Transfers today
+    - Transfers this week
+    - Transfers this month
+    - Active transfers
+  </Card>
+  
+  <Card title="Fleet Status" icon="plane">
+    - Total aircraft
+    - Operational aircraft
+    - Aircraft in maintenance
+    - Average utilization
+  </Card>
+  
+  <Card title="Upcoming Maintenance" icon="calendar-check">
+    - Services due this week
+    - Services overdue
+    - Hours-based services approaching
+    - Parts requiring attention
+  </Card>
+  
+  <Card title="Quick Actions" icon="bolt">
+    - Create new transfer
+    - View pending services
+    - Generate reports
+    - Access statistics
+  </Card>
+</CardGroup>
+
+## Flight Balance Reports
+
+SIGSAHO tracks flight balance for aircraft:
+
+### Understanding Flight Balance
+
+Flight balance tracks aircraft utilization and costs:
+
+```typescript
+GET /flight-balance?aircraft_id=5&date_from=2024-01-01&date_to=2024-12-31
+
+// Response
+{
+  "aircraft_id": 5,
+  "period": {
+    "from": "2024-01-01",
+    "to": "2024-12-31"
+  },
+  "totals": {
+    "flight_hours": 450.5,
+    "transfers": 125,
+    "fuel_consumed": 28500,
+    "maintenance_cost": 75000,
+    "operational_cost": 150000
+  },
+  "details": [
+    // Detailed balance entries
+  ]
+}
+```
+
+**Entity:** `flight-balance.entity.ts`, `detail-balance.entity.ts`
+
+### Generating Balance Reports
+
+<Steps>
+  <Step title="Navigate to Flight Balance">
+    Go to **Reportes** > **Balance de Vuelo**.
+  </Step>
+  
+  <Step title="Select Aircraft and Period">
+    Choose the aircraft and date range for the balance report.
+  </Step>
+  
+  <Step title="View Balance Details">
+    Review detailed breakdown of:
+    - Flight hours by transfer type
+    - Fuel consumption and costs
+    - Maintenance expenses
+    - Operational costs
+    - Revenue (if applicable)
+  </Step>
+  
+  <Step title="Export Balance Report">
+    Click **Exportar** to download the balance report as PDF or Excel.
+  </Step>
+</Steps>
+
+## Troubleshooting Reports
+
+<AccordionGroup>
+  <Accordion title="Report generation fails">
+    **Possible Causes:**
+    - Missing or corrupted data
+    - Server timeout for large reports
+    - PDF generation service unavailable
+    
+    **Solutions:**
+    - Try generating for a smaller date range
+    - Check that all required data fields are populated
+    - Contact administrator if problem persists
+  </Accordion>
+  
+  <Accordion title="Report shows incomplete information">
+    **Possible Causes:**
+    - Data entry incomplete
+    - Related records deleted
+    - Permissions restricting data access
+    
+    **Solutions:**
+    - Verify all required fields are filled in the original record
+    - Check that related entities (aircraft, crew, etc.) exist
+    - Ensure you have permission to view all report data
+  </Accordion>
+  
+  <Accordion title="Statistics don't match expectations">
+    **Possible Causes:**
+    - Filter configuration
+    - Date range selection
+    - Transfer status filtering
+    - Deleted transfers excluded
+    
+    **Solutions:**
+    - Clear all filters and reapply
+    - Verify date range includes expected transfers
+    - Check that transfers have correct status (FINISHED for completion statistics)
+    - Soft-deleted transfers are excluded from statistics
+  </Accordion>
+  
+  <Accordion title="Export file is empty or corrupted">
+    **Possible Causes:**
+    - Browser download interrupted
+    - Unsupported characters in data
+    - File format compatibility issue
+    
+    **Solutions:**
+    - Try downloading again
+    - Try a different export format
+    - Check for special characters in descriptions
+    - Use a different browser
+  </Accordion>
+  
+  <Accordion title="PDF download not working">
+    **Possible Causes:**
+    - Browser pop-up blocker
+    - PDF service timeout
+    - Large report size
+    
+    **Solutions:**
+    - Allow pop-ups for SIGSAHO domain
+    - Wait for longer processing time
+    - Try generating for smaller date range
+    - Contact support if issue persists
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Regular Reporting" icon="calendar-days">
+    Generate reports regularly (weekly/monthly) rather than on-demand to maintain consistent documentation.
+  </Card>
+  
+  <Card title="Data Quality" icon="check-double">
+    Ensure complete data entry for all transfers and services. Incomplete records produce incomplete reports.
+  </Card>
+  
+  <Card title="Report Retention" icon="folder-open">
+    Save generated reports for historical reference and compliance purposes. PDFs are ideal for archival.
+  </Card>
+  
+  <Card title="Custom Dashboards" icon="chart-simple">
+    Use API exports to create custom dashboards tailored to your organization's specific metrics.
+  </Card>
+</CardGroup>
+
+## Related Resources
+
+- [Managing Transfers](/guides/managing-transfers)
+- [Aircraft Maintenance](/guides/aircraft-maintenance)
+- [API Reference: Reports](/api/reports)
+- [API Reference: Statistics](/api/transfer-statistics)
