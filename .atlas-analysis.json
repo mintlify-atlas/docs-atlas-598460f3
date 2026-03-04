@@ -1,0 +1,119 @@
+{
+  "projectType": "saas",
+  "projectName": "SIGSAHO",
+  "projectDescription": "Aviation Operations Management System for centralizing, controlling, and optimizing aeronautical operations including medical transfers, aircraft management, and flight operations.",
+  "theme": "aspen",
+  "primaryColor": "#0066CC",
+  "lightColor": "#3B82F6",
+  "darkColor": "#1E40AF",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/medical-transfers",
+              "features/aircraft-management",
+              "features/flight-operations",
+              "features/dashboard-analytics",
+              "features/user-management"
+            ]
+          },
+          {
+            "group": "User Guides",
+            "pages": [
+              "guides/authentication",
+              "guides/managing-transfers",
+              "guides/aircraft-maintenance",
+              "guides/reports-statistics",
+              "guides/notifications"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/auth"
+            ]
+          },
+          {
+            "group": "Medical Transfers",
+            "pages": [
+              "api/medical-transfers",
+              "api/transfer-statistics"
+            ]
+          },
+          {
+            "group": "Aircraft",
+            "pages": [
+              "api/aircraft",
+              "api/aircraft-services",
+              "api/aircraft-parts"
+            ]
+          },
+          {
+            "group": "Operations",
+            "pages": [
+              "api/flight-balance",
+              "api/dashboard",
+              "api/reports"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "api/users",
+              "api/roles",
+              "api/notifications"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Medical transfer management and tracking",
+    "Aircraft fleet management and maintenance scheduling",
+    "Flight operations and balance management",
+    "Real-time dashboard and analytics",
+    "User authentication with role-based access control",
+    "Automated reports and statistics generation",
+    "Geographic tracking and visualization",
+    "Document management for aircraft and personnel",
+    "Training record management",
+    "Integration with external aviation weather APIs"
+  ],
+  "publicApiSurface": [
+    "POST /auth/login - User authentication",
+    "POST /auth/refresh - Token refresh",
+    "GET /auth/me - Get current user",
+    "GET /medical-transfers - List medical transfers",
+    "POST /medical-transfers - Create medical transfer",
+    "GET /aircraft - List aircraft",
+    "POST /aircraft - Register aircraft",
+    "GET /aircraft/:id/services - Aircraft maintenance services",
+    "GET /dashboard - Dashboard statistics",
+    "GET /flight-balance - Flight balance data",
+    "GET /reports - Generate reports",
+    "GET /transfer-statistics - Transfer statistics",
+    "GET /users - List users",
+    "POST /users - Create user",
+    "GET /roles - List roles",
+    "GET /trainings - Training records",
+    "GET /geography/municipalities - Geographic data",
+    "GET /notifications - Notification configurations"
+  ]
+}
